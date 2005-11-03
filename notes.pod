@@ -401,7 +401,20 @@ considered a formal spec.
 				* roles
 					- roles
 				* ...
-		* Store (isa Model)
+		* Store (plugin)
+		  the storage plugin is a thin wrapper around a store model, that
+		  provides a notion of a default store for easy dwimming.
+		  it's two methods are just dump delegations to $c->config->{authentication}{store}
+			- get_user( $id )
+			- user_supports( $id )
+			* DBIC
+			  generates an object, puts it in $c->{authetnciation}{store}
+			  this object inherits the model class but is not really a model,
+			  instead it delegates to the real DBIC model under it
+			* ... # each store impl has a dual life as a plugin
+		* Store::...::Model
+		  provides the actual storage model glue. For example, in DBIC get_user
+		  will do a retrieve on the user table.
 			- get_user( $id ) # $id is username, or other credential a user might type in
 			- user_supports
 			  like calling ->supports on the user, but applies to all users
