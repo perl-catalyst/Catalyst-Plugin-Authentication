@@ -10,7 +10,7 @@ use Catalyst::Exception ();
 use Digest              ();
 
 sub login {
-    my ( $self, $c, $user, $password ) = @_;
+    my ( $c, $user, $password ) = @_;
     $user = $c->get_user($user)
       unless Scalar::Util::blessed($user)
       and $user->isa("Catalyst:::Plugin::Authentication::User");
@@ -39,7 +39,7 @@ sub _check_password {
         $d->add( $user->password_pre_salt || '' );
         $d->add($password);
         $d->add( $user->password_post_salt || '' );
-        return $c->digest eq $user->hashed_password;
+        return $d->digest eq $user->hashed_password;
     }
     else {
         Catalyst::Exception->throw(
@@ -109,6 +109,67 @@ L<Catalyst:::Plugin::Authentication::User> it will be used as is. Otherwise
 C<< $c->get_user >> is used to retrieve it.
 
 $password is a string.
+
+=back
+
+=head1 SUPPORTING THIS PLUGIN
+
+=head2 Clear Text Passwords
+
+Predicate:
+
+	$user->supports(qw/password clear/);
+
+Expected methods:
+
+=over 4
+
+=item password
+
+Returns the user's clear text password as a string to be compared with C<eq>.
+
+=back
+
+=head2 Crypted Passwords
+
+Predicate:
+
+	$user->supports(qw/password crypted/);
+
+Expected methods:
+
+=over 4
+
+=item crypted_password
+
+Return's the user's crypted password as a string, with the salt as the first two chars.
+
+=back
+
+=head2 Hashed Passwords
+
+Predicate:
+
+	$user->supports(qw/password hashed/);
+
+Expected methods:
+
+=over 4
+
+=item hashed_passwords
+
+Return's the hash of the user's password as B<binary>.
+
+=item hash_algorithm
+
+Returns a string suitable for feeding into L<Digest/new>.
+
+=item password_pre_salt
+
+=item password_post_salt
+
+Returns a string to be hashed before/after the user's password. Typically only
+a pre-salt is used.
 
 =back
 

@@ -24,7 +24,7 @@ my %features = (
     password => {
         clear   => ["password"],
         crypted => ["crypted_password"],
-        hashed  => ["hashed_password hash_algorithm"],
+        hashed  => [qw/hashed_password hash_algorithm/],
     },
     session => 1,
 );

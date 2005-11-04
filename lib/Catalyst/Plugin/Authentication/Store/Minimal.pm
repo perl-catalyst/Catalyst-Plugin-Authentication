@@ -10,10 +10,13 @@ use Catalyst::Plugin::Authentication::Store::Minimal::Backend;
 sub setup {
     my $c = shift;
 
-    $c->config->{authentication}{store} =
-      Catalyst::Plugin::Authentication::Store::Minimal::Backend->new(
-        $c->config->{authentication}{users} );
+    $c->default_auth_store(
+        Catalyst::Plugin::Authentication::Store::Minimal::Backend->new(
+            $c->config->{authentication}{users}
+        )
+    );
 
+	$c->NEXT::setup(@_);
 }
 
 __PACKAGE__;

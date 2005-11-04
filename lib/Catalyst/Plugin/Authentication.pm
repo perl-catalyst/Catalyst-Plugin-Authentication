@@ -2,17 +2,15 @@
 
 package Catalyst::Plugin::Authentication;
 
-use base qw/Class::Accessor::Fast/;
+use base qw/Class::Accessor::Fast Class::Data::Inheritable/;
 
-BEGIN { __PACKAGE__->mk_accessors(qw/user/) }
+BEGIN {
+    __PACKAGE__->mk_accessors(qw/user/);
+    __PACKAGE__->mk_classdata(qw/default_auth_store/);
+}
 
 use strict;
 use warnings;
-
-sub default_auth_store {
-	my $c = shift;
-	$c->config->{authentication}{store};
-}
 
 sub set_authenticated {
     my ( $c, $user ) = @_;
@@ -32,7 +30,12 @@ sub logout {
     my $c = shift;
 
     $c->user(undef);
-    delete @{ $c->session }{qw/__user __user_class/};
+
+    if (    $c->isa("Catalyst::Plugin::Session")
+        and $c->config->{authentication}{use_session} )
+    {
+        delete @{ $c->session }{qw/__user __user_class/};
+    }
 }
 
 sub get_user {
@@ -72,6 +75,8 @@ sub setup {
         use_session => 1,
         %$cfg,
     );
+
+    $c->NEXT::setup(@_);
 }
 
 __PACKAGE__;
