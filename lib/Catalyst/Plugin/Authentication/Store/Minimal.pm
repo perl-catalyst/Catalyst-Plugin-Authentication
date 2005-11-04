@@ -1,7 +1,6 @@
 #!/usr/bin/perl
 
 package Catalyst::Plugin::Authentication::Store::Minimal;
-use base qw/Catalyst::Plugin::Authentication::Store/;
 
 use strict;
 use warnings;
@@ -61,8 +60,6 @@ more "serious" store for production.
 The hash in the config, as well as the user objects/hashes are freely mutable
 at runtime.
 
-This plugin inherits L<Catalyst::Plugin::Authentication::Store>.
-
 =head1 METHODS
 
 =over 4
@@ -70,7 +67,7 @@ This plugin inherits L<Catalyst::Plugin::Authentication::Store>.
 =item setup
 
 This method will popultate C<< $c->config->{authentication}{store} >> so that
-L<Catalyst::Plugin::Authentication::Store> can use it.
+L<Catalyst::Plugin::Authentication/default_auth_store> can use it.
 
 =back
 

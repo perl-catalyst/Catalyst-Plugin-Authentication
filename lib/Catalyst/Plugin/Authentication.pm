@@ -9,6 +9,11 @@ BEGIN { __PACKAGE__->mk_accessors(qw/user/) }
 use strict;
 use warnings;
 
+sub default_auth_store {
+	my $c = shift;
+	$c->config->{authentication}{store};
+}
+
 sub set_authenticated {
     my ( $c, $user ) = @_;
 
@@ -17,7 +22,8 @@ sub set_authenticated {
     if (    $c->isa("Catalyst::Plugin::Session")
         and $c->config->{authentication}{use_session} )
     {
-        $c->session->{__user} = $user->for_session if $user->supperts("session");
+        $c->session->{__user} = $user->for_session
+          if $user->supperts("session");
         $c->session->{__user_class} = ref $user;
     }
 }
@@ -27,6 +33,19 @@ sub logout {
 
     $c->user(undef);
     delete @{ $c->session }{qw/__user __user_class/};
+}
+
+sub get_user {
+    my ( $c, $uid ) = @_;
+
+    if ( my $store = $c->default_auth_store ) {
+        return $store->get_user($uid);
+    }
+    else {
+        Catalyst::Exception->throw(
+                "The user id $uid was passed to an authentication "
+              . "plugin, but no default store was specified" );
+    }
 }
 
 sub prepare {
@@ -91,6 +110,14 @@ Delete the currently logged in user from C<user> and the session.
 =item user
 
 Returns the currently logged user or undef if there is none.
+
+=item get_user $uid
+
+Delegate C<get_user> to the default store.
+
+=item default_auth_store
+
+Returns C<< $c->config->{authentication}{store} >>.
 
 =back
 
