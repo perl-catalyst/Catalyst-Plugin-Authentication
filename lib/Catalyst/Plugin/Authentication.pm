@@ -12,6 +12,8 @@ BEGIN {
 use strict;
 use warnings;
 
+our $VERSION = "0.01";
+
 sub set_authenticated {
     my ( $c, $user ) = @_;
 
