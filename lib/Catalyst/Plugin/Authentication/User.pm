@@ -9,7 +9,20 @@ sub id { die "virtual" }
 
 sub store { die "virtual" }
 
-sub supports { die "virtual" }
+sub supports {
+    my ( $self, @spec ) = @_;
+
+    my $cursor = $self->supported_features;
+
+    # traverse the feature list,
+    for (@spec) {
+        die "bad feature spec: @spec" if ref($cursor) ne "HASH";
+
+        $cursor = $cursor->{$_};
+    }
+
+    return $cursor;
+}
 
 __PACKAGE__;
 
