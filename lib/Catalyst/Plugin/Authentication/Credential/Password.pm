@@ -41,6 +41,10 @@ sub _check_password {
         $d->add( $user->password_post_salt || '' );
         return $d->digest eq $user->hashed_password;
     }
+    elsif ( $user->supports(qw/password self_check/) ) {
+		# while somewhat silly, this is to prevent code duplication
+		return $c->user->check_password( $password );
+    }
     else {
         Catalyst::Exception->throw(
                 "The user object $user does not support any "
