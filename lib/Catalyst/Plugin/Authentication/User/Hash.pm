@@ -7,33 +7,32 @@ use strict;
 use warnings;
 
 sub new {
-	my $class = shift;
+    my $class = shift;
 
-	bless { @_ }, $class;
+    bless {@_}, $class;
 }
 
 sub AUTOLOAD {
     my $self = shift;
     ( my $key ) = ( our $AUTOLOAD =~ m/([^:]*)$/ );
 
-	
-	if ( @_ ) {
-		my $arr = $self->{__hash_obj_key_is_array}{$key} = @_ > 1;
-		$self->{$key} = $arr ? [ @_ ] : shift;
-	}
+    if (@_) {
+        my $arr = $self->{__hash_obj_key_is_array}{$key} = @_ > 1;
+        $self->{$key} = $arr ? [@_] : shift;
+    }
 
-	my $data = $self->{$key};
+    my $data = $self->{$key};
     $self->{__hash_obj_key_is_array}{$key} ? @$data : $data;
 }
 
 my %features = (
     password => {
-        clear   => ["password"],
-        crypted => ["crypted_password"],
-        hashed  => [qw/hashed_password hash_algorithm/],
-		self_check => undef,
+        clear      => ["password"],
+        crypted    => ["crypted_password"],
+        hashed     => [qw/hashed_password hash_algorithm/],
+        self_check => undef,
     },
-	roles => ["roles"],
+    roles   => ["roles"],
     session => 1,
 );
 
@@ -49,18 +48,19 @@ sub supports {
         $cursor = $cursor->{$_};
     }
 
-	if (ref $cursor) {
-		die "bad feature spec: @spec" unless ref $cursor eq "ARRAY";
+    if ( ref $cursor ) {
+        die "bad feature spec: @spec" unless ref $cursor eq "ARRAY";
 
-		# check that all the keys required for a feature are in here
-		foreach my $key (@$cursor) {
-			return undef unless exists $self->{$key};
-		}
+        # check that all the keys required for a feature are in here
+        foreach my $key (@$cursor) {
+            return undef unless exists $self->{$key};
+        }
 
-		return 1;
-	} else {
-		return $cursor;
-	}
+        return 1;
+    }
+    else {
+        return $cursor;
+    }
 }
 
 sub for_session {
