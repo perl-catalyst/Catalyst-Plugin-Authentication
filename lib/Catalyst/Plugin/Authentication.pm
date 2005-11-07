@@ -57,7 +57,7 @@ sub prepare {
     my $c = shift->NEXT::prepare(@_);
 
     if (    $c->isa("Catalyst::Plugin::Session")
-        and $c->config->{authentication}{use_session}
+        and $c->default_auth_store
         and !$c->user )
     {
         if ( $c->sessionid and my $user = $c->session->{__user} ) {

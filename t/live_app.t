@@ -26,9 +26,15 @@ use Test::More 'no_plan';
 		ok(!$c->user, "no user");
 		ok($c->login( "foo", "s3cr3t" ), "can login with clear");
 		is( $c->user, $users->{foo}, "user object is in proper place");
-		$c->logout;
 
+		ok( !$c->user->roles, "no roles for foo" );
+		my @new = qw/foo bar gorch/;
+		$c->user->roles( @new );
+		is_deeply( [ $c->user->roles ], \@new, "roles set as array");
+
+		$c->logout;
 		ok(!$c->user, "no more user, after logout");
+
 
 		ok($c->login( "bar", "s3cr3t" ), "can login with crypted");
 		is( $c->user, $users->{bar}, "user object is in proper place");
@@ -42,6 +48,8 @@ use Test::More 'no_plan';
 		ok(!$c->user, "no user");
 
 		throws_ok { $c->login( "baz", "foo" ) } qr/support.*mechanism/, "can't login without any supported mech";
+
+		
 	}
 
 	__PACKAGE__->config->{authentication}{users} = $users = {
