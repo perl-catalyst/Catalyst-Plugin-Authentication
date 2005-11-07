@@ -62,7 +62,7 @@ sub prepare {
     {
         if ( $c->sessionid and my $user = $c->session->{__user} ) {
             $c->user( $c->session->{__user_class}->from_session( $c, $user ) );
-            $c->request->user( $c->user );
+            $c->request->{user} = $c->user; # compatibility kludge
         }
     }
 
