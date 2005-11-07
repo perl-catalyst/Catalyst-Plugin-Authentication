@@ -23,7 +23,7 @@ sub set_authenticated {
         and $c->config->{authentication}{use_session} )
     {
         $c->session->{__user} = $user->for_session
-          if $user->supperts("session");
+          if $user->supports("session");
         $c->session->{__user_class} = ref $user;
     }
 }
