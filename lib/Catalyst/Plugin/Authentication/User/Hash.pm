@@ -16,8 +16,14 @@ sub AUTOLOAD {
     my $self = shift;
     ( my $key ) = ( our $AUTOLOAD =~ m/([^:]*)$/ );
 
-    $self->{$key} = shift if @_;
-    $self->{$key};
+	
+	if ( @_ ) {
+		my $arr = $self->{__hash_obj_key_is_array}{$key} = @_ > 1;
+		$self->{$key} = $arr ? [ @_ ] : shift;
+	}
+
+	my $data = $self->{$key};
+    $self->{__hash_obj_key_is_array}{$key} ? @$data : $data;
 }
 
 my %features = (
@@ -25,7 +31,9 @@ my %features = (
         clear   => ["password"],
         crypted => ["crypted_password"],
         hashed  => [qw/hashed_password hash_algorithm/],
+		self_check => undef,
     },
+	roles => ["roles"],
     session => 1,
 );
 
@@ -37,18 +45,22 @@ sub supports {
     # traverse the feature list,
     for (@spec) {
         die "bad feature spec: @spec"
-          if ref($cursor) ne "HASH"
-          or !ref( $cursor = $cursor->{$_} );
+          if ref($cursor) ne "HASH";
+        $cursor = $cursor->{$_};
     }
 
-    die "bad feature spec: @spec" unless ref $cursor eq "ARRAY";
+	if (ref $cursor) {
+		die "bad feature spec: @spec" unless ref $cursor eq "ARRAY";
 
-    # check that all the keys required for a feature are in here
-    foreach my $key (@$cursor) {
-        return undef unless exists $self->{$key};
-    }
+		# check that all the keys required for a feature are in here
+		foreach my $key (@$cursor) {
+			return undef unless exists $self->{$key};
+		}
 
-    return 1;
+		return 1;
+	} else {
+		return $cursor;
+	}
 }
 
 sub for_session {
