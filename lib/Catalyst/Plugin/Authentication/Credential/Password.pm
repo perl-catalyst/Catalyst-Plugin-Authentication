@@ -11,6 +11,19 @@ use Digest              ();
 
 sub login {
     my ( $c, $user, $password ) = @_;
+
+    for ( $c->request ) {
+             $user ||= $_->param("login")
+          || $c->param("user")
+          || $c->param("username")
+          || Catalyst::Exception->throw("Can't determine username for login");
+
+             $password ||= $_->param("password")
+          || $c->param("passwd")
+          || $c->param("pass")
+          || Catalyst::Exception->throw("Can't determine password for login");
+    }
+
     $user = $c->get_user($user)
       unless Scalar::Util::blessed($user)
       and $user->isa("Catalyst:::Plugin::Authentication::User");
@@ -42,8 +55,9 @@ sub _check_password {
         return $d->digest eq $user->hashed_password;
     }
     elsif ( $user->supports(qw/password self_check/) ) {
-		# while somewhat silly, this is to prevent code duplication
-		return $c->user->check_password( $password );
+
+        # while somewhat silly, this is to prevent code duplication
+        return $user->check_password($password);
     }
     else {
         Catalyst::Exception->throw(
@@ -60,7 +74,7 @@ __END__
 
 =head1 NAME
 
-Catalyst:::Plugin::Authentication::Credential::Password - Authenticate a user
+Catalyst::Plugin::Authentication::Credential::Password - Authenticate a user
 with a password.
 
 =head1 SYNOPSIS
@@ -106,13 +120,18 @@ with L<Digest>.
 
 =item login $user, $password
 
+=item login
+
 Try to log a user in.
 
-$user can be an ID or object. If it isa
-L<Catalyst:::Plugin::Authentication::User> it will be used as is. Otherwise
+C<$user> can be an ID or object. If it isa
+L<Catalyst::Plugin::Authentication::User> it will be used as is. Otherwise
 C<< $c->get_user >> is used to retrieve it.
 
-$password is a string.
+C<$password> is a string.
+
+If C<$user> or C<$password> are not provided the parameters C<login>, C<user>,
+C<username> and C<password>, C<passwd>, C<pass> will be tried instead.
 
 =back
 
