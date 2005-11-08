@@ -72,7 +72,7 @@ sub prepare {
 sub setup {
     my $c = shift;
 
-    my $cfg = $c->config->{authentication};
+    my $cfg = $c->config->{authentication} || {};
 
     %$cfg = (
         use_session => 1,
