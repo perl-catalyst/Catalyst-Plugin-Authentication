@@ -14,13 +14,13 @@ sub login {
 
     for ( $c->request ) {
              $user ||= $_->param("login")
-          || $c->param("user")
-          || $c->param("username")
+          || $_->param("user")
+          || $_->param("username")
           || Catalyst::Exception->throw("Can't determine username for login");
 
              $password ||= $_->param("password")
-          || $c->param("passwd")
-          || $c->param("pass")
+          || $_->param("passwd")
+          || $_->param("pass")
           || Catalyst::Exception->throw("Can't determine password for login");
     }
 
