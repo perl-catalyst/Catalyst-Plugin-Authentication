@@ -23,7 +23,7 @@ sub AUTOLOAD {
 
     my $data = $self->{$key};
     ( $self->{__hash_obj_key_is_array}{$key} || $key =~ /roles/ )
-      ? @$data
+      ? @{ $data || [] }
       : $data;
 }
 
