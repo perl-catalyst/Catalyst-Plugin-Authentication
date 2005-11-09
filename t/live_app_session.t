@@ -7,11 +7,8 @@ use Test::More;
 
 BEGIN {
 	eval { require Catalyst::Plugin::Session; require Catalyst::Plugin::Session::State::Cookie };
-	if ($@) {
-		plan skip_all => "This test needs Catalyst::Plugin::Session and Catalyst::Plugin::Session::State::Cookie installed";
-	} else {
-		plan tests => 12;
-	}
+	plan skip_all => "This test needs Catalyst::Plugin::Session and Catalyst::Plugin::Session::State::Cookie installed" if $@;
+	plan tests => 12;
 }
 
 {

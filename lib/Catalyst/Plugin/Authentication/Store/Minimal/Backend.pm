@@ -17,10 +17,27 @@ sub new {
 sub get_user {
     my ( $self, $id ) = @_;
 
-	my $user = $self->{hash}{$id};
+    return unless exists $self->{hash}{$id};
 
-	bless $user, "Catalyst::Plugin::Authentication::User::Hash"
-	  unless Scalar::Util::blessed($user);
+    my $user = $self->{hash}{$id};
+
+    if ( ref $user ) {
+        if ( Scalar::Util::blessed($user) ) {
+            return $user;
+        }
+        elsif ( ref $user eq "HASH" ) {
+            return bless $user, "Catalyst::Plugin::Authentication::User::Hash";
+        }
+        else {
+            Catalyst::Exception->throw( "The user '$id' is a reference of type "
+                  . ref($user)
+                  . " but should be a HASH" );
+        }
+    }
+    else {
+        Catalyst::Exception->throw(
+            "The user '$id' is has to be a hash reference or an object");
+    }
 
     return $user;
 }
