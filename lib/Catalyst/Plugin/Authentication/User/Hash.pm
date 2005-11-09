@@ -9,7 +9,7 @@ use warnings;
 sub new {
     my $class = shift;
 
-    bless {@_}, $class;
+    bless { @_ }, $class;
 }
 
 sub AUTOLOAD {
@@ -22,7 +22,9 @@ sub AUTOLOAD {
     }
 
     my $data = $self->{$key};
-    $self->{__hash_obj_key_is_array}{$key} ? @$data : $data;
+    ( $self->{__hash_obj_key_is_array}{$key} || $key =~ /roles/ )
+      ? @$data
+      : $data;
 }
 
 my %features = (

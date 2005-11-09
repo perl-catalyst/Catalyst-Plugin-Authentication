@@ -24,7 +24,7 @@ sub login {
           || Catalyst::Exception->throw("Can't determine password for login");
     }
 
-    $user = $c->get_user($user)
+    $user = $c->get_user($user) || return
       unless Scalar::Util::blessed($user)
       and $user->isa("Catalyst:::Plugin::Authentication::User");
 
