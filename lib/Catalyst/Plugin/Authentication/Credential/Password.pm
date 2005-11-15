@@ -48,16 +48,28 @@ sub _check_password {
         return $crypted eq crypt( $password, $crypted );
     }
     elsif ( $user->supports(qw/password hashed/) ) {
+
         my $d = Digest->new( $user->hash_algorithm );
         $d->add( $user->password_pre_salt || '' );
         $d->add($password);
         $d->add( $user->password_post_salt || '' );
+
         return $d->digest eq $user->hashed_password;
+    }
+    elsif ( $user->supports(qw/password salted_hash/) ) {
+        require Crypt::SaltedHash;
+
+        my $salt_len =
+          $user->can("password_salt_len") ? $user->password_salt_len : 0;
+
+        return Crypt::SaltedHash->validate( $user->hashed_password, $password,
+            $salt_len );
     }
     elsif ( $user->supports(qw/password self_check/) ) {
 
         # while somewhat silly, this is to prevent code duplication
         return $user->check_password($password);
+
     }
     else {
         Catalyst::Exception->throw(
@@ -179,7 +191,7 @@ Expected methods:
 
 =over 4
 
-=item hashed_passwords
+=item hashed_password
 
 Return's the hash of the user's password as B<binary>.
 
@@ -193,6 +205,30 @@ Returns a string suitable for feeding into L<Digest/new>.
 
 Returns a string to be hashed before/after the user's password. Typically only
 a pre-salt is used.
+
+=head2 Crypt::SaltedHash Passwords
+
+Predicate:
+
+	$user->supports(qw/password salted_hash/);
+
+Expected methods:
+
+=over 4
+
+=item hashed_password
+
+Return's the hash of the user's password as returned from L<Crypt-SaltedHash>->generate.
+
+=back
+
+Optional methods:
+
+=over 4
+
+=item password_salt_len
+
+Returns the length of salt used to generate the salted hash.
 
 =back
 
