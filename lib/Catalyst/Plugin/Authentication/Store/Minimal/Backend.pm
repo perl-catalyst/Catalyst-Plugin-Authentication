@@ -36,8 +36,6 @@ sub get_user {
             return $user;
         }
         elsif ( ref $user eq "HASH" ) {
-			$user->{store} = $self;
-			$user->{id} = $id;
             return bless $user, "Catalyst::Plugin::Authentication::User::Hash";
         }
         else {

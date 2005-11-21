@@ -26,7 +26,7 @@ sub id {
 
 sub store {
 	my $self = shift;
-	$self->_accessor( "store", @_ );
+	ref $self || $self;
 }
 
 sub _accessor {
@@ -52,7 +52,7 @@ my %features = (
         self_check => undef,
     },
     roles   => ["roles"],
-    session => [qw/store id/],
+    session => 1,
 );
 
 sub supports {
@@ -85,6 +85,11 @@ sub supports {
 sub for_session {
     my $self = shift;
     return $self;    # let's hope we're serialization happy
+}
+
+sub from_session {
+	my ( $self, $c, $user ) = @_;
+	$user;
 }
 
 __PACKAGE__;
