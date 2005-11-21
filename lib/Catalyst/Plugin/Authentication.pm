@@ -13,6 +13,7 @@ use strict;
 use warnings;
 
 use Tie::RefHash;
+use Class::Inspector;
 
 our $VERSION = "0.01";
 
@@ -23,12 +24,18 @@ sub set_authenticated {
 
     if (    $c->isa("Catalyst::Plugin::Session")
         and $c->config->{authentication}{use_session}
-        and $user->supports("session")
-)
+        and $user->supports("session") )
     {
-        $c->session->{__user_store} = $c->get_auth_store_name( $user->store );
-        $c->session->{__user} = $user->for_session;
+        $c->save_user_in_session($user);
     }
+}
+
+sub save_user_in_session {
+	my ( $c, $user ) = @_;
+
+    my $store = $user->store || ref $user;
+    $c->session->{__user_store} = $c->get_auth_store_name($store) || $store;
+    $c->session->{__user} = $user->for_session;
 }
 
 sub logout {
@@ -64,9 +71,9 @@ sub prepare {
         and !$c->user )
     {
         if ( $c->sessionid and my $user_id = $c->session->{__user} ) {
-			my $store = $c->get_auth_store( $c->session->{__user_store} );
+            my $store = $c->get_auth_store( $c->session->{__user_store} );
             $c->user( $store->from_session( $c, $user_id ) );
-            $c->request->{user} = $c->user; # compatibility kludge
+            $c->request->{user} = $c->user;    # compatibility kludge
         }
     }
 
@@ -76,7 +83,6 @@ sub prepare {
 sub setup {
     my $c = shift;
 
-
     my $cfg = $c->config->{authentication} || {};
 
     %$cfg = (
@@ -84,58 +90,58 @@ sub setup {
         %$cfg,
     );
 
-	$c->register_auth_stores(
-		default => $cfg->{store},
-		%{ $cfg->{stores} || {} },
-	);
+    $c->register_auth_stores(
+        default => $cfg->{store},
+        %{ $cfg->{stores} || {} },
+    );
 
     $c->NEXT::setup(@_);
 }
 
 sub get_auth_store {
-	my ( $self, $name ) = @_;
-	$self->auth_stores->{$name};
+    my ( $self, $name ) = @_;
+    $self->auth_stores->{$name} || ( Class::Inspector->loaded($name) && $name );
 }
 
 sub get_auth_store_name {
-	my ( $self, $store ) = @_;
-	$self->auth_store_names->{$store};
+    my ( $self, $store ) = @_;
+    $self->auth_store_names->{$store};
 }
 
 sub register_auth_stores {
-	my ( $self, %new ) = @_;
+    my ( $self, %new ) = @_;
 
-	foreach my $name ( keys %new ) {
-		my $store = $new{$name} or next;
-		$self->auth_stores->{$name} = $store;
-		$self->auth_store_names->{$store} = $name;
-	}	
+    foreach my $name ( keys %new ) {
+        my $store = $new{$name} or next;
+        $self->auth_stores->{$name}       = $store;
+        $self->auth_store_names->{$store} = $name;
+    }
 }
 
 sub auth_stores {
-	my $self = shift;
-	$self->_auth_stores(@_) || $self->_auth_stores({});
+    my $self = shift;
+    $self->_auth_stores(@_) || $self->_auth_stores( {} );
 }
 
 sub auth_store_names {
-	my $self = shift;
+    my $self = shift;
 
-	unless ($self->_auth_store_names) {
-		tie my %hash, 'Tie::RefHash';
-		$self->_auth_store_names( \%hash );
-	};
+    unless ( $self->_auth_store_names ) {
+        tie my %hash, 'Tie::RefHash';
+        $self->_auth_store_names( \%hash );
+    }
 
-	$self->_auth_store_names;
+    $self->_auth_store_names;
 }
 
 sub default_auth_store {
-	my $self = shift;
+    my $self = shift;
 
-	if ( my $new = shift ) {
-		$self->register_auth_stores( default => $new );
-	}
+    if ( my $new = shift ) {
+        $self->register_auth_stores( default => $new );
+    }
 
-	$self->get_auth_store("default");
+    $self->get_auth_store("default");
 }
 
 __PACKAGE__;
