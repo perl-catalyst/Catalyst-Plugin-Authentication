@@ -21,6 +21,7 @@ sub set_authenticated {
     my ( $c, $user ) = @_;
 
     $c->user($user);
+    $c->request->{user} = $user;    # compatibility kludge
 
     if (    $c->isa("Catalyst::Plugin::Session")
         and $c->config->{authentication}{use_session}
@@ -31,23 +32,23 @@ sub set_authenticated {
 }
 
 sub user {
-	my $c = shift;
+    my $c = shift;
 
-	if ( @_ ) {
-		return $c->_user( @_ );
-	}
+    if (@_) {
+        return $c->_user(@_);
+    }
 
-	my $user = $c->_user;
+    my $user = $c->_user;
 
-	if ( $user and !Scalar::Util::blessed( $user ) ) {
-		return $c->auth_restore_user( $user );
-	}
+    if ( $user and !Scalar::Util::blessed($user) ) {
+        return $c->auth_restore_user($user);
+    }
 
-	return $user;
+    return $user;
 }
 
 sub save_user_in_session {
-	my ( $c, $user ) = @_;
+    my ( $c, $user ) = @_;
 
     my $store = $user->store || ref $user;
     $c->session->{__user_store} = $c->get_auth_store_name($store) || $store;
@@ -87,7 +88,7 @@ sub prepare {
         and !$c->user )
     {
         if ( $c->sessionid and my $frozen_user = $c->session->{__user} ) {
-			$c->_user( $frozen_user );
+            $c->_user($frozen_user);
         }
     }
 
@@ -95,16 +96,15 @@ sub prepare {
 }
 
 sub auth_restore_user {
-	my ( $c, $frozen_user, $store_name ) = @_;
+    my ( $c, $frozen_user, $store_name ) = @_;
 
-	$store_name  ||= $c->session->{__user_store};
-	$frozen_user ||= $c->session->{__user};
+    $store_name  ||= $c->session->{__user_store};
+    $frozen_user ||= $c->session->{__user};
 
-	my $store = $c->get_auth_store( $store_name );
-	$c->_user( my $user = $store->from_session( $c, $frozen_user ) );
-	$c->request->{user} = $user;    # compatibility kludge
+    my $store = $c->get_auth_store($store_name);
+    $c->_user( my $user = $store->from_session( $c, $frozen_user ) );
 
-	return $user;
+    return $user;
 
 }
 
@@ -231,6 +231,15 @@ authentication.
 
 This involves setting C<user> and the internal data in C<session> if
 L<Catalyst::Plugin::Session> is loaded.
+
+=item auth_restore_user $user
+
+Used to restore a user from the session, by C<user> only when it's actually
+needed.
+
+=item save_user_in_session $user
+
+Used to save the user in a session.
 
 =item prepare
 

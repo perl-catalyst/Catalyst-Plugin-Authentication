@@ -9,7 +9,7 @@ use warnings;
 sub new {
     my $class = shift;
 
-    bless { @_ }, $class;
+    bless { ( @_ > 1 ) ? @_ : %{ $_[0] }  }, $class;
 }
 
 sub AUTOLOAD {
