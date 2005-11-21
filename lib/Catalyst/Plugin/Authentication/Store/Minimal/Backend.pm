@@ -14,6 +14,14 @@ sub new {
     bless { hash => $hash }, $class;
 }
 
+sub from_session {
+	my ( $self, $c, $id ) = @_;
+
+	return $id if ref $id;
+
+	$self->get_user( $id );
+}
+
 sub get_user {
     my ( $self, $id ) = @_;
 
@@ -23,9 +31,13 @@ sub get_user {
 
     if ( ref $user ) {
         if ( Scalar::Util::blessed($user) ) {
+			$user->store( $self );
+			$user->id( $id );
             return $user;
         }
         elsif ( ref $user eq "HASH" ) {
+			$user->{store} = $self;
+			$user->{id} = $id;
             return bless $user, "Catalyst::Plugin::Authentication::User::Hash";
         }
         else {
