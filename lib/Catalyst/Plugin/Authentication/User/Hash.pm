@@ -16,6 +16,23 @@ sub AUTOLOAD {
     my $self = shift;
     ( my $key ) = ( our $AUTOLOAD =~ m/([^:]*)$/ );
 
+	$self->_accessor( $key, @_ );
+}
+
+sub id {
+	my $self = shift;
+	$self->_accessor( "id", @_ );
+}
+
+sub store {
+	my $self = shift;
+	$self->_accessor( "store", @_ );
+}
+
+sub _accessor {
+	my $self = shift;
+	my $key = shift;
+
     if (@_) {
         my $arr = $self->{__hash_obj_key_is_array}{$key} = @_ > 1;
         $self->{$key} = $arr ? [@_] : shift;
@@ -35,7 +52,7 @@ my %features = (
         self_check => undef,
     },
     roles   => ["roles"],
-    session => 1,
+    session => [qw/store id/],
 );
 
 sub supports {
@@ -67,14 +84,7 @@ sub supports {
 
 sub for_session {
     my $self = shift;
-
     return $self;    # let's hope we're serialization happy
-}
-
-sub from_session {
-    my ( $self, $c, $user ) = @_;
-
-    return $user;    # if we're serialization happy this should work
 }
 
 __PACKAGE__;
