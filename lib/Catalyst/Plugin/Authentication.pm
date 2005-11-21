@@ -5,7 +5,7 @@ package Catalyst::Plugin::Authentication;
 use base qw/Class::Accessor::Fast Class::Data::Inheritable/;
 
 BEGIN {
-    __PACKAGE__->mk_accessors(qw/user/);
+    __PACKAGE__->mk_accessors(qw/_user/);
     __PACKAGE__->mk_classdata($_) for qw/_auth_stores _auth_store_names/;
 }
 
@@ -28,6 +28,22 @@ sub set_authenticated {
     {
         $c->save_user_in_session($user);
     }
+}
+
+sub user {
+	my $c = shift;
+
+	if ( @_ ) {
+		return $c->_user( @_ );
+	}
+
+	my $user = $c->_user;
+
+	if ( $user and !Scalar::Util::blessed( $user ) ) {
+		return $c->auth_restore_user( $user );
+	}
+
+	return $user;
 }
 
 sub save_user_in_session {
@@ -70,14 +86,26 @@ sub prepare {
         and $c->default_auth_store
         and !$c->user )
     {
-        if ( $c->sessionid and my $user_id = $c->session->{__user} ) {
-            my $store = $c->get_auth_store( $c->session->{__user_store} );
-            $c->user( $store->from_session( $c, $user_id ) );
-            $c->request->{user} = $c->user;    # compatibility kludge
+        if ( $c->sessionid and my $frozen_user = $c->session->{__user} ) {
+			$c->_user( $frozen_user );
         }
     }
 
     return $c;
+}
+
+sub auth_restore_user {
+	my ( $c, $frozen_user, $store_name ) = @_;
+
+	$store_name  ||= $c->session->{__user_store};
+	$frozen_user ||= $c->session->{__user};
+
+	my $store = $c->get_auth_store( $store_name );
+	$c->_user( my $user = $store->from_session( $c, $frozen_user ) );
+	$c->request->{user} = $user;    # compatibility kludge
+
+	return $user;
+
 }
 
 sub setup {
