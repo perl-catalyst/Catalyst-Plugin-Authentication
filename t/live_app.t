@@ -49,7 +49,7 @@ use Test::More 'no_plan';
 
 		throws_ok { $c->login( "baz", "foo" ) } qr/support.*mechanism/, "can't login without any supported mech";
 
-		
+		$c->res->body( "ok" );
 	}
 
 	__PACKAGE__->config->{authentication}{users} = $users = {
@@ -71,4 +71,4 @@ use Test::More 'no_plan';
 
 use Catalyst::Test qw/AuthTestApp/;
 
-get("/moose");
+ok( get("/moose"), "get ok");
