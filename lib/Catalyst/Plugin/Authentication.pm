@@ -15,6 +15,11 @@ use warnings;
 use Tie::RefHash;
 use Class::Inspector;
 
+BEGIN {
+	require constant;
+	constant->import(have_want => eval { require Want });
+}
+
 our $VERSION = "0.01";
 
 sub set_authenticated {
@@ -43,6 +48,7 @@ sub user {
     my $user = $c->_user;
 
     if ( $user and !Scalar::Util::blessed($user) ) {
+		return 1 if have_want() && Want::want("BOOL");
         return $c->auth_restore_user($user);
     }
 
@@ -234,6 +240,7 @@ or by using a Store plugin:
 
 Sets the default store to
 L<Catalyst::Plugin::Authentication::Store::Minimal::Backend>.
+
 
 =item get_auth_store $name
 
