@@ -307,6 +307,22 @@ application is also using the L<Catalyst::Plugin::Authentication> plugin.
 
 =back
 
-=cut
+=head1 SEE ALSO
 
+L<Catalyst::Plugin::Authentication::Credential::Password>,
+L<Catalyst::Plugin::Authentication::Store::Minimal>,
+L<Catalyst::Plugin::Authorization::ACL>,
+L<Catalyst::Plugin::Authorization::Roles>.
+
+=head1 AUTHOR
+
+Yuval Kogman, C<nothingmuch@woobling.org>
+
+=head1 COPYRIGHT & LICNESE
+
+        Copyright (c) 2005 the aforementioned authors. All rights
+        reserved. This program is free software; you can redistribute
+        it and/or modify it under the same terms as Perl itself.
+
+=cut
 
