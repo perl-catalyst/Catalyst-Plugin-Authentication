@@ -9,29 +9,29 @@ use warnings;
 sub new {
     my $class = shift;
 
-    bless { ( @_ > 1 ) ? @_ : %{ $_[0] }  }, $class;
+    bless { ( @_ > 1 ) ? @_ : %{ $_[0] } }, $class;
 }
 
 sub AUTOLOAD {
     my $self = shift;
     ( my $key ) = ( our $AUTOLOAD =~ m/([^:]*)$/ );
 
-	$self->_accessor( $key, @_ );
+    $self->_accessor( $key, @_ );
 }
 
 sub id {
-	my $self = shift;
-	$self->_accessor( "id", @_ );
+    my $self = shift;
+    $self->_accessor( "id", @_ );
 }
 
 sub store {
-	my $self = shift;
-	ref $self || $self;
+    my $self = shift;
+    ref $self || $self;
 }
 
 sub _accessor {
-	my $self = shift;
-	my $key = shift;
+    my $self = shift;
+    my $key  = shift;
 
     if (@_) {
         my $arr = $self->{__hash_obj_key_is_array}{$key} = @_ > 1;
@@ -59,6 +59,8 @@ sub supports {
     my ( $self, @spec ) = @_;
 
     my $cursor = \%features;
+
+    return 1 if @spec == 1 and exists $self->{ $spec[0] };
 
     # traverse the feature list,
     for (@spec) {
@@ -88,8 +90,8 @@ sub for_session {
 }
 
 sub from_session {
-	my ( $self, $c, $user ) = @_;
-	$user;
+    my ( $self, $c, $user ) = @_;
+    $user;
 }
 
 __PACKAGE__;
