@@ -29,6 +29,8 @@ sub set_authenticated {
     {
         $c->save_user_in_session($user);
     }
+
+	$c->NEXT::set_authenticated( $user );
 }
 
 sub user {
@@ -84,7 +86,6 @@ sub prepare {
     my $c = shift->NEXT::prepare(@_);
 
     if (    $c->isa("Catalyst::Plugin::Session")
-        and $c->default_auth_store
         and !$c->user )
     {
         if ( $c->sessionid and my $frozen_user = $c->session->{__user} ) {
@@ -180,7 +181,8 @@ __END__
 
 =head1 NAME
 
-Catalyst::Plugin::Authentication - 
+Catalyst::Plugin::Authentication - Infrastructure plugin for the Catalyst
+authentication framework.
 
 =head1 SYNOPSIS
 
@@ -195,7 +197,8 @@ Catalyst::Plugin::Authentication -
 The authentication plugin is used by the various authentication and
 authorization plugins in catalyst.
 
-It defines the notion of a logged in user, and provides integration with the 
+It defines the notion of a logged in user, and provides integration with the
+L<Catalyst::Plugin::Session> plugin, 
 
 =head1 METHODS
 
