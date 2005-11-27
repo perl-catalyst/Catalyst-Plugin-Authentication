@@ -99,6 +99,8 @@ sub prepare {
 sub auth_restore_user {
     my ( $c, $frozen_user, $store_name ) = @_;
 
+	return unless $c->isa("Catalyst::PLugin::Session") and $c->config->{authentication}{use_session} and $c->sessionid;
+
     $store_name  ||= $c->session->{__user_store};
     $frozen_user ||= $c->session->{__user};
 
@@ -155,12 +157,10 @@ sub auth_stores {
 sub auth_store_names {
     my $self = shift;
 
-    unless ( $self->_auth_store_names ) {
+    $self->_auth_store_names || do {
         tie my %hash, 'Tie::RefHash';
         $self->_auth_store_names( \%hash );
     }
-
-    $self->_auth_store_names;
 }
 
 sub default_auth_store {
@@ -204,13 +204,13 @@ L<Catalyst::Plugin::Session> plugin,
 
 =over 4 
 
-=item logout
-
-Delete the currently logged in user from C<user> and the session.
-
 =item user
 
 Returns the currently logged user or undef if there is none.
+
+=item logout
+
+Delete the currently logged in user from C<user> and the session.
 
 =item get_user $uid
 
