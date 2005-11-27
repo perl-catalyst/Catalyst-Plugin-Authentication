@@ -16,12 +16,12 @@ sub login {
              $user ||= $_->param("login")
           || $_->param("user")
           || $_->param("username")
-          || Catalyst::Exception->throw("Can't determine username for login");
+          || return;
 
              $password ||= $_->param("password")
           || $_->param("passwd")
           || $_->param("pass")
-          || Catalyst::Exception->throw("Can't determine password for login");
+          || return;
     }
 
     $user = $c->get_user($user) || return
@@ -33,7 +33,7 @@ sub login {
         return 1;
     }
     else {
-        return undef;
+        return;
     }
 }
 
