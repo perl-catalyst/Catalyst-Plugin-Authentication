@@ -39,6 +39,12 @@ fetch things yourself. For example:
 
     $c->login( $user, $supplied_password );
 
+Instead of just:
+
+    $c->login( $id, $supplied_password );
+
+which will go to the default store.
+
 =head1 WRITING A BACKEND
 
 Writing an authentication storage backend is a very simple matter.
