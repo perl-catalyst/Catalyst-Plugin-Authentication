@@ -121,6 +121,10 @@ Keys the hash by $id and returns the value.
 If the return value is unblessed it will be blessed as
 L<Catalyst::Plugin::Authentication::User::Hash>.
 
+=item from_session $id
+
+Delegates to C<get_user>.
+
 =item user_supports
 
 Chooses a random user from the hash and delegates to it.

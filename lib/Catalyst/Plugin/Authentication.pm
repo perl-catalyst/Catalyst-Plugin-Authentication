@@ -30,7 +30,7 @@ sub set_authenticated {
         $c->save_user_in_session($user);
     }
 
-	$c->NEXT::set_authenticated( $user );
+    $c->NEXT::set_authenticated($user);
 }
 
 sub user {
@@ -85,7 +85,7 @@ sub get_user {
 sub prepare {
     my $c = shift->NEXT::prepare(@_);
 
-    if (    $c->isa("Catalyst::Plugin::Session")
+    if ( $c->isa("Catalyst::Plugin::Session")
         and !$c->user )
     {
         if ( $c->sessionid and my $frozen_user = $c->session->{__user} ) {
@@ -99,7 +99,10 @@ sub prepare {
 sub auth_restore_user {
     my ( $c, $frozen_user, $store_name ) = @_;
 
-	return unless $c->isa("Catalyst::PLugin::Session") and $c->config->{authentication}{use_session} and $c->sessionid;
+    return
+      unless $c->isa("Catalyst::PLugin::Session")
+      and $c->config->{authentication}{use_session}
+      and $c->sessionid;
 
     $store_name  ||= $c->session->{__user_store};
     $frozen_user ||= $c->session->{__user};
@@ -160,7 +163,7 @@ sub auth_store_names {
     $self->_auth_store_names || do {
         tie my %hash, 'Tie::RefHash';
         $self->_auth_store_names( \%hash );
-    }
+      }
 }
 
 sub default_auth_store {
@@ -216,11 +219,41 @@ Delete the currently logged in user from C<user> and the session.
 
 Delegate C<get_user> to the default store.
 
+=back
+
+=head1 METHODS FOR STORE MANAGEMENT
+
 =item default_auth_store
 
-Returns C<< $c->config->{authentication}{store} >>.
+Return the store whose name is 'default'.
 
-=back
+This is set to C<<$c->config->{authentication}{store}>> if that value exists,
+or by using a Store plugin:
+
+	use Catalyst qw/Authentication Authentication::Store::Minimal/;
+
+Sets the default store to
+L<Catalyst::Plugin::Authentication::Store::Minimal::Backend>.
+
+=item get_auth_store $name
+
+Return the store whose name is $name.
+
+=item get_auth_store_name $store
+
+Return the name of the store $store.
+
+=item auth_stores
+
+A hash keyed by name, with the stores registered in the app.
+
+=item auth_store_names
+
+A ref-hash keyed by store, which contains the names of the stores.
+
+=item register_auth_stores %stores_by_name
+
+Register stores into the application.
 
 =head1 INTERNAL METHODS
 

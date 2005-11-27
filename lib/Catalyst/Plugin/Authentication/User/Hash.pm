@@ -140,6 +140,12 @@ Just passes returns the unserialized object, hoping it's intact.
 
 Accessor for the key whose name is the method.
 
+=item id
+
+=item store
+
+Accessors that override superclass's dying virtual methods.
+
 =back
 
 =head1 SEE ALSO
