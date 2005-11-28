@@ -210,6 +210,8 @@ Returns a string suitable for feeding into L<Digest/new>.
 Returns a string to be hashed before/after the user's password. Typically only
 a pre-salt is used.
 
+=back
+
 =head2 Crypt::SaltedHash Passwords
 
 Predicate:
