@@ -229,6 +229,8 @@ Delegate C<get_user> to the default store.
 
 =head1 METHODS FOR STORE MANAGEMENT
 
+=over 4
+
 =item default_auth_store
 
 Return the store whose name is 'default'.
@@ -261,6 +263,8 @@ A ref-hash keyed by store, which contains the names of the stores.
 =item register_auth_stores %stores_by_name
 
 Register stores into the application.
+
+=back
 
 =head1 INTERNAL METHODS
 
