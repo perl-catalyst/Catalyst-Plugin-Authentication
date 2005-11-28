@@ -12,6 +12,11 @@ BEGIN {
 }
 
 {
+	package User::SessionRestoring;
+	use base qw/Catalyst::Plugin::Authentication::User::Hash/;
+
+	sub for_session { $_[0]->id }
+	
 	package AuthTestApp;
 	use Catalyst qw/
 		Session
@@ -57,12 +62,15 @@ BEGIN {
 	}
 
 	__PACKAGE__->config->{authentication}{users} = $users = {
-		foo => {
+		foo => User::SessionRestoring->new(
+			id => 'foo',
 			password => "s3cr3t",
-		},
+		),
 	};
 
 	__PACKAGE__->setup;
+
+	$users->{foo}{store} = __PACKAGE__->default_auth_store;
 }
 
 use Test::WWW::Mechanize::Catalyst qw/AuthTestApp/; # for the cookie support
