@@ -380,6 +380,8 @@ L<Catalyst::Plugin::Authorization::Roles>.
 =head1 AUTHOR
 
 Yuval Kogman, C<nothingmuch@woobling.org>
+Jess Robinson
+David Kamholz
 
 =head1 COPYRIGHT & LICNESE
 
