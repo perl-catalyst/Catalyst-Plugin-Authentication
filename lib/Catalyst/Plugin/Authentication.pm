@@ -20,7 +20,7 @@ use Class::Inspector;
 #	constant->import(have_want => eval { require Want });
 #}
 
-our $VERSION = "0.01";
+our $VERSION = "0.02";
 
 sub set_authenticated {
     my ( $c, $user ) = @_;
