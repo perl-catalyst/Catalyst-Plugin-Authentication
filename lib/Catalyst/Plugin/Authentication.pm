@@ -254,7 +254,7 @@ If you're just going to say
 	}
 
 it should be more efficient than C<<$c->user>> when a user is marked in the session
-but C<<$c->user>> hasn't been called yet.
+but C<< $c->user >> hasn't been called yet.
 
 =item logout
 
@@ -278,9 +278,24 @@ value is set to true per default.
 
 =item store
 
-If multiple stores are being used, name the store you want as default here.
+If multiple stores are being used, set the module you want as default here.
 
 =back
+
+=item stores
+
+If multiple stores are being used, you need to provide a name for each store
+here, as a hash, the keys are the names you wish to use, and the values are
+the the names of the plugins.
+
+ # example
+ __PACKAGE__->config( authentication => {
+                        store => 'Catalyst::Plugin::Authentication::Store::HtPasswd',
+                        stores => { 
+                           'dbic' => 'Catalyst::Plugin::Authentication::Store::DBIC'
+                                  }
+                                         });
+
 
 =head1 METHODS FOR STORE MANAGEMENT
 
