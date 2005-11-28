@@ -214,13 +214,21 @@ authentication framework.
 
 =head1 DESCRIPTION
 
-The authentication plugin provides generic user support. It is the basis for both authentication (checking the user is who they claim to be), and authorization (allowing the user to do what the system authorises them to do).
+The authentication plugin provides generic user support. It is the basis 
+for both authentication (checking the user is who they claim to be), and 
+authorization (allowing the user to do what the system authorises them to do).
 
-Using authentication is split into two parts. A Store is used to actually store the user information, and can store any amount of data related to the user. Multiple stores can be accessed from within one application. Credentials are used to verify users, using the store, given data from the frontend.
+Using authentication is split into two parts. A Store is used to actually 
+store the user information, and can store any amount of data related to 
+the user. Multiple stores can be accessed from within one application. 
+Credentials are used to verify users, using the store, given data from 
+the frontend.
 
-To implement authentication in a catalyst application you need to add this module, plus at least one store and one credential module.
+To implement authentication in a catalyst application you need to add this 
+module, plus at least one store and one credential module.
 
-Authentication data can also be stored in a session, if the application is using the L<Catalyst::Plugin::Session> module.
+Authentication data can also be stored in a session, if the application 
+is using the L<Catalyst::Plugin::Session> module.
 
 =head1 METHODS
 
@@ -265,7 +273,12 @@ Fetch a particular users details, defined by the given ID, via the default store
 =item use_session
 
 Whether or not to store the user's logged in state in the session, if the
-application is also using the L<Catalyst::Plugin::Session> plugin.
+application is also using the L<Catalyst::Plugin::Session> plugin. This 
+value is set to true per default.
+
+=item store
+
+If multiple stores are being used, name the store you want as default here.
 
 =back
 
