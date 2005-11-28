@@ -15,10 +15,10 @@ use warnings;
 use Tie::RefHash;
 use Class::Inspector;
 
-BEGIN {
-	require constant;
-	constant->import(have_want => eval { require Want });
-}
+#BEGIN {
+#	require constant;
+#	constant->import(have_want => eval { require Want });
+#}
 
 our $VERSION = "0.01";
 
