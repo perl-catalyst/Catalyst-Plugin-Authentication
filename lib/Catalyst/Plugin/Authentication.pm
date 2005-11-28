@@ -55,6 +55,11 @@ sub user {
     return $user;
 }
 
+sub user_exists {
+	my $c = shift;
+	return defined($c->_user);
+}
+
 sub save_user_in_session {
     my ( $c, $user ) = @_;
 
@@ -216,6 +221,24 @@ L<Catalyst::Plugin::Session> plugin,
 =item user
 
 Returns the currently logged user or undef if there is none.
+
+=item user_exists
+
+Whether or not a user is logged in right now.
+
+The reason this method exists is that C<<$c->user>> may needlessly load the
+user from the auth store.
+
+If you're just going to say
+
+	if ( $c->user_user ) {
+		# foo
+	} else {
+		$c->forward("login");
+	}
+
+it should be more efficient than C<<$c->user>> when a user is marked in the session
+but C<<$c->user>> hasn't been called yet.
 
 =item logout
 
