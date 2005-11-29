@@ -139,7 +139,7 @@ with L<Digest>.
 
 Try to log a user in.
 
-C<$username> can be an ID or string (e.g. retrieved from a form) or an object. 
+C<$username> can be a string (e.g. retrieved from a form) or an object. 
 If the object is a L<Catalyst::Plugin::Authentication::User> it will be used 
 as is. Otherwise C<< $c->get_user >> is used to retrieve it.
 
