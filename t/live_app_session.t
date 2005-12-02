@@ -6,8 +6,8 @@ use warnings;
 use Test::More;
 
 BEGIN {
-	eval { require Catalyst::Plugin::Session; require Catalyst::Plugin::Session::State::Cookie };
-	plan skip_all => "This test needs Catalyst::Plugin::Session and Catalyst::Plugin::Session::State::Cookie installed" if $@;
+	eval { require Test::WWW::Mechanize::Catalyst; require Catalyst::Plugin::Session; require Catalyst::Plugin::Session::State::Cookie };
+	plan skip_all => "This test needs Test::WWW::Mechanize::Catalyst, Catalyst::Plugin::Session and Catalyst::Plugin::Session::State::Cookie installed" if $@;
 	plan tests => 14;
 }
 
