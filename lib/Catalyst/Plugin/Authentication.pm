@@ -78,6 +78,8 @@ sub logout {
     {
         delete @{ $c->session }{qw/__user __user_store/};
     }
+    
+    $c->NEXT::logout(@_);
 }
 
 sub get_user {
