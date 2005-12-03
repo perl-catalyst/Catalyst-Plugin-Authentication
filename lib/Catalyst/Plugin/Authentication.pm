@@ -20,7 +20,7 @@ use Class::Inspector;
 #	constant->import(have_want => eval { require Want });
 #}
 
-our $VERSION = "0.02";
+our $VERSION = "0.03";
 
 sub set_authenticated {
     my ( $c, $user ) = @_;
@@ -282,8 +282,6 @@ value is set to true per default.
 
 If multiple stores are being used, set the module you want as default here.
 
-=back
-
 =item stores
 
 If multiple stores are being used, you need to provide a name for each store
@@ -298,6 +296,7 @@ the the names of the plugins.
                                   }
                                          });
 
+=back
 
 =head1 METHODS FOR STORE MANAGEMENT
 
@@ -379,10 +378,12 @@ L<Catalyst::Plugin::Authentication::Store::Minimal>,
 L<Catalyst::Plugin::Authorization::ACL>,
 L<Catalyst::Plugin::Authorization::Roles>.
 
-=head1 AUTHOR
+=head1 AUTHORS
 
 Yuval Kogman, C<nothingmuch@woobling.org>
+
 Jess Robinson
+
 David Kamholz
 
 =head1 COPYRIGHT & LICNESE
