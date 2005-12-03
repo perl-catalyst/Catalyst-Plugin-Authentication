@@ -79,6 +79,8 @@ Authorization::Roles plugin.
 
 See the SYNOPSIS for an example.
 
+=back
+
 =head1 INTERNAL METHODS
 
 =over 4
