@@ -246,7 +246,7 @@ Returns the currently logged in user or undef if there is none.
 
 Whether or not a user is logged in right now.
 
-The reason this method exists is that C<<$c->user>> may needlessly load the
+The reason this method exists is that C<< $c->user >> may needlessly load the
 user from the auth store.
 
 If you're just going to say
@@ -257,7 +257,7 @@ If you're just going to say
 		$c->forward("login");
 	}
 
-it should be more efficient than C<<$c->user>> when a user is marked in the session
+it should be more efficient than C<< $c->user >> when a user is marked in the session
 but C<< $c->user >> hasn't been called yet.
 
 =item logout
