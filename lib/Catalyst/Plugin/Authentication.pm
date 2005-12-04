@@ -15,12 +15,14 @@ use warnings;
 use Tie::RefHash;
 use Class::Inspector;
 
+# this optimization breaks under Template::Toolkit
+# use user_exists instead
 #BEGIN {
 #	require constant;
 #	constant->import(have_want => eval { require Want });
 #}
 
-our $VERSION = "0.03";
+our $VERSION = "0.04";
 
 sub set_authenticated {
     my ( $c, $user ) = @_;
