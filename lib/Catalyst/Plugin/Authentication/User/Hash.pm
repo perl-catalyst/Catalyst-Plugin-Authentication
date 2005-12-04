@@ -26,7 +26,7 @@ sub id {
 
 sub store {
     my $self = shift;
-    ref $self || $self;
+    $self->_accessor( "store", @_ ) || ref $self;
 }
 
 sub _accessor {
