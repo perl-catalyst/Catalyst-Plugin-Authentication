@@ -380,6 +380,18 @@ L<Catalyst::Plugin::Authentication::Store::Minimal>,
 L<Catalyst::Plugin::Authorization::ACL>,
 L<Catalyst::Plugin::Authorization::Roles>.
 
+=head1 DON'T SEE ALSO
+
+This module along with it's sub plugins deprecate a great number of other
+modules. These include Catalyst::Plugin::Authentication::Simple,
+Catalyst::Plugin::Authentication::CDBI.
+
+At the time of writing these plugins have not yet been replaced or updated, but
+should be eventually: Catalyst::Plugin::Authentication::OpenID,
+Catalyst::Plugin::Authentication::LDAP,
+Catalyst::Plugin::Authentication::CDBI::Basic,
+Catalyst::Plugin::Authentication::Basic::Remote
+
 =head1 AUTHORS
 
 Yuval Kogman, C<nothingmuch@woobling.org>
