@@ -298,6 +298,154 @@ L<Catalyst::Plugin::Authorization::Roles> provides an accepted way to separate
 and group users into categories, and then check which categories the current
 user belongs to.
 
+=head1 EXAMPLE
+
+Let's say we were storing users in an apache style htpasswd file. The way users
+are stored is in that file, with a hashed password and some extra comments. The
+way users are verified is by supplying a password which is matched with the
+file.
+
+This means that our application will begin like this:
+
+    package MyApp;
+
+    use Catalyst qw/
+        Authentication
+        Authentication::Credential::Password
+        Authentication::Store::Htpasswd
+    /;
+
+    __PACKAGE__->config->{authentication}{htpasswd} = "passwdfile";
+
+This loads the appropriate methods and also sets the htpasswd store as the
+default store.
+    
+So, now that we have the code loaded we need to get data from the user into the
+credential verifier.
+
+Let's create an authentication controller:
+
+    package MyApp::Controller::Auth;
+
+    sub login : Local {
+        my ( $self, $c ) = @_;
+
+        if (    my $user = $c->req->param("user")
+            and my $password = $c->req->param("password") )
+        {
+            if ( $c->login( $user, $password ) ) {
+                $c->res->body( "hello " . $c->user->name );
+            } else {
+                # login incorrect
+            }
+        }
+        else {
+            # invalid form input
+        }
+    }
+
+This code should be very readable. If all the necessary fields are supplied,
+call the L<Authentication::Credential::Password/login> method on the
+controller. If that succeeds the user is logged in.
+
+It could be simplified though:
+
+    sub login : Local {
+        my ( $self, $c ) = @_;
+
+        if ( $c->login ) {
+            ...
+        }
+    }
+
+Since the C<login> method knows how to find logically named parameters on it's
+own.
+
+The credential verifier will ask the default store to get the user whose ID is
+the user parameter. In this case the default store is the htpasswd one. Once it
+fetches the user from the store the password is checked and if it's OK
+C<< $c->user >> will contain the user object returned from the htpasswd store.
+
+We can also pass a user object to the credential verifier manually, if we have
+several stores per app. This is discussed in
+L<Catalyst::Plugin::Authentication::Store>.
+
+Now imagine each admin user has a comment set in the htpasswd file saying
+"admin".
+
+A restricted action might look like this:
+
+    sub restricted : Local {
+        my ( $self, $c ) = @_;
+
+        $c->detach("unauthorized")
+          unless $c->user_exists
+          and $c->user->extra_info() eq "admin";
+
+        # do something restricted here
+    }
+
+This is somewhat similar to role based access control.
+L<Catalyst::Plugin::Authentication::Store::Htpasswd> treats the extra info
+field as a comma separated list of roles if it's treated that way. Let's
+leverage this. Add the role authorization plugin:
+
+    use Catalyst qw/
+        ...
+        Authorization::Roles
+    /;
+
+    sub restricted : Local {
+        my ( $self, $c ) = @_;
+
+        $c->detach("unauthorized") unless $c->check_roles("admin");
+
+        # do something restricted here
+    }
+
+This is somewhat simpler and will work if you change your store, too, since the
+role interface is consistent.
+
+Let's say your app grew, and you now have 10000 users. It's no longer efficient
+to maintain an htpasswd file, so you move this data to a database.
+
+    use Catalyst qw/
+        Authentication
+        Authentication::Credential::Password
+        Authentication::Store::DBIC
+        Authorization::Roles
+    /;
+
+    __PACKAGE__->config->{authentication}{dbic} = ...; # see the DBIC store docs
+
+The rest of your code should be unchanged. Now let's say you are integrating
+typekey authentication to your system. For simplicity's sake we'll assume that
+the user's are still keyed in the same way.
+
+    use Catalyst qw/
+        Authentication
+        Authentication::Credential::Password
+        Authentication::Credential::TypeKey
+        Authentication::Store::DBIC
+        Authorization::Roles
+    /;
+
+And in your auth controller add a new action:
+
+    sub typekey : Local {
+        my ( $self, $c ) = @_;
+
+        if ( $c->authenticate_typekey) { # uses $c->req and Authen::TypeKey
+            # same stuff as the $c->login method
+            # ...
+        }
+    }
+
+You've now added a new credential verification mechanizm orthogonally to the
+other components. All you have to do is make sure that the credential verifiers
+pass on the same types of parameters to the store in order to retrieve user
+objects.
+
 =head1 METHODS
 
 =over 4 
@@ -457,6 +605,10 @@ L<Catalyst::Plugin::Authentication::Credential::TypeKey>
 
 L<Catalyst::Plugin::Authorization::ACL>,
 L<Catalyst::Plugin::Authorization::Roles>
+
+=head2 Internals Documentation
+
+L<Catalyst::Plugin::Authentication::Store>
 
 =head2 Misc
 
