@@ -234,6 +234,70 @@ module, plus at least one store and one credential module.
 Authentication data can also be stored in a session, if the application 
 is using the L<Catalyst::Plugin::Session> module.
 
+=head1 INTRODUCTION
+
+=head2 The Authentication/Authorization Process
+
+Web applications typically need to identify a user - to tell the user apart
+from other users. This is usually done in order to display private information
+that is only that user's business, or to limit access to the application so
+that only certain entities can access certain parts.
+
+This process is split up into several steps. First you ask the user to identify
+themselves. At this point you can't be sure that the user is really who they
+claim to be.
+
+Then the user tells you who they are, and backs this claim with some peice of
+information that only the real user could give you. For example, a password is
+a secret that is known to both the user and you. When the user tells you this
+password you can assume they're in on the secret and can be trusted (ignore
+identity theft for now). Checking the password, or any other proof is called
+B<credential verification>.
+
+By this time you know exactly who the user is - the user's identity is
+B<authenticated>. This is where this module's job stops, and other plugins step
+in. The next logical step is B<authorization>, the process of deciding what a
+user is (or isn't) allowed to do. For example, say your users are split into
+two main groups - regular users and administrators. You should verify that the
+currently logged in user is indeed an administrator before performing the
+actions of an administrative part of your apploication. One way to do this is
+with role based access control.
+
+=head2 The Components In This Framework
+
+=head3 Credential Verifiers
+
+When user input is transferred to the L<Catalyst> application (typically via
+form inputs) this data then enters the authentication framework through these
+plugins.
+
+These plugins check the data, and ensure that it really proves the user is who
+they claim to be.
+
+=head3 Storage Backends
+
+The credentials also identify a user, and this family of modules is supposed to
+take this identification data and return a standardized object oriented
+representation of users.
+
+When a user is retrieved from a store it is not necessarily authenticated.
+Credential verifiers can either accept a user object, or fetch the object
+themselves from the default store.
+
+=head3 The Core Plugin
+
+This plugin on it's own is the glue, providing store registration, session
+integration, and other goodness for the other plugins.
+
+=head3 Other Plugins
+
+More layers of plugins can be stacked on top of the authentication code. For
+example, L<Catalyst::Plugin::Session::PerUser> provides an abstraction of
+browser sessions that is more persistent per users.
+L<Catalyst::Plugin::Authorization::Roles> provides an accepted way to separate
+and group users into categories, and then check which categories the current
+user belongs to.
+
 =head1 METHODS
 
 =over 4 
@@ -375,10 +439,29 @@ Sets the default configuration parameters.
 
 =head1 SEE ALSO
 
-L<Catalyst::Plugin::Authentication::Credential::Password>,
+This list might not be up to date.
+
+=head2 User Storage Backends
+
 L<Catalyst::Plugin::Authentication::Store::Minimal>,
+L<Catalyst::Plugin::Authentication::Store::Htpasswd>,
+L<Catalyst::Plugin::Authentication::Store::DBIC> (also works with Class::DBI).
+
+=head2 Credential verification
+
+L<Catalyst::Plugin::Authentication::Credential::Password>,
+L<Catalyst::Plugin::Authentication::Credential::HTTP>,
+L<Catalyst::Plugin::Authentication::Credential::TypeKey>
+
+=head2 Authorization
+
 L<Catalyst::Plugin::Authorization::ACL>,
-L<Catalyst::Plugin::Authorization::Roles>.
+L<Catalyst::Plugin::Authorization::Roles>
+
+=head2 Misc
+
+L<Catalyst::Plugin::Session>,
+L<Catalyst::Plugin::Session::PerUser>
 
 =head1 DON'T SEE ALSO
 
