@@ -9,7 +9,7 @@ my $build = Module::Build->new(
         'perl'     => '5.8.1',
         'Catalyst' => '5.49',
     },
-    reccomends    => { 'Want' => 0, },
+    recommends    => { 'Want' => 0, },
     create_readme => 1,
     sign          => 1,
 );
