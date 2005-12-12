@@ -228,7 +228,7 @@ the user. Multiple stores can be accessed from within one application.
 Credentials are used to verify users, using the store, given data from 
 the frontend.
 
-To implement authentication in a catalyst application you need to add this 
+To implement authentication in a Catalyst application you need to add this 
 module, plus at least one store and one credential module.
 
 Authentication data can also be stored in a session, if the application 
@@ -247,7 +247,7 @@ This process is split up into several steps. First you ask the user to identify
 themselves. At this point you can't be sure that the user is really who they
 claim to be.
 
-Then the user tells you who they are, and backs this claim with some peice of
+Then the user tells you who they are, and backs this claim with some piece of
 information that only the real user could give you. For example, a password is
 a secret that is known to both the user and you. When the user tells you this
 password you can assume they're in on the secret and can be trusted (ignore
@@ -260,7 +260,7 @@ in. The next logical step is B<authorization>, the process of deciding what a
 user is (or isn't) allowed to do. For example, say your users are split into
 two main groups - regular users and administrators. You should verify that the
 currently logged in user is indeed an administrator before performing the
-actions of an administrative part of your apploication. One way to do this is
+actions of an administrative part of your application. One way to do this is
 with role based access control.
 
 =head2 The Components In This Framework
@@ -286,7 +286,7 @@ themselves from the default store.
 
 =head3 The Core Plugin
 
-This plugin on it's own is the glue, providing store registration, session
+This plugin on its own is the glue, providing store registration, session
 integration, and other goodness for the other plugins.
 
 =head3 Other Plugins
@@ -300,10 +300,9 @@ user belongs to.
 
 =head1 EXAMPLE
 
-Let's say we were storing users in an apache style htpasswd file. The way users
-are stored is in that file, with a hashed password and some extra comments. The
-way users are verified is by supplying a password which is matched with the
-file.
+Let's say we were storing users in an Apache style htpasswd file. Users are
+stored in that file, with a hashed password and some extra comments. Users are
+verified by supplying a password which is matched with the file.
 
 This means that our application will begin like this:
 
