@@ -616,15 +616,15 @@ L<Catalyst::Plugin::Session::PerUser>
 
 =head1 DON'T SEE ALSO
 
-This module along with it's sub plugins deprecate a great number of other
-modules. These include Catalyst::Plugin::Authentication::Simple,
-Catalyst::Plugin::Authentication::CDBI.
+This module along with its sub plugins deprecate a great number of other
+modules. These include L<Catalyst::Plugin::Authentication::Simple>,
+L<Catalyst::Plugin::Authentication::CDBI>.
 
 At the time of writing these plugins have not yet been replaced or updated, but
-should be eventually: Catalyst::Plugin::Authentication::OpenID,
-Catalyst::Plugin::Authentication::LDAP,
-Catalyst::Plugin::Authentication::CDBI::Basic,
-Catalyst::Plugin::Authentication::Basic::Remote
+should be eventually: L<Catalyst::Plugin::Authentication::OpenID>,
+L<Catalyst::Plugin::Authentication::LDAP>,
+L<Catalyst::Plugin::Authentication::CDBI::Basic>,
+L<Catalyst::Plugin::Authentication::Basic::Remote>.
 
 =head1 AUTHORS
 
