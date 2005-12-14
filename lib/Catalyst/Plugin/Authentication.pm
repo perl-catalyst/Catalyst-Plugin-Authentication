@@ -462,14 +462,14 @@ user from the auth store.
 
 If you're just going to say
 
-	if ( $c->user_user ) {
+	if ( $c->user_exists ) {
 		# foo
 	} else {
 		$c->forward("login");
 	}
 
-it should be more efficient than C<< $c->user >> when a user is marked in the session
-but C<< $c->user >> hasn't been called yet.
+it should be more efficient than C<< $c->user >> when a user is marked in the
+session but C<< $c->user >> hasn't been called yet.
 
 =item logout
 
