@@ -397,7 +397,7 @@ leverage this. Add the role authorization plugin:
     sub restricted : Local {
         my ( $self, $c ) = @_;
 
-        $c->detach("unauthorized") unless $c->check_roles("admin");
+        $c->detach("unauthorized") unless $c->check_user_roles("admin");
 
         # do something restricted here
     }
