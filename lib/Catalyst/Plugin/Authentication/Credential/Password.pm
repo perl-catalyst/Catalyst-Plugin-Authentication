@@ -13,26 +13,48 @@ sub login {
     my ( $c, $user, $password ) = @_;
 
     for ( $c->request ) {
-             $user ||= $_->param("login")
-          || $_->param("user")
-          || $_->param("username")
-          || return;
+        unless ( $user ||= $_->param("login")
+            || $_->param("user")
+            || $_->param("username") )
+        {
+            $c->log->debug(
+                "Can't login a user without a user object or user ID param");
+            return;
+        }
 
-             $password ||= $_->param("password")
-          || $_->param("passwd")
-          || $_->param("pass")
-          || return;
+        unless ( $password ||= $_->param("password")
+            || $_->param("passwd")
+            || $_->param("pass") )
+        {
+            $c->log->debug("Can't login a user without a password");
+            return;
+        }
     }
 
-    $user = $c->get_user($user) || return
-      unless Scalar::Util::blessed($user)
-      and $user->isa("Catalyst:::Plugin::Authentication::User");
+    unless ( Scalar::Util::blessed($user)
+        and $user->isa("Catalyst:::Plugin::Authentication::User") )
+    {
+        if ( my $user_obj = $c->get_user($user) ) {
+            $user = $user_obj;
+        }
+        else {
+            $c->log->debug("User '$user' doesn't exist in the default store")
+              if $c->debug;
+            return;
+        }
+    }
 
     if ( $c->_check_password( $user, $password ) ) {
         $c->set_authenticated($user);
+        $c->log->debug("Successfully authenticated user '$user'.")
+          if $c->debug;
         return 1;
     }
     else {
+        $c->log->debug(
+            "Failed to authenticate user '$user'. Reason: 'Incorrect password'"
+          )
+          if $c->debug;
         return;
     }
 }
