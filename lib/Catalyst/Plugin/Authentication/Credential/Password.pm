@@ -123,6 +123,15 @@ with a password.
       Authentication::Credential::Password
       /;
 
+    package MyApp::Controller::Auth;
+
+    # *** NOTE ***
+    # if you place an action named 'login' in your application's root (as
+    # opposed to inside a controller) the following snippet will recurse,
+    # giving you lots of grief.
+    # never name actions in the root controller after plugin methods - use
+    # controllers and : Global instead.
+
     sub login : Local {
         my ( $self, $c ) = @_;
 
