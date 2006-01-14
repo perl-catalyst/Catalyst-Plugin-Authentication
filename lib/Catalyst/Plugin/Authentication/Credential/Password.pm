@@ -18,7 +18,8 @@ sub login {
             || $_->param("username") )
         {
             $c->log->debug(
-                "Can't login a user without a user object or user ID param");
+                "Can't login a user without a user object or user ID param")
+                  if $c->debug;
             return;
         }
 
@@ -26,13 +27,14 @@ sub login {
             || $_->param("passwd")
             || $_->param("pass") )
         {
-            $c->log->debug("Can't login a user without a password");
+            $c->log->debug("Can't login a user without a password")
+              if $c->debug;
             return;
         }
     }
 
     unless ( Scalar::Util::blessed($user)
-        and $user->isa("Catalyst:::Plugin::Authentication::User") )
+        and $user->isa("Catalyst::Plugin::Authentication::User") )
     {
         if ( my $user_obj = $c->get_user($user) ) {
             $user = $user_obj;
@@ -52,8 +54,7 @@ sub login {
     }
     else {
         $c->log->debug(
-            "Failed to authenticate user '$user'. Reason: 'Incorrect password'"
-          )
+            "Failed to authenticate user '$user'. Reason: 'Incorrect password'")
           if $c->debug;
         return;
     }
