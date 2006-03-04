@@ -10,7 +10,7 @@ use Catalyst::Exception ();
 use Digest              ();
 
 sub login {
-    my ( $c, $user, $password ) = @_;
+    my ( $c, $user, $password, @rest ) = @_;
 
     for ( $c->request ) {
         unless ( $user ||= $_->param("login")
@@ -36,7 +36,7 @@ sub login {
     unless ( Scalar::Util::blessed($user)
         and $user->isa("Catalyst::Plugin::Authentication::User") )
     {
-        if ( my $user_obj = $c->get_user($user) ) {
+        if ( my $user_obj = $c->get_user( $user, $password, @rest ) ) {
             $user = $user_obj;
         }
         else {
