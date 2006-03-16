@@ -77,11 +77,14 @@ sub _check_password {
         $d->add($password);
         $d->add( $user->password_post_salt || '' );
 
-        my $stored   = $user->hashed_password;
-        my $computed = $d->digest;
+        my $stored      = $user->hashed_password;
+        my $computed    = $d->clone()->digest;
+        my $b64computed = $d->clone()->b64digest;
 
         return ( ( $computed eq $stored )
-              || ( unpack( "H*", $computed ) eq $stored ) );
+              || ( unpack( "H*", $computed ) eq $stored )
+              || ( $b64computed eq $stored)
+              || ( $b64computed.'=' eq $stored) );
     }
     elsif ( $user->supports(qw/password salted_hash/) ) {
         require Crypt::SaltedHash;
