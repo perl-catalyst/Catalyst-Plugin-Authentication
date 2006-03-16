@@ -1,5 +1,8 @@
 Revision history for Perl extension Catalyst::Plugin::Authentication
 
+0.07    Pending
+        - allow base64 hashed passwords
+
 0.06    2005-03-14 19:23:50
         - pass extra get_user args to store so they can be made use of
 
