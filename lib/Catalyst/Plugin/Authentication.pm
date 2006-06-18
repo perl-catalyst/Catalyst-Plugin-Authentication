@@ -357,7 +357,7 @@ It could be simplified though:
         }
     }
 
-Since the C<login> method knows how to find logically named parameters on it's
+Since the C<login> method knows how to find logically named parameters on its
 own.
 
 The credential verifier will ask the default store to get the user whose ID is
