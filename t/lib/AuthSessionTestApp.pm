@@ -46,7 +46,7 @@ sub elk : Local {
 sub fluffy_bunny : Local {
 	my ( $self, $c ) = @_;
 
-	ok( !$c->sessionid, "no session ID was restored");
+	ok( !$c->session_is_valid, "no session ID was restored");
 	ok( !$c->user, "no user was restored");
 }
 
