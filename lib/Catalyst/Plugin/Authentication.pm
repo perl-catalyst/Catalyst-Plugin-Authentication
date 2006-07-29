@@ -50,14 +50,14 @@ sub user {
     if ( defined(my $user = $c->_user) ) {
         return $user;
     } else {
-        my $frozen = $self->_user_in_session;
+        my $frozen = $c->_user_in_session;
         return $c->auth_restore_user($frozen);
     }
 }
 
 sub user_exists {
 	my $c = shift;
-	return defined($c->_user) || defined($self->_user_in_session);
+	return defined($c->_user) || defined($c->_user_in_session);
 }
 
 sub _user_in_session {
