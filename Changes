@@ -2,6 +2,7 @@ Revision history for Perl extension Catalyst::Plugin::Authentication
 
 0.08
         - factor test applications out to files due to changes in Catalyst::Test
+        - don't load session at prepare time unless necessary
 
 0.07    2006-03-17 17:33:12
         - allow base64 hashed passwords

@@ -63,10 +63,8 @@ sub user_exists {
 sub _user_in_session {
     my $c = shift;
 
-    if ( $c->isa("Catalyst::Plugin::Session") ) {
-        if ( $c->session_is_valid ) {
-            return $c->session->{__user};
-        }
+    if ( $c->isa("Catalyst::Plugin::Session") and $c->session_is_valid ) {
+        return $c->session->{__user};
     }
 
     return;
