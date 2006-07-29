@@ -27,3 +27,6 @@
 
 \.DS_Store$
 \.tar\.gz$
+
+# Module::Bane
+\bBuild.PL$
