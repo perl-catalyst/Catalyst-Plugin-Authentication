@@ -6,9 +6,10 @@ my $build = Module::Build->new(
     license            => 'perl',
     module_name        => 'Catalyst::Plugin::Authentication',
     requires           => {
-        'perl'             => '5.8.1',
-        'Catalyst'         => '5.49',
-        'Class::Inspector' => 0,
+        'perl'                      => '5.8.1',
+        'Catalyst'                  => '5.49',
+        'Class::Inspector'          => 0,
+        'Catalyst::Plugin::Session' => '0.10',
     },
     create_readme => 1,
     sign          => 1,
