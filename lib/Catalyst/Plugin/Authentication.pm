@@ -22,7 +22,7 @@ use Class::Inspector;
 #	constant->import(have_want => eval { require Want });
 #}
 
-our $VERSION = "0.08";
+our $VERSION = "0.09";
 
 sub set_authenticated {
     my ( $c, $user ) = @_;
@@ -116,6 +116,7 @@ sub auth_restore_user {
     return unless defined($frozen_user);
 
     $store_name  ||= $c->session->{__user_store};
+    return unless $store_name; # FIXME die unless? This is an internal inconsistency
 
     my $store = $c->get_auth_store($store_name);
     $c->_user( my $user = $store->from_session( $c, $frozen_user ) );
