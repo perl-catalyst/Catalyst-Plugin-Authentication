@@ -13,20 +13,26 @@ sub login {
     my ( $c, $user, $password, @rest ) = @_;
 
     for ( $c->request ) {
-        unless ( $user ||= $_->param("login")
-            || $_->param("user")
-            || $_->param("username") )
-        {
+        unless (
+            defined($user)
+                or
+            $user = $_->param("login")
+                 || $_->param("user")
+                 || $_->param("username")
+        ) {
             $c->log->debug(
                 "Can't login a user without a user object or user ID param")
                   if $c->debug;
             return;
         }
 
-        unless ( $password ||= $_->param("password")
-            || $_->param("passwd")
-            || $_->param("pass") )
-        {
+        unless (
+            defined($password)
+                or
+            $password = $_->param("password")
+                     || $_->param("passwd")
+                     || $_->param("pass")
+        ) {
             $c->log->debug("Can't login a user without a password")
               if $c->debug;
             return;
