@@ -10,6 +10,7 @@ my $build = Module::Build->new(
         'Catalyst'                  => '5.49',
         'Class::Inspector'          => 0,
         'Catalyst::Plugin::Session' => '0.10',
+        'Tie::RefHash'              => '1.35',
     },
     create_readme => 1,
     sign          => 1,

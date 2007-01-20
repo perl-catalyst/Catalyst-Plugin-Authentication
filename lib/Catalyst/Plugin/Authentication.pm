@@ -30,14 +30,32 @@ sub set_authenticated {
     $c->user($user);
     $c->request->{user} = $user;    # compatibility kludge
 
-    if (    $c->isa("Catalyst::Plugin::Session")
-        and $c->config->{authentication}{use_session}
-        and $user->supports("session") )
-    {
+    if ( $c->_should_save_user_in_session($user) ) {
         $c->save_user_in_session($user);
     }
 
     $c->NEXT::set_authenticated($user);
+}
+
+sub _should_save_user_in_session {
+    my ( $c, $user ) = @_;
+
+    $c->_auth_sessions_supported
+    and $c->config->{authentication}{use_session}
+    and $user->supports("session");
+}
+
+sub _should_load_user_from_session {
+    my ( $c, $user ) = @_;
+
+    $c->_auth_sessions_supported
+    and $c->config->{authentication}{use_session}
+    and $c->session_is_valid;
+}
+
+sub _auth_sessions_supported {
+    my $c = shift;
+    $c->isa("Catalyst::Plugin::Session");
 }
 
 sub user {
@@ -72,15 +90,16 @@ sub logout {
 
     $c->user(undef);
 
-    if (
-        $c->isa("Catalyst::Plugin::Session")
-        and $c->config->{authentication}{use_session}
-        and $c->session_is_valid
-    ) {
-        delete @{ $c->session }{qw/__user __user_store/};
+    if ( $c->_should_load_user_from_session ) {
+        $c->_delete_user_from_session();
     }
     
     $c->NEXT::logout(@_);
+}
+
+sub _delete_user_from_session {
+    my $c = shift;
+    delete @{ $c->session }{qw/__user __user_store/};
 }
 
 sub get_user {
@@ -99,14 +118,17 @@ sub get_user {
 sub _user_in_session {
     my $c = shift;
 
-    return unless
-        $c->isa("Catalyst::Plugin::Session")
-        and $c->config->{authentication}{use_session}
-        and $c->session_is_valid;
+    return unless $c->_should_load_user_from_session;
 
     return $c->session->{__user};
+}
 
-    return;
+sub _store_in_session {
+    my $c = shift;
+    
+    # we don't need verification, it's only called if _user_in_session returned something useful
+
+    return $c->session->{__user_store};
 }
 
 sub auth_restore_user {
@@ -115,10 +137,11 @@ sub auth_restore_user {
     $frozen_user ||= $c->_user_in_session;
     return unless defined($frozen_user);
 
-    $store_name  ||= $c->session->{__user_store};
+    $store_name  ||= $c->_store_in_session;
     return unless $store_name; # FIXME die unless? This is an internal inconsistency
 
     my $store = $c->get_auth_store($store_name);
+
     $c->_user( my $user = $store->from_session( $c, $frozen_user ) );
 
     return $user;
@@ -128,7 +151,7 @@ sub auth_restore_user {
 sub setup {
     my $c = shift;
 
-    my $cfg = $c->config->{authentication} || {};
+    my $cfg = $c->config->{authentication} ||= {};
 
     %$cfg = (
         use_session => 1,
