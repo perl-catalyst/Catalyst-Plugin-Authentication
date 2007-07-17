@@ -45,27 +45,6 @@ sub set_authenticated {
     $c->NEXT::set_authenticated($user, $realmname);
 }
 
-sub _should_save_user_in_session {
-    my ( $c, $user ) = @_;
-
-    $c->_auth_sessions_supported
-    and $c->config->{authentication}{use_session}
-    and $user->supports("session");
-}
-
-sub _should_load_user_from_session {
-    my ( $c, $user ) = @_;
-
-    $c->_auth_sessions_supported
-    and $c->config->{authentication}{use_session}
-    and $c->session_is_valid;
-}
-
-sub _auth_sessions_supported {
-    my $c = shift;
-    $c->isa("Catalyst::Plugin::Session");
-}
-
 sub user {
     my $c = shift;
 
@@ -149,7 +128,10 @@ sub find_user {
 sub _user_in_session {
     my $c = shift;
 
-    return unless $c->_should_load_user_from_session;
+    return unless
+        $c->isa("Catalyst::Plugin::Session")
+        and $c->config->{authentication}{use_session}
+        and $c->session_is_valid;
 
     return $c->session->{__user};
 }
