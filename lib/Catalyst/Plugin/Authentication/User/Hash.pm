@@ -19,6 +19,9 @@ sub AUTOLOAD {
     $self->_accessor( $key, @_ );
 }
 
+# this class effectively handles any method calls
+sub can { 1 }
+
 sub id {
     my $self = shift;
     $self->_accessor( "id", @_ );

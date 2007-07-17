@@ -25,7 +25,7 @@ sub new {
     $self->_config->{'password_hash_type'} ||= 'SHA-1';
     
     my $passwordtype = $self->_config->{'password_type'};
-    if (!grep /$passwordtype/, ('clear', 'hashed', 'salted_hash', 'crypted', 'self_check')) {
+    if (!grep /$passwordtype/, ('none', 'clear', 'hashed', 'salted_hash', 'crypted', 'self_check')) {
         Catalyst::Exception->throw(__PACKAGE__ . " used with unsupported password type: " . $self->_config->{'password_type'});
     }
     return $self;
