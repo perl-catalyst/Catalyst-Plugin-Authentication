@@ -184,19 +184,16 @@ sub setup {
 sub _authentication_initialize {
     my $app = shift;
 
-    if ($app->_auth_realms) { return };
-    
+    ## let's avoid recreating / configuring everything if we have already done it, eh?
+    if ($app->can('_auth_realms')) { return };
 
+    ## make classdata where it is used.  
+    $app->mk_classdata( '_auth_realms' => {});
     
     my $cfg = $app->config->{'authentication'} ||= {};
 
     $cfg->{use_session} = 1;
-
-    ## make classdata where it is used.  
-    $app->mk_classdata( _auth_realms => {});
     
-    
-
     if (exists($cfg->{'realms'})) {
         foreach my $realm (keys %{$cfg->{'realms'}}) {
             $app->setup_auth_realm($realm, $cfg->{'realms'}{$realm});
