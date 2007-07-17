@@ -38,7 +38,7 @@ sub set_authenticated {
         and $c->config->{authentication}{use_session}
         and $user->supports("session") )
     {
-        $c->save_user_in_session($realmname, $user);
+        $c->save_user_in_session($user, $realmname);
     }
     $user->_set_auth_realm($realmname);
     
@@ -89,7 +89,7 @@ sub user_exists {
 
 
 sub save_user_in_session {
-    my ( $c, $realmname, $user ) = @_;
+    my ( $c, $user, $realmname ) = @_;
 
     $c->session->{__user_realm} = $realmname;
     
@@ -203,7 +203,7 @@ sub _authentication_initialize {
         #  if we have a 'default-realm' in the config hash and we don't already 
         # have a realm called 'default', we point default at the realm specified
         if (exists($cfg->{'default_realm'}) && !$c->get_auth_realm('default')) {
-            $c->set_default_auth_realm($cfg->{'default_realm'});
+            $c->_set_default_auth_realm($cfg->{'default_realm'});
         }
     } else {
         foreach my $storename (keys %{$cfg->{'stores'}}) {
@@ -290,7 +290,13 @@ sub get_auth_realm {
     return $app->auth_realms->{$realmname};
 }
 
-sub set_default_auth_realm {
+
+# Very internal method.  Vital Valuable Urgent, Do not touch on pain of death.
+# Using this method just assigns the default realm to be the value associated
+# with the realmname provided.  It WILL overwrite any real realm called 'default'
+# so can be very confusing if used improperly.  It's used properly already. 
+# Translation: don't use it.
+sub _set_default_auth_realm {
     my ($app, $realmname) = @_;
     
     if (exists($app->auth_realms->{$realmname})) {
@@ -339,7 +345,7 @@ sub get_user {
     return $c->find_user( {'id' => $uid, 'rest'=>\@rest }, 'default' );
 }
 
-##
+
 ## this should only be called when using old-style authentication plugins.  IF this gets
 ## called in a new-style config - it will OVERWRITE the store of your default realm.  Don't do it.
 ## also - this is a partial setup - because no credential is instantiated... in other words it ONLY
@@ -399,11 +405,6 @@ sub auth_stores {
     my %hash = ( 'default' => $self->get_auth_realm('default')->{'store'});
 }
 
-
-
-
-
-
 __PACKAGE__;
 
 __END__
@@ -437,14 +438,17 @@ Using authentication is split into two parts. A Store is used to actually
 store the user information, and can store any amount of data related to the
 user. Credentials are used to verify users, using information from the store,
 given data from the frontend. A Credential and a Store are paired to form a
-'Realm'. A Catalyst applicaiton using the authentication framework must have
-at least one realm, and may have multiple.
+'Realm'. A Catalyst application using the authentication framework must have
+at least one realm, and may have several.
 
 To implement authentication in a Catalyst application you need to add this 
 module, and specify at least one realm in the configuration. 
 
 Authentication data can also be stored in a session, if the application 
 is using the L<Catalyst::Plugin::Session> module.
+
+B<NOTE> in version 0.10 of this module, the api changed.  Please see 
+L</COMPATIBILITY ROUTINES> for more information.
 
 =head1 INTRODUCTION
 
@@ -675,39 +679,6 @@ changing your config:
 The authentication system works behind the scenes to load your data from the
 new source. The rest of your application is completely unchanged.
 
-=head1 METHODS
-
-=over 4 
-
-
-=item authenticate( $userinfo, $realm )
-
-Attempts to authenticate the user using the information in the $userinfo hash
-reference using the realm $realm. $realm may be omitted, in which case the
-default realm is checked.
-
-=item user
-
-Returns the currently logged in user or undef if there is none.
-
-=item user_exists
-
-Returns true if a user is logged in right now. The difference between
-user_exists and user is that user_exists will return true if a user is logged
-in, even if it has not been retrieved from the storage backend. If you only
-need to know if the user is logged in, depending on the storage mechanism this
-can be much more efficient.
-
-=item logout
-
-Logs the user out, Deletes the currently logged in user from $c->user and the session.
-
-=item find_user( $userinfo, $realm )
-
-Fetch a particular users details, matching the provided user info, from the realm 
-specified in $realm.
-
-=back
 
 =head1 CONFIGURATION
 
@@ -744,7 +715,7 @@ specified in $realm.
 =item use_session
 
 Whether or not to store the user's logged in state in the session, if the
-application is also using the L<Catalyst::Plugin::Session> plugin. This 
+application is also using L<Catalyst::Plugin::Session>. This 
 value is set to true per default.
 
 =item default_realm
@@ -762,50 +733,88 @@ Each realm config contains two hashes, one called 'credential' and one called
 'store', each of which provide configuration details to the respective modules.
 The contents of these hashes is specific to the module being used, with the 
 exception of the 'class' element, which tells the core Authentication module the
-classname to use for that entry.  
+classname to instantiate.  
 
 The 'class' element follows the standard Catalyst mechanism of class
 specification. If a class is prefixed with a +, it is assumed to be a complete
 class name. Otherwise it is considered to be a portion of the class name. For
-credentials, the classname 'Password', for example, is expanded to
-Catalyst::Plugin::Authentication::Credential::Password. For stores, the
-classname 'storename' is expanded to:
-Catalyst::Plugin::Authentication::Store::storename::Backend.
+credentials, the classname 'B<Password>', for example, is expanded to
+Catalyst::Plugin::Authentication::Credential::B<Password>. For stores, the
+classname 'B<storename>' is expanded to:
+Catalyst::Plugin::Authentication::Store::B<storename>::Backend.
 
 
 =back
 
-    ... this is where the documentation fairy got distracted and moved on to other things ...
+
+=head1 METHODS
+
+=over 4 
+
+=item authenticate( $userinfo, $realm )
+
+Attempts to authenticate the user using the information in the $userinfo hash
+reference using the realm $realm. $realm may be omitted, in which case the
+default realm is checked.
+
+=item user
+
+Returns the currently logged in user or undef if there is none.
+
+=item user_exists
+
+Returns true if a user is logged in right now. The difference between
+user_exists and user is that user_exists will return true if a user is logged
+in, even if it has not been retrieved from the storage backend. If you only
+need to know if the user is logged in, depending on the storage mechanism this
+can be much more efficient.
+
+=item logout
+
+Logs the user out, Deletes the currently logged in user from $c->user and the session.
+
+=item find_user( $userinfo, $realm )
+
+Fetch a particular users details, matching the provided user info, from the realm 
+specified in $realm.
+
+=back
 
 =head1 INTERNAL METHODS
 
+These methods are for Catalyst::Plugin::Authentication B<INTERNAL USE> only.
+Please do not use them in your own code, whether application or credential /
+store modules. If you do, you will very likely get the nasty shock of having
+to fix / rewrite your code when things change. They are documented here only
+for reference.
+
 =over 4
 
-=item set_authenticated $user
+=item set_authenticated ( $user, $realmname )
 
-Marks a user as authenticated. Should be called from a
-C<Catalyst::Plugin::Authentication::Credential> plugin after successful
-authentication.
+Marks a user as authenticated. This is called from within the authenticate
+routine when a credential returns a user. $realmname defaults to 'default'
 
-This involves setting C<user> and the internal data in C<session> if
-L<Catalyst::Plugin::Session> is loaded.
+=item auth_restore_user ( $user, $realmname )
 
-=item auth_restore_user $user
+Used to restore a user from the session. In most cases this is called without
+arguments to restore the user via the session. Can be called with arguments
+when restoring a user from some other method.  Currently not used in this way.
 
-Used to restore a user from the session, by C<user> only when it's actually
-needed.
+=item save_user_in_session ( $user, $realmname )
 
-=item save_user_in_session $user
+Used to save the user in a session. Saves $user in session, marked as
+originating in $realmname. Both arguments are required.
 
-Used to save the user in a session.
+=item auth_realms
 
-=item prepare
+Returns a hashref containing realmname -> realm instance pairs. Realm
+instances contain an instantiated store and credential object as the 'store'
+and 'credential' elements, respectively
 
-Revives a user from the session object if there is one.
+=item get_auth_realm ( $realmname )
 
-=item setup
-
-Sets the default configuration parameters.
+Retrieves the realm instance for the realmname provided.
 
 =item 
 
@@ -858,17 +867,30 @@ L<Catalyst::Plugin::Authentication::Basic::Remote>.
 
 =over 4
 
-In version 0.10 of the L<Catalyst::Plugin::Authentication> plugin, the API
-used changed. For app developers, this change is fairly minor, but for
-Credential and Store authors, the changes are significant. The items below are
-still present in the plugin, though using them is deprecated. They remain only
-as a transition tool, for those sites which can not be upgraded to use the new
-system due to local customizations, or use of Credential / store modules that
-have not yet been updated.
- 
-=head1 METHODS FOR STORE MANAGEMENT
+In version 0.10 of L<Catalyst::Plugin::Authentication>, the API
+changed. For app developers, this change is fairly minor, but for
+Credential and Store authors, the changes are significant. 
+
+Please see the documentation in version 0.09 of
+Catalyst::Plugin::Authentication for a better understanding of how the old api
+functioned.
+
+The items below are still present in the plugin, though using them is
+deprecated. They remain only as a transition tool, for those sites which can
+not be upgraded to use the new system due to local customizations, or use of
+Credential / store modules that have not yet been updated.
+
+These routines should not be used in any application using realms
+functionality or any of the methods described above. These are for reference
+purposes only.
 
 =over 4
+
+=item login
+
+This method is used to initiate authentication and user retrieval. Technically
+this is part of the old Password credential module, included here for
+completeness.
 
 =item default_auth_store
 
@@ -882,7 +904,6 @@ or by using a Store plugin:
 Sets the default store to
 L<Catalyst::Plugin::Authentication::Store::Minimal::Backend>.
 
-
 =item get_auth_store $name
 
 Return the store whose name is $name.
@@ -894,10 +915,6 @@ Return the name of the store $store.
 =item auth_stores
 
 A hash keyed by name, with the stores registered in the app.
-
-=item auth_store_names
-
-A ref-hash keyed by store, which contains the names of the stores.
 
 =item register_auth_stores %stores_by_name
 
@@ -914,6 +931,8 @@ Yuval Kogman, C<nothingmuch@woobling.org>
 Jess Robinson
 
 David Kamholz
+
+Jay Kuri C<jayk@cpan.org>
 
 =head1 COPYRIGHT & LICENSE
 
