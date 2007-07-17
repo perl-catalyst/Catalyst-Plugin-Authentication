@@ -16,19 +16,24 @@ sub auth_realm {
 }
 
 
-
+## this relies on 'supported_features' being implemented by the subclass.. 
+## but it is not an error if it is not.  it just means you support nothing.  
+## nihilist user objects are welcome here.
 sub supports {
     my ( $self, @spec ) = @_;
 
-    my $cursor = $self->supported_features;
+    my $cursor = undef;
+    if ($self->can('supported_features')) {
+        $cursor = $self->supported_features;
 
-    # traverse the feature list,
-    for (@spec) {
-        #die "bad feature spec: @spec" if ref($cursor) ne "HASH";
-        return if ref($cursor) ne "HASH";
+        # traverse the feature list,
+        for (@spec) {
+            #die "bad feature spec: @spec" if ref($cursor) ne "HASH";
+            return if ref($cursor) ne "HASH";
 
-        $cursor = $cursor->{$_};
-    }
+            $cursor = $cursor->{$_};
+        }
+    } 
 
     return $cursor;
 }

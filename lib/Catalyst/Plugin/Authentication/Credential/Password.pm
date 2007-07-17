@@ -28,7 +28,7 @@ sub authenticate {
     my ( $self, $c, $authstore, $authinfo ) = @_;
 
     my $user_obj = $authstore->find_user($authinfo, $c);
-    if ($user_obj) {
+    if (ref($user_obj)) {
         if ($self->check_password($user_obj, $authinfo)) {
             return $user_obj;
         }
