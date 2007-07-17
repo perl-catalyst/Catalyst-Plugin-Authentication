@@ -24,10 +24,11 @@ sub id {
     $self->_accessor( "id", @_ );
 }
 
-sub store {
-    my $self = shift;
-    $self->_accessor( "store", @_ ) || ref $self;
-}
+## deprecated. Let the base class handle this.
+#    sub store {
+#        my $self = shift;
+#        $self->_accessor( "store", @_ ) || ref $self;
+#    }
 
 sub _accessor {
     my $self = shift;

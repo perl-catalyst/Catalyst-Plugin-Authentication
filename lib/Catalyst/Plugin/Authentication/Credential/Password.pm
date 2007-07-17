@@ -9,36 +9,105 @@ use Scalar::Util        ();
 use Catalyst::Exception ();
 use Digest              ();
 
-sub login {
-    my ( $c, $user, $password, @rest ) = @_;
-
-    for ( $c->request ) {
-        unless (
-            defined($user)
-                or
-            $user = $_->param("login")
-                 || $_->param("user")
-                 || $_->param("username")
-        ) {
-            $c->log->debug(
-                "Can't login a user without a user object or user ID param")
-                  if $c->debug;
-            return;
-        }
-
-        unless (
-            defined($password)
-                or
-            $password = $_->param("password")
-                     || $_->param("passwd")
-                     || $_->param("pass")
-        ) {
-            $c->log->debug("Can't login a user without a password")
-              if $c->debug;
-            return;
-        }
+sub new {
+    my ($class, $config, $app) = @_;
+    
+    my $self = { %{$config} };
+    $self->{'password_field'} ||= 'password';
+    $self->{'password_type'}  ||= 'clear';
+    $self->{'password_hash_type'} ||= 'SHA-1';
+    
+    if (!grep /$$self{'password_type'}/, ('clear', 'hashed', 'salted_hash', 'crypted', 'self_check')) {
+        Catalyst::Exception->throw(__PACKAGE__ . " used with unsupported password type: " . $self->{'password_type'});
     }
 
+    bless $self, $class;
+}
+
+sub authenticate {
+    my ( $self, $c, $authstore, $authinfo ) = @_;
+
+    my $user_obj = $authstore->find_user($authinfo, $c);
+    if ($user_obj) {
+        if ($self->check_password($user_obj, $authinfo)) {
+            return $user_obj;
+        }
+    } else {
+        $c->log->debug("Unable to locate user matching user info provided");
+        return;
+    }
+}
+
+sub check_password {
+    my ( $self, $user, $authinfo ) = @_;
+    
+    if ($self->{'password_type'} eq 'self_check') {
+        return $user->check_password($authinfo->{$self->{'password_field'}});
+    } else {
+        my $password = $authinfo->{$self->{'password_field'}};
+        my $storedpassword = $user->get($self->{'password_field'});
+        
+        if ($self->{password_type} eq 'clear') {
+            return $password eq $storedpassword;
+        }  elsif ($self->{'password_type'} eq 'crypted') {            
+            return $storedpassword eq crypt( $password, $storedpassword );
+        } elsif ($self->{'password_type'} eq 'salted_hash') {
+            require Crypt::SaltedHash;
+            my $salt_len = $self->{'password_salt_len'} ? $self->{'password_salt_len'} : 0;
+            return Crypt::SaltedHash->validate( $storedpassword, $password,
+                $salt_len );
+        } elsif ($self->{'password_type'} eq 'hashed') {
+
+             my $d = Digest->new( $self->{'password_hash_type'} );
+             $d->add( $self->{'password_pre_salt'} || '' );
+             $d->add($password);
+             $d->add( $self->{'password_post_salt'} || '' );
+
+             my $computed    = $d->clone()->digest;
+             my $b64computed = $d->clone()->b64digest;
+             return ( ( $computed eq $storedpassword )
+                   || ( unpack( "H*", $computed ) eq $storedpassword )
+                   || ( $b64computed eq $storedpassword)
+                   || ( $b64computed.'=' eq $storedpassword) );
+        }
+    }
+}
+
+## BACKWARDS COMPATIBILITY - all subs below here are deprecated 
+## They are here for compatibility with older modules that use / inherit from C::P::A::Password 
+## login()'s existance relies rather heavily on the fact that Credential::Password
+## is being used as a credential.  This may not be the case.  This is only here 
+## for backward compatibility.  It will go away in a future version
+## login should not be used in new applications.
+
+sub login {
+    my ( $c, $user, $password, @rest ) = @_;
+    
+    unless (
+        defined($user)
+            or
+        $user = $c->request->param("login")
+             || $c->request->param("user")
+             || $c->request->param("username")
+    ) {
+        $c->log->debug(
+            "Can't login a user without a user object or user ID param")
+              if $c->debug;
+        return;
+    }
+
+    unless (
+        defined($password)
+            or
+        $password = $c->request->param("password")
+                 || $c->request->param("passwd")
+                 || $c->request->param("pass")
+    ) {
+        $c->log->debug("Can't login a user without a password")
+          if $c->debug;
+        return;
+    }
+    
     unless ( Scalar::Util::blessed($user)
         and $user->isa("Catalyst::Plugin::Authentication::User") )
     {
@@ -64,11 +133,13 @@ sub login {
           if $c->debug;
         return;
     }
+    
 }
 
+## also deprecated.  Here for compatibility with older credentials which do not inherit from C::P::A::Password
 sub _check_password {
     my ( $c, $user, $password ) = @_;
-
+    
     if ( $user->supports(qw/password clear/) ) {
         return $user->password eq $password;
     }

@@ -9,9 +9,9 @@ use Catalyst::Plugin::Authentication::User::Hash;
 use Scalar::Util ();
 
 sub new {
-    my ( $class, $hash ) = @_;
+    my ( $class, $config, $app) = @_;
 
-    bless { hash => $hash }, $class;
+    bless { hash => $config }, $class;
 }
 
 sub from_session {
@@ -19,25 +19,28 @@ sub from_session {
 
 	return $id if ref $id;
 
-	$self->get_user( $id );
+	$self->find_user( { id => $id } );
 }
 
-sub get_user {
-    my ( $self, $id ) = @_;
+## this is not necessarily a good example of what find_user can do, since all we do is   
+## look up with the id anyway.  find_user can be used to locate a user based on other 
+## combinations of data.  See C::P::Authentication::Store::DBIx::Class for a better example
+sub find_user {
+    my ( $self, $userinfo, $c ) = @_;
 
-    return unless exists $self->{hash}{$id};
+    my $id = $userinfo->{'id'};
+    
+    return unless exists $self->{'hash'}{$id};
 
-    my $user = $self->{hash}{$id};
+    my $user = $self->{'hash'}{$id};
 
     if ( ref $user ) {
         if ( Scalar::Util::blessed($user) ) {
-			$user->store( $self );
 			$user->id( $id );
             return $user;
         }
         elsif ( ref $user eq "HASH" ) {
             $user->{id} ||= $id;
-            $user->{store} ||= $self;
             return bless $user, "Catalyst::Plugin::Authentication::User::Hash";
         }
         else {
@@ -63,6 +66,18 @@ sub user_supports {
 
     $user->supports(@_);
 }
+
+## Backwards compatibility
+#
+# This is a backwards compatible routine.  get_user is specifically for loading a user by it's unique id
+# find_user is capable of doing the same by simply passing { id => $id }  
+# no new code should be written using get_user as it is deprecated.
+sub get_user {
+    my ( $self, $id ) = @_;
+    $self->find_user({id => $id});
+}
+
+
 
 __PACKAGE__;
 
