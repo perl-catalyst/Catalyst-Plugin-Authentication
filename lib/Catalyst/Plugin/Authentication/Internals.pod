@@ -111,7 +111,7 @@ Catalyst application.
     been loaded, so your new() method must not rely on any of those being 
     present.  If any of this is required for your store to function, you should
     defer that part of initialization until the first method call. 
-    
+
 The C<new()> method should return a blessed reference to your store object.
 
 =item find_user( $authinfo, $c ) 
@@ -185,8 +185,8 @@ L<Catalyst::Plugin::Authentication|Catalyst::Plugin::Authentication> plugin
 are below. Note that of these, only get_object is strictly required, as the
 L<Catalyst::Plugin::Authentication::User|Catalyst::Plugin::Authentication::User>
 base class contains reasonable implementations of the rest. If you do choose
-to implement only the C<get_object()> routine, please read the base class
-documentation so that you fully understand how the other routines will be
+to implement only the C<get_object()> routine, please read the base class code
+and documentation so that you fully understand how the other routines will be
 implemented for you.
 
 Also, your user object can implement whatever additional methods you require
@@ -239,4 +239,9 @@ reasonable to return C<$self>.
 =back 
 
 
+=head1 WRITING A CREDENTIAL
+
+There are two parts to an authentication store, the backend and the user object.
+
+=head2 STORAGE BACKEND
 ... Documentation fairy fell asleep here.  
