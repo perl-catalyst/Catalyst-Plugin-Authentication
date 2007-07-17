@@ -318,7 +318,7 @@ sub authenticate {
         $app->log->debug("The realm requested, '$realmname' does not exist," .
                          " or there is no credential associated with it.")
     }
-    return 0;
+    return undef;
 }
 
 ## BACKWARDS COMPATIBILITY  -- Warning:  Here be monsters!
@@ -545,7 +545,7 @@ This means that our application will begin like this:
                                     class => 'Password'
                                 },
                                 store => {
-                                class => 'Minimal',
+                                    class => 'Minimal',
                 	                users = {
                 	                    bob => {
                 	                        password => "s3cr3t",
@@ -647,51 +647,41 @@ plugin:
 This is somewhat simpler and will work if you change your store, too, since the
 role interface is consistent.
 
-   .... This is the end of the updated documentation for v0.10 - more soon ....
-   
-Let's say your app grew, and you now have 10000 users. It's no longer efficient
-to maintain an htpasswd file, so you move this data to a database.
+Let's say your app grew, and you now have 10000 users. It's no longer
+efficient to maintain a hash of users, so you move this data to a database.
+You can accomplish this simply by installing the DBIx::Class Store and
+changing your config:
 
-    use Catalyst qw/
-        Authentication
-        Authentication::Credential::Password
-        Authentication::Store::DBIC
-        Authorization::Roles
-    /;
+    __PACKAGE__->config->{authentication} = 
+                    {  
+                        default_realm => 'members',
+                        realms => {
+                            members => {
+                                credential => {
+                                    class => 'Password'
+                                },
+                                store => {
+                                    class => 'DBIx::Class',
+            	                    user_class => 'MyApp::Users',
+            	                    role_column => 'roles'	                
+            	                }
+                	        }
+                    	}
+                    };
 
-    __PACKAGE__->config->{authentication}{dbic} = ...; # see the DBIC store docs
-
-The rest of your code should be unchanged. Now let's say you are integrating
-typekey authentication to your system. For simplicity's sake we'll assume that
-the user's are still keyed in the same way.
-
-    use Catalyst qw/
-        Authentication
-        Authentication::Credential::Password
-        Authentication::Credential::TypeKey
-        Authentication::Store::DBIC
-        Authorization::Roles
-    /;
-
-And in your auth controller add a new action:
-
-    sub typekey : Local {
-        my ( $self, $c ) = @_;
-
-        if ( $c->authenticate_typekey) { # uses $c->req and Authen::TypeKey
-            # same stuff as the $c->login method
-            # ...
-        }
-    }
-
-You've now added a new credential verification mechanizm orthogonally to the
-other components. All you have to do is make sure that the credential verifiers
-pass on the same types of parameters to the store in order to retrieve user
-objects.
+The authentication system works behind the scenes to load your data from the
+new source. The rest of your application is completely unchanged.
 
 =head1 METHODS
 
 =over 4 
+
+
+=item authenticate $userinfo, $realm
+
+Attempts to authenticate the user using the information in $userinfo hash
+reference using the realm $realm. $realm may be omitted, in which case the
+default realm is checked.
 
 =item user
 
@@ -699,29 +689,20 @@ Returns the currently logged in user or undef if there is none.
 
 =item user_exists
 
-Whether or not a user is logged in right now.
-
-The reason this method exists is that C<< $c->user >> may needlessly load the
-user from the auth store.
-
-If you're just going to say
-
-	if ( $c->user_exists ) {
-		# foo
-	} else {
-		$c->forward("login");
-	}
-
-it should be more efficient than C<< $c->user >> when a user is marked in the
-session but C<< $c->user >> hasn't been called yet.
+Returns true if a user is logged in right now. The difference between
+user_exists and user is that user_exists will return true if a user is logged
+in, even if it has not been retrieved from the storage backend. If you only
+need to know if the user is logged in, depending on the storage mechanism this
+can be much more efficient.
 
 =item logout
 
-Delete the currently logged in user from C<user> and the session.
+Logs the user out, Deletes the currently logged in user from C<user> and the session.
 
-=item get_user $uid
+=item find_user( $userinfo, $realm )
 
-Fetch a particular users details, defined by the given ID, via the default store.
+Fetch a particular users details, matching the provided user info, from the realm 
+specified in $realm.
 
 =back
 
@@ -729,70 +710,68 @@ Fetch a particular users details, defined by the given ID, via the default store
 
 =over 4
 
+    # example
+    __PACKAGE__->config->{authentication} = 
+                {  
+                    default_realm => 'members',
+                    realms => {
+                        members => {
+                            credential => {
+                                class => 'Password'
+                            },
+                            store => {
+                                class => 'DBIx::Class',
+        	                    user_class => 'MyApp::Users',
+        	                    role_column => 'roles'	                
+        	                }
+            	        },
+            	        admins => {
+            	            credential => {
+            	                class => 'Password'
+            	            },
+            	            store => {
+            	                class => '+MyApp::Authentication::Store::NetAuth',
+            	                authserver => '192.168.10.17'
+            	            }
+            	        }
+            	        
+                	}
+                };
+
 =item use_session
 
 Whether or not to store the user's logged in state in the session, if the
 application is also using the L<Catalyst::Plugin::Session> plugin. This 
 value is set to true per default.
 
-=item store
+=item default_realm
 
-If multiple stores are being used, set the module you want as default here.
+This defines which realm should be used as when no realm is provided to methods
+that require a realm such as authenticate or find_user.
 
-=item stores
+=item realms
 
-If multiple stores are being used, you need to provide a name for each store
-here, as a hash, the keys are the names you wish to use, and the values are
-the the names of the plugins.
+This contains the series of realm configurations you want to use for your app.
+The only rule here is that there must be at least one.  A realm consists of a
+name, which is used to reference the realm, a credential and a store.  
 
- # example
- __PACKAGE__->config( authentication => {
-                        store => 'Catalyst::Plugin::Authentication::Store::HtPasswd',
-                        stores => { 
-                           'dbic' => 'Catalyst::Plugin::Authentication::Store::DBIC'
-                                  }
-                                         });
+Each realm config contains two hashes, one called 'credential' and one called 
+'store', each of which provide configuration details to the respective modules.
+The contents of these hashes is specific to the module being used, with the 
+exception of the 'class' element, which tells the core Authentication module the
+classname to use for that entry.  
+
+The 'class' element follows the standard Catalyst mechanism of class
+specification. If a class is prefixed with a +, it is assumed to be a complete
+class name. Otherwise it is considered to be a portion of the class name. For
+credentials, the classname 'Password', for example, is expanded to
+Catalyst::Plugin::Authentication::Credential::Password. For stores, the
+classname 'storename' is expanded to:
+Catalyst::Plugin::Authentication::Store::storename::Backend.
+
 
 =back
 
-=head1 METHODS FOR STORE MANAGEMENT
-
-=over 4
-
-=item default_auth_store
-
-Return the store whose name is 'default'.
-
-This is set to C<< $c->config->{authentication}{store} >> if that value exists,
-or by using a Store plugin:
-
-	use Catalyst qw/Authentication Authentication::Store::Minimal/;
-
-Sets the default store to
-L<Catalyst::Plugin::Authentication::Store::Minimal::Backend>.
-
-
-=item get_auth_store $name
-
-Return the store whose name is $name.
-
-=item get_auth_store_name $store
-
-Return the name of the store $store.
-
-=item auth_stores
-
-A hash keyed by name, with the stores registered in the app.
-
-=item auth_store_names
-
-A ref-hash keyed by store, which contains the names of the stores.
-
-=item register_auth_stores %stores_by_name
-
-Register stores into the application.
-
-=back
 
 =head1 INTERNAL METHODS
 
@@ -869,6 +848,60 @@ should be eventually: L<Catalyst::Plugin::Authentication::OpenID>,
 L<Catalyst::Plugin::Authentication::LDAP>,
 L<Catalyst::Plugin::Authentication::CDBI::Basic>,
 L<Catalyst::Plugin::Authentication::Basic::Remote>.
+
+
+=head1 COMPATIBILITY ROUTINES
+
+=over 4
+
+In version 0.10 of the L<Catalyst::Plugin::Authentication> plugin, the API
+used changed. For app developers, this change is fairly minor, but for
+Credential and Store authors, the changes are significant. The items below are
+still present in the plugin, though using them is deprecated. They remain only
+as a transition tool, for those sites which can not be upgraded to use the new
+system due to local customizations, or use of Credential / store modules that
+have not yet been updated.
+ 
+=head1 METHODS FOR STORE MANAGEMENT
+
+=over 4
+
+=item default_auth_store
+
+Return the store whose name is 'default'.
+
+This is set to C<< $c->config->{authentication}{store} >> if that value exists,
+or by using a Store plugin:
+
+	use Catalyst qw/Authentication Authentication::Store::Minimal/;
+
+Sets the default store to
+L<Catalyst::Plugin::Authentication::Store::Minimal::Backend>.
+
+
+=item get_auth_store $name
+
+Return the store whose name is $name.
+
+=item get_auth_store_name $store
+
+Return the name of the store $store.
+
+=item auth_stores
+
+A hash keyed by name, with the stores registered in the app.
+
+=item auth_store_names
+
+A ref-hash keyed by store, which contains the names of the stores.
+
+=item register_auth_stores %stores_by_name
+
+Register stores into the application.
+
+=back
+
+
 
 =head1 AUTHORS
 
