@@ -447,8 +447,8 @@ module, and specify at least one realm in the configuration.
 Authentication data can also be stored in a session, if the application 
 is using the L<Catalyst::Plugin::Session> module.
 
-B<NOTE> in version 0.10 of this module, the api changed.  Please see 
-L</COMPATIBILITY ROUTINES> for more information.
+B<NOTE> in version 0.10 of this module, the interface to this module changed.
+Please see L</COMPATIBILITY ROUTINES> for more information.
 
 =head1 INTRODUCTION
 
@@ -827,8 +827,7 @@ This list might not be up to date.
 =head2 User Storage Backends
 
 L<Catalyst::Plugin::Authentication::Store::Minimal>,
-L<Catalyst::Plugin::Authentication::Store::Htpasswd>,
-L<Catalyst::Plugin::Authentication::Store::DBIC> (also works with Class::DBI).
+L<Catalyst::Plugin::Authentication::Store::DBIx::Class>,
 
 =head2 Credential verification
 
@@ -865,20 +864,19 @@ L<Catalyst::Plugin::Authentication::Basic::Remote>.
 
 =head1 COMPATIBILITY ROUTINES
 
-=over 4
-
 In version 0.10 of L<Catalyst::Plugin::Authentication>, the API
 changed. For app developers, this change is fairly minor, but for
 Credential and Store authors, the changes are significant. 
 
 Please see the documentation in version 0.09 of
-Catalyst::Plugin::Authentication for a better understanding of how the old api
+Catalyst::Plugin::Authentication for a better understanding of how the old API
 functioned.
 
 The items below are still present in the plugin, though using them is
 deprecated. They remain only as a transition tool, for those sites which can
-not be upgraded to use the new system due to local customizations, or use of
-Credential / store modules that have not yet been updated.
+not yet be upgraded to use the new system due to local customizations or use
+of Credential / Store modules that have not yet been updated to work with the 
+new backend API.
 
 These routines should not be used in any application using realms
 functionality or any of the methods described above. These are for reference
@@ -899,6 +897,7 @@ Return the store whose name is 'default'.
 This is set to C<< $c->config->{authentication}{store} >> if that value exists,
 or by using a Store plugin:
 
+    # load the Minimal authentication store.
 	use Catalyst qw/Authentication Authentication::Store::Minimal/;
 
 Sets the default store to
