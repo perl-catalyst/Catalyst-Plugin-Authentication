@@ -316,7 +316,7 @@ sub authenticate {
     
     if ($realm && exists($realm->{'credential'})) {
         my $user = $realm->{'credential'}->authenticate($app, $realm->{store}, $userinfo);
-        if ($user) {
+        if (ref($user)) {
             $app->set_authenticated($user, $realmname);
             return $user;
         }
@@ -822,7 +822,8 @@ Retrieves the realm instance for the realmname provided.
 
 =head1 SEE ALSO
 
-This list might not be up to date.
+This list might not be up to date.  Below are modules known to work with the updated
+API of 0.10 and are therefore compatible with realms.  
 
 =head2 User Storage Backends
 
@@ -832,8 +833,6 @@ L<Catalyst::Plugin::Authentication::Store::DBIx::Class>,
 =head2 Credential verification
 
 L<Catalyst::Plugin::Authentication::Credential::Password>,
-L<Catalyst::Plugin::Authentication::Credential::HTTP>,
-L<Catalyst::Plugin::Authentication::Credential::TypeKey>
 
 =head2 Authorization
 
@@ -842,7 +841,7 @@ L<Catalyst::Plugin::Authorization::Roles>
 
 =head2 Internals Documentation
 
-L<Catalyst::Plugin::Authentication::Store>
+L<Catalyst::Plugin::Authentication::Internals>
 
 =head2 Misc
 
@@ -861,6 +860,17 @@ L<Catalyst::Plugin::Authentication::LDAP>,
 L<Catalyst::Plugin::Authentication::CDBI::Basic>,
 L<Catalyst::Plugin::Authentication::Basic::Remote>.
 
+=head1 INCOMPATABILITIES
+
+The realms based configuration and functionality of the 0.10 update 
+of L<Catalyst::Plugin::Authentication> required a change in the API used by
+credentials and stores.  It has a compatibility mode which allows use of
+modules that have not yet been updated. This, however, completely mimics the
+older api and disables the new realm-based features. In other words you can
+not mix the older credential and store modules with realms, or realm-based
+configs. The changes required to update modules are relatively minor and are
+covered in L<Catalyst::Plugin::Authentication::Internals>.  We hope that most
+modules will move to the compatible list above very quickly.
 
 =head1 COMPATIBILITY ROUTINES
 
@@ -887,8 +897,9 @@ purposes only.
 =item login
 
 This method is used to initiate authentication and user retrieval. Technically
-this is part of the old Password credential module, included here for
-completeness.
+this is part of the old Password credential module and it still resides in the
+L<Password|Catalyst::Plugin::Authentication::Credential::Password> class. It is
+included here for reference only.
 
 =item default_auth_store
 
@@ -927,11 +938,12 @@ Register stores into the application.
 
 Yuval Kogman, C<nothingmuch@woobling.org>
 
+Jay Kuri, C<jayk@cpan.org>
+
 Jess Robinson
 
 David Kamholz
 
-Jay Kuri C<jayk@cpan.org>
 
 =head1 COPYRIGHT & LICENSE
 

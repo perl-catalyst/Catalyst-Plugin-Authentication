@@ -37,11 +37,7 @@ sub find_user {
     my $user = $self->{'hash'}{$id};
 
     if ( ref $user ) {
-        if ( Scalar::Util::blessed($user) ) {
-			$user->id( $id );
-            return $user;
-        }
-        elsif ( ref $user eq "HASH" ) {
+        if ( ref $user eq "HASH" ) {
             $user->{id} ||= $id;
             return bless $user, "Catalyst::Plugin::Authentication::User::Hash";
         }
@@ -183,6 +179,8 @@ hash ref as it's backing structure.
 =item find_user ( $authinfo, $c ) 
 
 Keys the hash by the 'id' or 'username' element in the authinfo hash and returns the user.
+
+... documentation fairy stopped here. ...
 
 If the return value is unblessed it will be blessed as
 L<Catalyst::Plugin::Authentication::User::Hash>.
