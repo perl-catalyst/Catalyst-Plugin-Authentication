@@ -30,6 +30,8 @@ sub find_user {
 
     my $id = $userinfo->{'id'};
     
+    $id ||= $userinfo->{'username'};
+    
     return unless exists $self->{'hash'}{$id};
 
     my $user = $self->{'hash'}{$id};
@@ -99,41 +101,88 @@ authentication storage backend.
 
     use Catalyst qw/
         Authentication
-        Authentication::Credential::Password
     /;
 
-    my %users = (
-        user => { password => "s3cr3t" },
-    );
+    __PACKAGE__->config->{authentication} = 
+                    {  
+                        default_realm => 'members',
+                        realms => {
+                            members => {
+                                credential => {
+                                    class => 'Password'
+                                },
+                                store => {
+                                    class => 'Minimal',
+                	                users = {
+                	                    bob => {
+                	                        password => "s00p3r",                	                    
+                	                        editor => 'yes',
+                	                        roles => [qw/edit delete/],
+                	                    },
+                	                    william => {
+                	                        password => "s3cr3t",
+                	                        roles => [qw/comment/],
+                	                    }
+                	                }	                
+                	            }
+                	        }
+                    	}
+                    };
+
     
-    our $users = Catalyst::Plugin::Authentication::Store::Minimal::Backend->new(\%users);
-
-    sub action : Local {
-        my ( $self, $c ) = @_;
-
-        $c->login( $users->get_user( $c->req->param("login") ),
-            $c->req->param("password") );
-    }
-
 =head1 DESCRIPTION
 
-You probably want L<Catalyst::Plugin::Authentication::Store::Minimal>, unless
-you are mixing several stores in a single app and one of them is Minimal.
+This authentication store backend lets you create a very quick and dirty user
+database in your application's config hash.
 
-Otherwise, this lets you create a store manually.
+You will need to include the Authentication plugin, and at least one Credential
+plugin to use this Store. Credential::Password is reccommended.
 
-=head1 METHODS
+It's purpose is mainly for testing, and it should probably be replaced by a
+more "serious" store for production.
+
+The hash in the config, as well as the user objects/hashes are freely mutable
+at runtime.
+
+=head1 CONFIGURATION
 
 =over 4
 
-=item new $hash_ref
+=item class 
 
-Constructs a new store object, which uses the supplied hash ref as it's backing
-structure.
+The classname used for the store. This is part of
+L<Catalyst::Plugin::Authentication> and is the method by which
+Catalyst::Plugin::Authentication::Store::Minimal::Backend is loaded as the
+user store. For this module to be used, this must be set to
+'Minimal'.
 
-=item get_user $id
+=item users
 
-Keys the hash by $id and returns the value.
+This is a simple hash of users, the keys are the usenames, and the values are
+hashrefs containing a password key/value pair, and optionally, a roles/list 
+of role-names pair. If using roles, you will also need to add the 
+Authorization::Roles plugin.
+
+See the SYNOPSIS for an example.
+
+=back
+
+=head1 METHODS
+
+There are no publicly exported routines in the Minimal store (or indeed in
+most authentication stores)  However, below is a description of the routines 
+required by L<Catalyst::Plugin::Authentication> for all authentication stores.
+
+=over 4
+
+=item new ( $config, $app )
+
+Constructs a new store object, which uses the user element of the supplied config 
+hash ref as it's backing structure.
+
+=item find_user ( $authinfo, $c ) 
+
+Keys the hash by the 'id' or 'username' element in the authinfo hash and returns the user.
 
 If the return value is unblessed it will be blessed as
 L<Catalyst::Plugin::Authentication::User::Hash>.

@@ -34,8 +34,6 @@ database in C<< $c->config >>.
 
     use Catalyst qw/
       Authentication
-      Authentication::Store::Minimal
-      Authentication::Credential::Password
       /;
 
     __PACKAGE__->config->{authentication}{users} = {
