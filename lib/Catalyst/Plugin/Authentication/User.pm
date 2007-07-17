@@ -49,7 +49,7 @@ sub get {
     my ($self, $field) = @_;
     
     my $object;
-    if ($object = $self->get_object && $object->can($field)) {
+    if ($object = $self->get_object and $object->can($field)) {
         return $object->$field();
     } else {
         return undef;
