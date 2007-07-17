@@ -11,8 +11,8 @@ sub setup {
     my $c = shift;
 
     $c->default_auth_store(
-        Catalyst::Plugin::Authentication::Store::Minimal::Backend->new(
-            $c->config->{authentication}{users}
+        Catalyst::Plugin::Authentication::Store::Minimal::Backend->new( 
+            $c->config->{authentication}{users}, $c
         )
     );
 
