@@ -106,10 +106,11 @@ first argument, C<$config>, is a hash reference containing the configuration
 information for the store module. The second argument is a reference to the
 Catalyst application.
 
-    Note that when new() is called, Catalyst has not yet loaded the various 
-    controller and model classes, nor is it definite that other plugins have 
-    been loaded, so your new() method must not rely on any of those being 
-    present.  If any of this is required for your store to function, you should
+    Note that when new() is called, Catalyst has not yet loaded 
+    the various controller and model classes, nor is it definite
+    that other plugins have been loaded, so your new() method 
+    must not rely on any of those being present.  If any of 
+    this is required for your store to function, you should
     defer that part of initialization until the first method call. 
 
 The C<new()> method should return a blessed reference to your store object.
@@ -126,8 +127,8 @@ How C<find_user()> accomplishes it's job is entirely up to you, the author, as
 is what $authinfo is required to contain.  Many stores will simply use a 
 username element in $authinfo to locate the user, but more advanced functionality
 is possible and you may bend the $authinfo to your needs.  Be aware, however, that
-both Credentials and Stores work with the same $authinfo hash, so take care to
-avoid overlapping element names.
+both Credentials and Stores usually work with the same $authinfo hash, so take 
+care to avoid overlapping element names.
 
 Please note that this routine may be called numerous times in various
 circumstances, and that a successful match for a user here does B<NOT>
@@ -218,11 +219,12 @@ access the underlying storage mechanism for the user data and return the
 information. This is used as a standard method of accessing an authenticated
 user's data, and MUST be implemented by all user objects.  
 
-    Note: There is no equivalent 'set' method. Each user class is likely
-    to vary greatly in how data must be saved and it is therefore impractical to 
-    try to provide a standard way of accomplishing it. When an application 
-    developer needs to save data, they should obtain the underlying object / data
-    by calling get_object, and work with it directly.
+    Note: There is no equivalent 'set' method. Each user class is 
+    likely to vary greatly in how data must be saved and it is 
+    therefore impractical to try to provide a standard way of 
+    accomplishing it. When an application developer needs to save 
+    data, they should obtain the underlying object / data by 
+    calling get_object, and work with it directly.
     
 
 =item get_object( )
@@ -241,4 +243,92 @@ reasonable to return C<$self>.
 
 =head1 WRITING A CREDENTIAL
 
-... Documentation fairy fell asleep here.  
+Compared to writing a store, writing a credential is very simple.  There is only
+one class to implement, and it consists of only two required routines. They are:
+
+    new()           - instantiates the credential object
+    authenticate()  - performs the authentication and returns a user object
+    
+=head2 CREDENTIAL METHODS
+
+=over 4
+
+=item new( $config, $app )
+
+Like the Store method of the same name, the C<new()> method is called only 
+once, during the setup process of 
+L<Catalyst::Plugin::Authentication|Catalyst::Plugin::Authentication>. The
+first argument, C<$config>, is a hash reference containing the configuration
+information for the credential module. The second argument is a reference 
+to the Catalyst application.
+
+    Again, when the credential's new() method is called, Catalyst 
+    has not yet loaded the various controller and model classes. 
+
+The new method should perform any necessary setup required and instantiate 
+your credential object.  It should return your instantiated credential.
+
+=item authenticate( $c, $authstore, $authinfo )
+
+This is the workhorse of your credential.  When $c->authenticate() is called
+the L<Catalyst::Plugin::Authentication|Catalyst::Plugin::Authentication> module retrieves the
+store object from the realm and passes it, along with the $authinfo hash
+to your credential's authenticate method.  Your module should use the 
+$authinfo hash to obtain the user from the store passed, and then perform 
+any credential verification steps necessary to authenticate the user.  This
+method should return the user object returned by the authentication store if
+credential verification succeeded.  It should return undef on failure.  
+
+How your credential module performs the credential verification is entirely
+up to you.  In most cases, the credential will retrieve a user from the store
+first (using the stores find_user() method), and then validate the user's 
+information.  However, this does not have to be the case.  
+
+It is perfectly acceptable for your credential to perform other tasks prior to
+attempting to retrieve the user from the store. It may also make sense for
+your credential to perform activities which help to locate the user in
+question, for example, finding a user id based on an encrypted token.
+In these scenarios, the $authinfo hash passed to the store's find_user()
+can be different than that which is passed in to $c->authenticate(). Once
+again this is perfectly acceptable if it makes sense for your credential,
+though you are strongly advised to note this behavior clearly in your 
+credential's documentation - as application authors are almost 
+certainly expecting the user to be found using the information provided 
+to $c->authenticate().
+
+Look at the L<Catalyst::Plugin::Authentication::Credential::Password|Catalyst::Plugin::Authentication::Credential::Password>
+module source to see this in action.  In order to avoid possible 
+mismatches between the encrypted and unencrypted passwords, the password 
+credential actually removes the provided password from the authinfo 
+array.  It does this because, in many cases, the store's password 
+field will be encrypted in some way, and the password passed to 
+$c->authenticate is almost certainly in plaintext. 
+
+NOTE: You should always assume that a store is going to use all
+the information passed to it to locate the user in question. 
+If there are fields in the $authinfo hash that you are sure
+are specific to your credential, you may want to consider 
+removing them before user retrieval.  A better solution is to
+place those arguments that are specific to your credential 
+within their own subhash named after your module.
+ 
+The L<Catalyst::Plugin::Authentication::Store::DBIx::Class|Catalyst::Plugin::Authentication::Store::DBIx::Class> module does this
+in order to encapsulate arguments intended specifically for 
+that module. See the L<Catalyst::Plugin::Authentication::Store::DBIx::Class::User|Catalyst::Plugin::Authentication::Store::DBIx::Class::User>
+source for details.
+
+=back
+
+=head1 AUTHORS
+
+Jay Kuri, C<jayk@cpan.org>
+
+=head1 COPYRIGHT & LICENSE
+
+        Copyright (c) 2005 the aforementioned authors. All rights
+        reserved. This program is free software; you can redistribute
+        it and/or modify it under the same terms as Perl itself.
+
+=cut
+
+ 

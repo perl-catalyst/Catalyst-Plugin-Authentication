@@ -121,7 +121,9 @@ authentication store.
                         realms => {
                             members => {
                                 credential => {
-                                    class => 'Password'
+                                    class => 'Password',
+                                    password_field => 'password',
+                                    password_type => 'clear'
                                 },
                                 store => {
                                     class => 'Minimal',
