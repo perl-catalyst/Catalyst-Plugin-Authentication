@@ -60,9 +60,11 @@ sub check_password {
         my $password = $authinfo->{$self->_config->{'password_field'}};
         my $storedpassword = $user->get($self->_config->{'password_field'});
         
-        if ($self->_config->{password_type} eq 'clear') {
+        if ($self->_config->{'password_type'} eq 'none') {
+            return 1;
+        } elsif ($self->_config->{'password_type'} eq 'clear') {
             return $password eq $storedpassword;
-        }  elsif ($self->_config->{'password_type'} eq 'crypted') {            
+        } elsif ($self->_config->{'password_type'} eq 'crypted') {            
             return $storedpassword eq crypt( $password, $storedpassword );
         } elsif ($self->_config->{'password_type'} eq 'salted_hash') {
             require Crypt::SaltedHash;
@@ -282,6 +284,12 @@ passed in, it must be told what format the password will be in when it is retrei
 from the user object. The supported options are:
 
 =over 8
+
+=item none
+
+No password check is done. An attempt is made to retrieve the user based on
+the information provided in the $c->authenticate() call. If a user is found, 
+authentication is considered to be successful.
 
 =item clear
 
