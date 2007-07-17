@@ -1,6 +1,6 @@
 Revision history for Perl extension Catalyst::Plugin::Authentication
 
-0.10	
+0.09999_01	
         - major changes to the internals of the plugin, to better encapsulate
           credentials and stores.
         - introduction of 'realms' concept, allowing multiple different
