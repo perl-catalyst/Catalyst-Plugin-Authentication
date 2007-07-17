@@ -88,7 +88,7 @@ sub check_password {
 
 ## BACKWARDS COMPATIBILITY - all subs below here are deprecated 
 ## They are here for compatibility with older modules that use / inherit from C::P::A::Password 
-## login()'s existance relies rather heavily on the fact that Credential::Password
+## login()'s existance relies rather heavily on the fact that only Credential::Password
 ## is being used as a credential.  This may not be the case.  This is only here 
 ## for backward compatibility.  It will go away in a future version
 ## login should not be used in new applications.
@@ -252,6 +252,10 @@ The password module is capable of working with several different password
 encryption/hashing algorithms. The one the module uses is determined by the
 credential configuration.
 
+Those who have used L<Catalyst::Plugin::Authentication> prior to the 0.10 release
+should note that the password field and type information is no longer part
+of the store configuration and is now part of the Password credential configuration.
+
 =over 4 
 
 =item class 
@@ -325,12 +329,13 @@ Any post-salt data to be passed to L<Digest/add> after processing the password.
 
 =head1 USAGE
 
-The Password credential module is very simple to use.  Once configured as indicated
-above, authenticating using this module is simply a matter of calling $c->authenticate()
-with an authinfo hashref that includes the B<password> element.  The password element should
-contain the password supplied by the user to be authenticated, in clear text.  The other
-information supplied in the auth hash is ignored by the Password module, and simply passed
-to the auth store to be used to retrieve the user.  An example call follows:
+The Password credential module is very simple to use. Once configured as
+indicated above, authenticating using this module is simply a matter of
+calling $c->authenticate() with an authinfo hashref that includes the
+B<password> element. The password element should contain the password supplied
+by the user to be authenticated, in clear text. The other information supplied
+in the auth hash is ignored by the Password module, and simply passed to the
+auth store to be used to retrieve the user. An example call follows:
 
     if ($c->authenticate({ username => $username,
                            password => $password} )) {

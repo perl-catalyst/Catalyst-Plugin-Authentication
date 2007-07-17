@@ -6,7 +6,6 @@ use base qw/Class::Accessor::Fast Class::Data::Inheritable/;
 
 BEGIN {
     __PACKAGE__->mk_accessors(qw/_user/);
-    __PACKAGE__->mk_classdata($_) for qw/_auth_realms/;
 }
 
 use strict;
@@ -22,7 +21,7 @@ use Class::Inspector;
 #	constant->import(have_want => eval { require Want });
 #}
 
-our $VERSION = "0.10";
+our $VERSION = "0.09999_01";
 
 sub set_authenticated {
     my ( $c, $user, $realmname ) = @_;
@@ -175,51 +174,48 @@ sub auth_restore_user {
 # we can't actually do our setup in setup because the model has not yet been loaded.  
 # So we have to trigger off of setup_finished.  :-(
 sub setup {
-    my $c = shift;
+    my $app = shift;
 
-    $c->_authentication_initialize();
-    $c->NEXT::setup(@_);
+    $app->_authentication_initialize();
+    $app->NEXT::setup(@_);
 }
 
 ## the actual initialization routine. whee.
 sub _authentication_initialize {
-    my $c = shift;
+    my $app = shift;
 
-    if ($c->_auth_realms) { return };
+    if ($app->_auth_realms) { return };
     
-    if (!exists($c->config->{'authentication'}) {
-        $c->config->{'authentication'} = {};
-    }
-    
-    my $cfg = $c->config->{'authentication'};
 
-    %$cfg = (
-        use_session => 1,
-        %$cfg,
-    );
-
-    my $realmhash = {};
-    $c->_auth_realms($realmhash);
     
-    ## BACKWARDS COMPATIBILITY - if realm is not defined - then we are probably dealing
-    ## with an old-school config.  The only caveat here is that we must add a classname 
+    my $cfg = $app->config->{'authentication'} ||= {};
+
+    $cfg->{use_session} = 1;
+
+    ## make classdata where it is used.  
+    $app->mk_classdata( _auth_realms => {});
+    
+    
+
     if (exists($cfg->{'realms'})) {
-        
         foreach my $realm (keys %{$cfg->{'realms'}}) {
-            $c->setup_auth_realm($realm, $cfg->{'realms'}{$realm});
+            $app->setup_auth_realm($realm, $cfg->{'realms'}{$realm});
         }
-
         #  if we have a 'default-realm' in the config hash and we don't already 
         # have a realm called 'default', we point default at the realm specified
-        if (exists($cfg->{'default_realm'}) && !$c->get_auth_realm('default')) {
-            $c->_set_default_auth_realm($cfg->{'default_realm'});
+        if (exists($cfg->{'default_realm'}) && !$app->get_auth_realm('default')) {
+            $app->_set_default_auth_realm($cfg->{'default_realm'});
         }
     } else {
+        
+        ## BACKWARDS COMPATIBILITY - if realm is not defined - then we are probably dealing
+        ## with an old-school config.  The only caveat here is that we must add a classname
+        
         foreach my $storename (keys %{$cfg->{'stores'}}) {
             my $realmcfg = {
                 store => $cfg->{'stores'}{$storename},
             };
-            $c->setup_auth_realm($storename, $realmcfg);
+            $app->setup_auth_realm($storename, $realmcfg);
         }
     }
     
@@ -278,7 +274,6 @@ sub setup_auth_realm {
     
     $app->auth_realms->{$realmname}{'store'} = $storeclass->new($config->{'store'}, $app);
     $app->auth_realms->{$realmname}{'credential'} = $credentialclass->new($config->{'credential'}, $app);
-   
 }
 
 sub auth_realms {
@@ -426,7 +421,8 @@ authentication framework.
     /;
 
     # later on ...
-    $c->authenticate({ username => 'myusername', password => 'mypassword' });
+    $c->authenticate({ username => 'myusername', 
+                       password => 'mypassword' });
     my $age = $c->user->get('age');
     $c->logout;
 
@@ -481,7 +477,7 @@ The next logical step is B<authorization>, the process of deciding what a user
 is (or isn't) allowed to do. For example, say your users are split into two
 main groups - regular users and administrators. You want to verify that the
 currently logged in user is indeed an administrator before performing the
-actions in an administrative part of your application. These decisionsmay be
+actions in an administrative part of your application. These decisions may be
 made within your application code using just the information available after
 authentication, or it may be facilitated by a number of plugins.  
 
@@ -548,30 +544,32 @@ This means that our application will begin like this:
     /;
 
     __PACKAGE__->config->{authentication} = 
-                    {  
-                        default_realm => 'members',
-                        realms => {
-                            members => {
-                                credential => {
-                                    class => 'Password'
-                                },
-                                store => {
-                                    class => 'Minimal',
-                	                users = {
-                	                    bob => {
-                	                        password => "s00p3r",                	                    
-                	                        editor => 'yes',
-                	                        roles => [qw/edit delete/],
-                	                    },
-                	                    william => {
-                	                        password => "s3cr3t",
-                	                        roles => [qw/comment/],
-                	                    }
-                	                }	                
-                	            }
-                	        }
-                    	}
-                    };
+                {  
+                    default_realm => 'members',
+                    realms => {
+                        members => {
+                            credential => {
+                                class => 'Password',
+                                password_field => 'password',
+                                password_type => 'clear'
+                            },
+                            store => {
+                                class => 'Minimal',
+            	                users = {
+            	                    bob => {
+            	                        password => "s00p3r",                	                    
+            	                        editor => 'yes',
+            	                        roles => [qw/edit delete/],
+            	                    },
+            	                    william => {
+            	                        password => "s3cr3t",
+            	                        roles => [qw/comment/],
+            	                    }
+            	                }	                
+            	            }
+            	        }
+                	}
+                };
     
 
 This tells the authentication plugin what realms are available, which
@@ -601,8 +599,8 @@ To show an example of this, let's create an authentication controller:
     }
 
 This code should be very readable. If all the necessary fields are supplied,
-call the L<Catalyst::Plugin::Authentication/authenticate> method in the
-controller. If it succeeds the user is logged in.
+call the "authenticate" method from the controller. If it succeeds the 
+user is logged in.
 
 The credential verifier will attempt to retrieve the user whose details match
 the authentication information provided to $c->authenticate(). Once it fetches
@@ -621,8 +619,8 @@ call:
     } ...
 
 
-Now suppose we want to restrict the ability to edit to a user with 'edit'
-in it's roles list.  
+Now suppose we want to restrict the ability to edit to a user with an 
+'editor' value of yes.
 
 The restricted action might look like this:
 
@@ -631,12 +629,17 @@ The restricted action might look like this:
 
         $c->detach("unauthorized")
           unless $c->user_exists
-          and $c->user->get('editor') == 'yes';
+          and $c->user->get('editor') eq 'yes';
 
         # do something restricted here
     }
 
-This is somewhat similar to role based access control.
+(Note that if you have multiple realms, you can use $c->user_in_realm('realmname')
+in place of $c->user_exists(); This will essentially perform the same 
+verification as user_exists, with the added requirement that if there is a 
+user, it must have come from the realm specified.)
+
+The above example is somewhat similar to role based access control.  
 L<Catalyst::Plugin::Authentication::Store::Minimal> treats the roles field as
 an array of role names. Let's leverage this. Add the role authorization
 plugin:
@@ -668,7 +671,9 @@ changing your config:
                         realms => {
                             members => {
                                 credential => {
-                                    class => 'Password'
+                                    class => 'Password',
+                                    password_field => 'password',
+                                    password_type => 'clear'
                                 },
                                 store => {
                                     class => 'DBIx::Class',
@@ -694,7 +699,9 @@ new source. The rest of your application is completely unchanged.
                     realms => {
                         members => {
                             credential => {
-                                class => 'Password'
+                                class => 'Password',
+                                password_field => 'password',
+                                password_type => 'clear'
                             },
                             store => {
                                 class => 'DBIx::Class',
@@ -704,7 +711,9 @@ new source. The rest of your application is completely unchanged.
             	        },
             	        admins => {
             	            credential => {
-            	                class => 'Password'
+            	                class => 'Password',
+            	                password_field => 'password',
+                                password_type => 'clear'
             	            },
             	            store => {
             	                class => '+MyApp::Authentication::Store::NetAuth',
@@ -775,7 +784,7 @@ can be much more efficient.
 =item user_in_realm ( $realm )
 
 Works like user_exists, except that it only returns true if a user is both 
-logged in right now and is from the realm provided.  
+logged in right now and was retrieved from the realm provided.  
 
 =item logout
 
