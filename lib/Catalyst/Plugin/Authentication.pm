@@ -187,7 +187,11 @@ sub _authentication_initialize {
 
     if ($c->_auth_realms) { return };
     
-    my $cfg = $c->config->{'authentication'} || {};
+    if (!exists($c->config->{'authentication'}) {
+        $c->config->{'authentication'} = {};
+    }
+    
+    my $cfg = $c->config->{'authentication'};
 
     %$cfg = (
         use_session => 1,
