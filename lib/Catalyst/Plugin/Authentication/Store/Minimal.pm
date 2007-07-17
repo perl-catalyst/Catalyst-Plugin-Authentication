@@ -12,7 +12,7 @@ sub setup {
 
     $c->default_auth_store(
         Catalyst::Plugin::Authentication::Store::Minimal::Backend->new( 
-            $c->config->{authentication}{users}, $c
+            $c->config->{authentication}, $c
         )
     );
 
