@@ -11,7 +11,7 @@ use Scalar::Util ();
 sub new {
     my ( $class, $config, $app) = @_;
 
-    bless { hash => $config }, $class;
+    bless { hash => $config->{'users'} }, $class;
 }
 
 sub from_session {

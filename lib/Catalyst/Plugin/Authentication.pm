@@ -435,8 +435,8 @@ authorization (allowing the user to do what the system authorises them to do).
 Using authentication is split into two parts. A Store is used to actually 
 store the user information, and can store any amount of data related to 
 the user. Multiple stores can be accessed from within one application. 
-Credentials are used to verify users, using the store, given data from 
-the frontend.
+Credentials are used to verify users, using information from the store, 
+given data from the frontend.
 
 To implement authentication in a Catalyst application you need to add this 
 module, plus at least one store and one credential module.
@@ -475,28 +475,42 @@ with role based access control.
 
 =head2 The Components In This Framework
 
+=head3 Realms
+
+Configuration of the Catalyst::Plugin::Authentication framework is done in
+terms of realms. In simplest terms, a realm is a pairing of a Credential
+verifier and a User storage (Store) backend.
+
+An application can have any number of Realms, each of which operates
+independant of the others. Each realm has a name, which is used to identify it
+as the target of an authentication request. This name can be anything, such as
+'users' or 'members'. One realm must be defined as the default_realm, which is
+used when no realm name is specified. More about this in the configuration
+section.
+
 =head3 Credential Verifiers
 
 When user input is transferred to the L<Catalyst> application (typically via
-form inputs) this data then enters the authentication framework through these
-plugins.
+form inputs) this authentication data then enters the authentication framework
+through the $c->authenticate() routine. From there, it is passed to the
+appropriate Credential verifier.
 
 These plugins check the data, and ensure that it really proves the user is who
 they claim to be.
 
 =head3 Storage Backends
 
-The credentials also identify a user, and this family of modules is supposed to
-take this identification data and return a standardized object oriented
-representation of users.
+The authentication data also identify a user, and the Storage Backend modules
+use this data to locate and return a standardized object-oriented
+representation of a user.
 
 When a user is retrieved from a store it is not necessarily authenticated.
-Credential verifiers can either accept a user object, or fetch the object
-themselves from the default store.
+Credential verifiers accept a set of authentication data and use this
+information to retrieve the user from the store they are paired with.
 
 =head3 The Core Plugin
 
-This plugin on its own is the glue, providing store registration, session
+This plugin on its own is the glue, providing realm configuration, session
 integration, and other goodness for the other plugins.
 
 =head3 Other Plugins
@@ -510,7 +524,7 @@ user belongs to.
 
 =head1 EXAMPLE
 
-Let's say we were storing users in an Apache style htpasswd file. Users are
+Let's say we were storing users in an simple perl hash. Users are
 stored in that file, with a hashed password and some extra comments. Users are
 verified by supplying a password which is matched with the file.
 
@@ -520,19 +534,41 @@ This means that our application will begin like this:
 
     use Catalyst qw/
         Authentication
-        Authentication::Credential::Password
-        Authentication::Store::Htpasswd
     /;
 
-    __PACKAGE__->config->{authentication}{htpasswd} = "passwdfile";
-
-This loads the appropriate methods and also sets the htpasswd store as the
-default store.
+    __PACKAGE__->config->{authentication} = 
+                    {  
+                        default_realm => 'members',
+                        realms => {
+                            members => {
+                                credential => {
+                                    class => 'Password'
+                                },
+                                store => {
+                                class => 'Minimal',
+                	                users = {
+                	                    bob => {
+                	                        password => "s3cr3t",
+                	                        editor => 'yes',
+                	                        roles => [qw/edit delete/],
+                	                    },
+                	                    william => {
+                	                        password => "s00p3r",
+                	                        roles => [qw/comment/],
+                	                    }
+                	                }	                
+                	            }
+                	        }
+                    	}
+                    };
     
-So, now that we have the code loaded we need to get data from the user into the
-credential verifier.
 
-Let's create an authentication controller:
+This tells the authentication plugin what realms are available, which credential
+and store modules are used, and the configuration of each. 
+    
+With this code loaded, we can now attempt to authenticate users.  
+
+To show an example of this, let's create an authentication controller:
 
     package MyApp::Controller::Auth;
 
@@ -542,8 +578,9 @@ Let's create an authentication controller:
         if (    my $user = $c->req->param("user")
             and my $password = $c->req->param("password") )
         {
-            if ( $c->login( $user, $password ) ) {
-                $c->res->body( "hello " . $c->user->name );
+            if ( $c->authenticate( { username => $user, 
+                                     password => $password } ) ) {
+                $c->res->body( "hello " . $c->user->get("name") );
             } else {
                 # login incorrect
             }
@@ -554,60 +591,55 @@ Let's create an authentication controller:
     }
 
 This code should be very readable. If all the necessary fields are supplied,
-call the L<Authentication::Credential::Password/login> method on the
-controller. If that succeeds the user is logged in.
+call the L<Catalyst::Plugin::Authentication/authenticate> method in the
+controller. If it succeeds the user is logged in.
 
-It could be simplified though:
+The credential verifier will attempt to retrieve the user whose details match
+the authentication information provided to $c->authenticate(). Once it fetches
+the user the password is checked and if it matches the user will be
+'authenticated' and C<< $c->user >> will contain the user object retrieved
+from the store.
 
-    sub login : Local {
-        my ( $self, $c ) = @_;
+In the above case, the default realm is checked, but we could just as easily
+check an alternate realm. If this were an admin login, for example, we could
+authenticate on the admin realm by simply changing the $c->authenticate()
+call:
 
-        if ( $c->login ) {
-            ...
-        }
-    }
+    if ( $c->authenticate( { username => $user, 
+                             password => $password }, 'admin' )l ) {
+        $c->res->body( "hello " . $c->user->get("name") );
+    } ...
 
-Since the C<login> method knows how to find logically named parameters on its
-own.
 
-The credential verifier will ask the default store to get the user whose ID is
-the user parameter. In this case the default store is the htpasswd one. Once it
-fetches the user from the store the password is checked and if it's OK
-C<< $c->user >> will contain the user object returned from the htpasswd store.
+Now suppose we want to restrict the ability to edit to a user with 'edit'
+in it's roles list.  
 
-We can also pass a user object to the credential verifier manually, if we have
-several stores per app. This is discussed in
-L<Catalyst::Plugin::Authentication::Store>.
+The restricted action might look like this:
 
-Now imagine each admin user has a comment set in the htpasswd file saying
-"admin".
-
-A restricted action might look like this:
-
-    sub restricted : Local {
+    sub edit : Local {
         my ( $self, $c ) = @_;
 
         $c->detach("unauthorized")
           unless $c->user_exists
-          and $c->user->extra_info() eq "admin";
+          and $c->user->get('editor') == 'yes';
 
         # do something restricted here
     }
 
 This is somewhat similar to role based access control.
-L<Catalyst::Plugin::Authentication::Store::Htpasswd> treats the extra info
-field as a comma separated list of roles if it's treated that way. Let's
-leverage this. Add the role authorization plugin:
+L<Catalyst::Plugin::Authentication::Store::Minimal> treats the roles field as
+an array of role names. Let's leverage this. Add the role authorization
+plugin:
 
     use Catalyst qw/
         ...
         Authorization::Roles
     /;
 
-    sub restricted : Local {
+    sub edit : Local {
         my ( $self, $c ) = @_;
 
-        $c->detach("unauthorized") unless $c->check_roles("admin");
+        $c->detach("unauthorized") unless $c->check_roles("edit");
 
         # do something restricted here
     }
@@ -615,6 +647,8 @@ leverage this. Add the role authorization plugin:
 This is somewhat simpler and will work if you change your store, too, since the
 role interface is consistent.
 
+   .... This is the end of the updated documentation for v0.10 - more soon ....
+   
 Let's say your app grew, and you now have 10000 users. It's no longer efficient
 to maintain an htpasswd file, so you move this data to a database.
 
