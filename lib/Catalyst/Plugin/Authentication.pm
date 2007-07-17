@@ -428,18 +428,20 @@ authentication framework.
 
 =head1 DESCRIPTION
 
-The authentication plugin provides generic user support. It is the basis 
-for both authentication (checking the user is who they claim to be), and 
-authorization (allowing the user to do what the system authorises them to do).
+The authentication plugin provides generic user support for Catalyst apps. It
+is the basis for both authentication (checking the user is who they claim to
+be), and authorization (allowing the user to do what the system authorises
+them to do).
 
-Using authentication is split into two parts. A Store is used to actually 
-store the user information, and can store any amount of data related to 
-the user. Multiple stores can be accessed from within one application. 
-Credentials are used to verify users, using information from the store, 
-given data from the frontend.
+Using authentication is split into two parts. A Store is used to actually
+store the user information, and can store any amount of data related to the
+user. Credentials are used to verify users, using information from the store,
+given data from the frontend. A Credential and a Store are paired to form a
+'Realm'. A Catalyst applicaiton using the authentication framework must have
+at least one realm, and may have multiple.
 
 To implement authentication in a Catalyst application you need to add this 
-module, plus at least one store and one credential module.
+module, and specify at least one realm in the configuration. 
 
 Authentication data can also be stored in a session, if the application 
 is using the L<Catalyst::Plugin::Session> module.
@@ -465,13 +467,16 @@ identity theft for now). Checking the password, or any other proof is called
 B<credential verification>.
 
 By this time you know exactly who the user is - the user's identity is
-B<authenticated>. This is where this module's job stops, and other plugins step
-in. The next logical step is B<authorization>, the process of deciding what a
-user is (or isn't) allowed to do. For example, say your users are split into
-two main groups - regular users and administrators. You should verify that the
+B<authenticated>. This is where this module's job stops, and your application
+or other plugins step in.  
+
+The next logical step is B<authorization>, the process of deciding what a user
+is (or isn't) allowed to do. For example, say your users are split into two
+main groups - regular users and administrators. You want to verify that the
 currently logged in user is indeed an administrator before performing the
-actions of an administrative part of your application. One way to do this is
-with role based access control.
+actions in an administrative part of your application. These decisionsmay be
+made within your application code using just the information available after
+authentication, or it may be facilitated by a number of plugins.  
 
 =head2 The Components In This Framework
 
@@ -485,14 +490,14 @@ An application can have any number of Realms, each of which operates
 independant of the others. Each realm has a name, which is used to identify it
 as the target of an authentication request. This name can be anything, such as
 'users' or 'members'. One realm must be defined as the default_realm, which is
-used when no realm name is specified. More about this in the configuration
-section.
+used when no realm name is specified. More information about configuring
+realms is available in the configuration section.
 
 =head3 Credential Verifiers
 
 When user input is transferred to the L<Catalyst> application (typically via
-form inputs) this authentication data then enters the authentication framework
-through the $c->authenticate() routine. From there, it is passed to the
+form inputs) the application may pass this information into the authentication
+system through the $c->authenticate() method.  From there, it is passed to the
 appropriate Credential verifier.
 
 These plugins check the data, and ensure that it really proves the user is who
@@ -500,7 +505,7 @@ they claim to be.
 
 =head3 Storage Backends
 
-The authentication data also identify a user, and the Storage Backend modules
+The authentication data also identifies a user, and the Storage Backend modules
 use this data to locate and return a standardized object-oriented
 representation of a user.
 
@@ -524,9 +529,8 @@ user belongs to.
 
 =head1 EXAMPLE
 
-Let's say we were storing users in an simple perl hash. Users are
-stored in that file, with a hashed password and some extra comments. Users are
-verified by supplying a password which is matched with the file.
+Let's say we were storing users in a simple perl hash. Users are
+verified by supplying a password which is matched within the hash.
 
 This means that our application will begin like this:
 
@@ -548,12 +552,12 @@ This means that our application will begin like this:
                                     class => 'Minimal',
                 	                users = {
                 	                    bob => {
-                	                        password => "s3cr3t",
+                	                        password => "s00p3r",                	                    
                 	                        editor => 'yes',
                 	                        roles => [qw/edit delete/],
                 	                    },
                 	                    william => {
-                	                        password => "s00p3r",
+                	                        password => "s3cr3t",
                 	                        roles => [qw/comment/],
                 	                    }
                 	                }	                
@@ -563,10 +567,9 @@ This means that our application will begin like this:
                     };
     
 
-This tells the authentication plugin what realms are available, which credential
-and store modules are used, and the configuration of each. 
-    
-With this code loaded, we can now attempt to authenticate users.  
+This tells the authentication plugin what realms are available, which
+credential and store modules are used, and the configuration of each. With
+this code loaded, we can now attempt to authenticate users.
 
 To show an example of this, let's create an authentication controller:
 
@@ -597,7 +600,7 @@ controller. If it succeeds the user is logged in.
 The credential verifier will attempt to retrieve the user whose details match
 the authentication information provided to $c->authenticate(). Once it fetches
 the user the password is checked and if it matches the user will be
-'authenticated' and C<< $c->user >> will contain the user object retrieved
+B<authenticated> and C<< $c->user >> will contain the user object retrieved
 from the store.
 
 In the above case, the default realm is checked, but we could just as easily
@@ -677,9 +680,9 @@ new source. The rest of your application is completely unchanged.
 =over 4 
 
 
-=item authenticate $userinfo, $realm
+=item authenticate( $userinfo, $realm )
 
-Attempts to authenticate the user using the information in $userinfo hash
+Attempts to authenticate the user using the information in the $userinfo hash
 reference using the realm $realm. $realm may be omitted, in which case the
 default realm is checked.
 
@@ -697,7 +700,7 @@ can be much more efficient.
 
 =item logout
 
-Logs the user out, Deletes the currently logged in user from C<user> and the session.
+Logs the user out, Deletes the currently logged in user from $c->user and the session.
 
 =item find_user( $userinfo, $realm )
 
@@ -772,6 +775,7 @@ Catalyst::Plugin::Authentication::Store::storename::Backend.
 
 =back
 
+    ... this is where the documentation fairy got distracted and moved on to other things ...
 
 =head1 INTERNAL METHODS
 
