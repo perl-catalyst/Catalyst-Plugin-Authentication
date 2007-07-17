@@ -222,7 +222,7 @@ sub _authentication_initialize {
 sub setup_auth_realm {
     my ($app, $realmname, $config) = @_;
     
-    $app->log->debug("Setting up $realmname");
+    $app->log->debug("Setting up auth realm $realmname") if $app->debug;
     if (!exists($config->{'store'}{'class'})) {
         Carp::croak "Couldn't setup the authentication realm named '$realmname', no class defined";
     } 
