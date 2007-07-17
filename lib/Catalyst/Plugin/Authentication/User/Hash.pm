@@ -91,7 +91,7 @@ sub supports {
 sub for_session {
     my $self = shift;
     
-    return $self; # if we have a store and an ID we serialize by ref, otherwise we serialize the whole user
+    return $self; # we serialize the whole user
 }
 
 sub from_session {
