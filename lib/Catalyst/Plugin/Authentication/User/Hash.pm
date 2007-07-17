@@ -45,6 +45,7 @@ sub _accessor {
       : $data;
 }
 
+## password portion of this is no longer necessary, but here for backwards compatibility.
 my %features = (
     password => {
         clear      => ["password"],

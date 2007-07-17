@@ -17,7 +17,7 @@ provides the interface to the application developer, the actual work of
 verifying the credentials and retrieving users is delegated to separate
 modules. These modules are called B<Credentials> and storage backends, or
 B<Stores>, respectively. For authentication to function there must be at least
-one credential and one storage backend. A pairing of a store and a credential
+one credential and one store. A pairing of a store and a credential
 is referred to as a B<Realm>. There may be any number of realms defined for an
 application, though most applications will not require more than one or two.
 
@@ -81,11 +81,11 @@ process.
 
 =head1 WRITING A STORE
 
-There are two parts to an authentication store, the backend and the user object.
+There are two parts to an authentication store, the store object and the user object.
 
 =head2 STORAGE BACKEND
 
-Writing a storage backend is actually quite simple.  There are only five methods
+Writing a store is actually quite simple.  There are only five methods
 that must be implemented. They are:
 
     new()           - instantiates the store object
@@ -241,7 +241,4 @@ reasonable to return C<$self>.
 
 =head1 WRITING A CREDENTIAL
 
-There are two parts to an authentication store, the backend and the user object.
-
-=head2 STORAGE BACKEND
 ... Documentation fairy fell asleep here.  

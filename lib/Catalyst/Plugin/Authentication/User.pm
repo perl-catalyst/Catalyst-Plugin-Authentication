@@ -4,17 +4,18 @@ package Catalyst::Plugin::Authentication::User;
 
 use strict;
 use warnings;
+use base qw/Class::Accessor::Fast/;
 
+## auth_realm is the realm this user came from. 
+BEGIN {
+    __PACKAGE__->mk_accessors(qw/auth_realm/);
+}
+
+## THIS IS NOT A COMPLETE CLASS! it is intended to provide base functionality only.  
+## translation - it won't work if you try to use it directly.
 
 ## chances are you want to override this.
 sub id { shift->get('id'); }
-
-## returns the realm the user came from - not a good idea to override this.
-sub auth_realm {
-    my $self = shift;
-    $self->{'realm'};
-}
-
 
 ## this relies on 'supported_features' being implemented by the subclass.. 
 ## but it is not an error if it is not.  it just means you support nothing.  
@@ -63,13 +64,6 @@ sub get {
 ## note that it is perfectly acceptable to return $self in cases where there is no underlying object.
 sub get_object {
     return shift;
-}
-
-## this is an internal routine.  I suggest you don't rely on it's presence. 
-## sets the realm the user came from.
-sub _set_auth_realm {
-    my ($self, $realmname) = @_;
-    $self->{'realm'} = $realmname;
 }
 
 ## Backwards Compatibility

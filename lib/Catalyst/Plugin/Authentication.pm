@@ -40,7 +40,7 @@ sub set_authenticated {
     {
         $c->save_user_in_session($user, $realmname);
     }
-    $user->_set_auth_realm($realmname);
+    $user->auth_realm($realmname);
     
     $c->NEXT::set_authenticated($user, $realmname);
 }
@@ -73,8 +73,8 @@ sub user {
         return $c->_user(@_);
     }
 
-    if ( defined(my $user = $c->_user) ) {
-        return $user;
+    if ( defined($c->_user) ) {
+        return $c->_user;
     } else {
         return $c->auth_restore_user;
     }
@@ -87,15 +87,28 @@ sub user_exists {
 	return defined($c->_user) || defined($c->_user_in_session);
 }
 
+# works like user_exists - except only returns true if user 
+# exists AND is in the realm requested.
+sub user_in_realm {
+    my ($c, $realmname) = @_;
+
+    if (defined($c->_user)) {
+        return ($c->_user->auth_realm eq $realmname);
+    } elsif (defined($c->_user_in_session)) {
+        return ($c->session->{__user_realm} eq $realmname);  
+    } else {
+        return undef;
+    }
+}
 
 sub save_user_in_session {
     my ( $c, $user, $realmname ) = @_;
 
     $c->session->{__user_realm} = $realmname;
     
-    # we want to ask the backend for a user prepared for the session.
+    # we want to ask the store for a user prepared for the session.
     # but older modules split this functionality between the user and the
-    # backend.  We try the store first.  If not, we use the old method.
+    # store.  We try the store first.  If not, we use the old method.
     my $realm = $c->get_auth_realm($realmname);
     if ($realm->{'store'}->can('for_session')) {
         $c->session->{__user} = $realm->{'store'}->for_session($c, $user);
@@ -141,14 +154,6 @@ sub _user_in_session {
     return $c->session->{__user};
 }
 
-sub _store_in_session {
-    my $c = shift;
-    
-    # we don't need verification, it's only called if _user_in_session returned something useful
-
-    return $c->session->{__user_store};
-}
-
 sub auth_restore_user {
     my ( $c, $frozen_user, $realmname ) = @_;
 
@@ -162,7 +167,7 @@ sub auth_restore_user {
     $c->_user( my $user = $realm->{'store'}->from_session( $c, $frozen_user ) );
     
     # this sets the realm the user originated in.
-    $user->_set_auth_realm($realmname);
+    $user->auth_realm($realmname);
     return $user;
 
 }
@@ -216,7 +221,6 @@ sub _authentication_initialize {
     
 }
 
-
 # set up realmname.
 sub setup_auth_realm {
     my ($app, $realmname, $config) = @_;
@@ -230,9 +234,9 @@ sub setup_auth_realm {
     my $storeclass = $config->{'store'}{'class'};
     
     ## follow catalyst class naming - a + prefix means a fully qualified class, otherwise it's
-    ## taken to mean C::P::A::Store::(specifiedclass)::Backend
+    ## taken to mean C::P::A::Store::(specifiedclass)
     if ($storeclass !~ /^\+(.*)$/ ) {
-        $storeclass = "Catalyst::Plugin::Authentication::Store::${storeclass}::Backend";
+        $storeclass = "Catalyst::Plugin::Authentication::Store::${storeclass}";
     } else {
         $storeclass = $1;
     }
@@ -269,15 +273,8 @@ sub setup_auth_realm {
     }
     
     $app->auth_realms->{$realmname}{'store'} = $storeclass->new($config->{'store'}, $app);
-    if ($credentialclass->can('new')) {
-        $app->auth_realms->{$realmname}{'credential'} = $credentialclass->new($config->{'credential'}, $app);
-    } else {
-        # if the credential class is not actually a class - has no 'new' operator, we wrap it, 
-        # once again - to allow our code to be simple at runtime and allow non-OO packages to function.
-        my $wrapperclass = 'Catalyst::Plugin::Authentication::Credential::Wrapper';
-        Catalyst::Utils::ensure_class_loaded( $wrapperclass );
-        $app->auth_realms->{$realmname}{'credential'} = $wrapperclass->new($config->{'credential'}, $app);
-    }
+    $app->auth_realms->{$realmname}{'credential'} = $credentialclass->new($config->{'credential'}, $app);
+   
 }
 
 sub auth_realms {
@@ -313,6 +310,8 @@ sub authenticate {
     }
         
     my $realm = $app->get_auth_realm($realmname);
+    
+    ## note to self - make authenticate throw an exception if realm is invalid.
     
     if ($realm && exists($realm->{'credential'})) {
         my $user = $realm->{'credential'}->authenticate($app, $realm->{store}, $userinfo);
@@ -509,7 +508,7 @@ they claim to be.
 
 =head3 Storage Backends
 
-The authentication data also identifies a user, and the Storage Backend modules
+The authentication data also identifies a user, and the Storage backend modules
 use this data to locate and return a standardized object-oriented
 representation of a user.
 
@@ -741,7 +740,7 @@ class name. Otherwise it is considered to be a portion of the class name. For
 credentials, the classname 'B<Password>', for example, is expanded to
 Catalyst::Plugin::Authentication::Credential::B<Password>. For stores, the
 classname 'B<storename>' is expanded to:
-Catalyst::Plugin::Authentication::Store::B<storename>::Backend.
+Catalyst::Plugin::Authentication::Store::B<storename>.
 
 
 =back
@@ -765,9 +764,14 @@ Returns the currently logged in user or undef if there is none.
 
 Returns true if a user is logged in right now. The difference between
 user_exists and user is that user_exists will return true if a user is logged
-in, even if it has not been retrieved from the storage backend. If you only
+in, even if it has not been yet retrieved from the storage backend. If you only
 need to know if the user is logged in, depending on the storage mechanism this
 can be much more efficient.
+
+=item user_in_realm ( $realm )
+
+Works like user_exists, except that it only returns true if a user is both 
+logged in right now and is from the realm provided.  
 
 =item logout
 
@@ -886,7 +890,7 @@ The items below are still present in the plugin, though using them is
 deprecated. They remain only as a transition tool, for those sites which can
 not yet be upgraded to use the new system due to local customizations or use
 of Credential / Store modules that have not yet been updated to work with the 
-new backend API.
+new API.
 
 These routines should not be used in any application using realms
 functionality or any of the methods described above. These are for reference
@@ -912,7 +916,7 @@ or by using a Store plugin:
 	use Catalyst qw/Authentication Authentication::Store::Minimal/;
 
 Sets the default store to
-L<Catalyst::Plugin::Authentication::Store::Minimal::Backend>.
+L<Catalyst::Plugin::Authentication::Store::Minimal>.
 
 =item get_auth_store $name
 
