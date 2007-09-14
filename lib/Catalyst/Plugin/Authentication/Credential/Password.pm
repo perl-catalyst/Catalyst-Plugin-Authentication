@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 package Catalyst::Plugin::Authentication::Credential::Password;
 use base qw/Class::Accessor::Fast/;
 
