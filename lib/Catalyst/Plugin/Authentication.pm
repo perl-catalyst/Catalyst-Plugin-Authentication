@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 package Catalyst::Plugin::Authentication;
 
 use base qw/Class::Accessor::Fast Class::Data::Inheritable/;

@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 package Catalyst::Plugin::Authentication::User::Hash;
 use base qw/Catalyst::Plugin::Authentication::User/;
 

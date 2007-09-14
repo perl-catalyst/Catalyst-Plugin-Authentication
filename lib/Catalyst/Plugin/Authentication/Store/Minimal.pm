@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 package Catalyst::Plugin::Authentication::Store::Minimal;
 
 use strict;
