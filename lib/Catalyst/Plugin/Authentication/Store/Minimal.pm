@@ -104,8 +104,7 @@ __END__
 
 =head1 NAME
 
-Catalyst::Plugin::Authentication::Store::Minimal - Minimal
-authentication store.
+Catalyst::Plugin::Authentication::Store::Minimal - Minimal authentication store
 
 =head1 SYNOPSIS
 
