@@ -11,6 +11,7 @@ use warnings;
 
 use Tie::RefHash;
 use Class::Inspector;
+use Catalyst::Plugin::Authentication::Realm;
 
 # this optimization breaks under Template::Toolkit
 # use user_exists instead
@@ -30,14 +31,20 @@ sub set_authenticated {
     if (!$realmname) {
         $realmname = 'default';
     }
+    my $realm = $c->get_auth_realm($realmname);
+    
+    if (!$realm) {
+        Catalyst::Exception->throw(
+                "set_authenticated called with nonexistant realm: '$realmname'.");
+    }
     
     if (    $c->isa("Catalyst::Plugin::Session")
         and $c->config->{authentication}{use_session}
         and $user->supports("session") )
     {
-        $c->save_user_in_session($user, $realmname);
+        $realm->save_user_in_session($c, $user);
     }
-    $user->auth_realm($realmname);
+    $user->auth_realm($realm->name);
     
     $c->NEXT::set_authenticated($user, $realmname);
 }
@@ -77,7 +84,7 @@ sub user_in_realm {
     }
 }
 
-sub save_user_in_session {
+sub __old_save_user_in_session {
     my ( $c, $user, $realmname ) = @_;
 
     $c->session->{__user_realm} = $realmname;
@@ -114,11 +121,12 @@ sub find_user {
     
     $realmname ||= 'default';
     my $realm = $c->get_auth_realm($realmname);
-    if ( $realm->{'store'} ) {
-        return $realm->{'store'}->find_user($userinfo, $c);
-    } else {
-        $c->log->debug('find_user: unable to locate a store matching the requested realm');
+    
+    if (!$realm) {
+        Catalyst::Exception->throw(
+                "find_user called with nonexistant realm: '$realmname'.");
     }
+    return $realm->find_user($userinfo, $c);
 }
 
 
@@ -143,7 +151,7 @@ sub auth_restore_user {
     return unless $realmname; # FIXME die unless? This is an internal inconsistency
 
     my $realm = $c->get_auth_realm($realmname);
-    $c->_user( my $user = $realm->{'store'}->from_session( $c, $frozen_user ) );
+    $c->_user( my $user = $realm->from_session( $c, $frozen_user ) );
     
     # this sets the realm the user originated in.
     $user->auth_realm($realmname);
@@ -179,7 +187,7 @@ sub _authentication_initialize {
         foreach my $realm (keys %{$cfg->{'realms'}}) {
             $app->setup_auth_realm($realm, $cfg->{'realms'}{$realm});
         }
-        #  if we have a 'default-realm' in the config hash and we don't already 
+        #  if we have a 'default_realm' in the config hash and we don't already 
         # have a realm called 'default', we point default at the realm specified
         if (exists($cfg->{'default_realm'}) && !$app->get_auth_realm('default')) {
             $app->_set_default_auth_realm($cfg->{'default_realm'});
@@ -210,67 +218,18 @@ sub _authentication_initialize {
 sub setup_auth_realm {
     my ($app, $realmname, $config) = @_;
     
-    $app->log->debug("Setting up auth realm $realmname") if $app->debug;
-    if (!exists($config->{'store'}{'class'})) {
-        Carp::croak "Couldn't setup the authentication realm named '$realmname', no class defined";
-    } 
-        
-    # use the 
-    my $storeclass = $config->{'store'}{'class'};
-    
-    ## follow catalyst class naming - a + prefix means a fully qualified class, otherwise it's
-    ## taken to mean C::P::A::Store::(specifiedclass)
-    if ($storeclass !~ /^\+(.*)$/ ) {
-        $storeclass = "Catalyst::Plugin::Authentication::Store::${storeclass}";
+    my $realmclass = 'Catalyst::Plugin::Authentication::Realm';
+    if (defined($config->{'class'})) {
+        $realmclass = $config->{'class'};
+        Catalyst::Utils::ensure_class_loaded( $realmclass );
+    }
+    my $realm = $realmclass->new($realmname, $config, $app);
+    if ($realm) {
+        $app->auth_realms->{$realmname} = $realm;
     } else {
-        $storeclass = $1;
+        $app->log->debug("realm initialization for '$realmname' failed.");
     }
-    
-
-    # a little niceness - since most systems seem to use the password credential class, 
-    # if no credential class is specified we use password.
-    $config->{credential}{class} ||= '+Catalyst::Plugin::Authentication::Credential::Password';
-
-    my $credentialclass = $config->{'credential'}{'class'};
-    
-    ## follow catalyst class naming - a + prefix means a fully qualified class, otherwise it's
-    ## taken to mean C::P::A::Credential::(specifiedclass)
-    if ($credentialclass !~ /^\+(.*)$/ ) {
-        $credentialclass = "Catalyst::Plugin::Authentication::Credential::${credentialclass}";
-    } else {
-        $credentialclass = $1;
-    }
-    
-    # if we made it here - we have what we need to load the classes;
-    Catalyst::Utils::ensure_class_loaded( $credentialclass );
-    Catalyst::Utils::ensure_class_loaded( $storeclass );
-    
-    # BACKWARDS COMPATIBILITY - if the store class does not define find_user, we define it in terms 
-    # of get_user and add it to the class.  this is because the auth routines use find_user, 
-    # and rely on it being present. (this avoids per-call checks)
-    if (!$storeclass->can('find_user')) {
-        no strict 'refs';
-        *{"${storeclass}::find_user"} = sub {
-                                                my ($self, $info) = @_;
-                                                my @rest = @{$info->{rest}} if exists($info->{rest});
-                                                $self->get_user($info->{id}, @rest);
-                                            };
-    }
-    
-    ## a little cruft to stay compatible with some poorly written stores / credentials
-    ## we'll remove this soon.
-    if ($storeclass->can('new')) {
-        $app->auth_realms->{$realmname}{'store'} = $storeclass->new($config->{'store'}, $app);
-    } else {
-        $app->log->error("THIS IS DEPRECATED: $storeclass has no new() method - Attempting to use uninstantiated");
-        $app->auth_realms->{$realmname}{'store'} = $storeclass;
-    }
-    if ($credentialclass->can('new')) {
-        $app->auth_realms->{$realmname}{'credential'} = $credentialclass->new($config->{'credential'}, $app);
-    } else {
-        $app->log->error("THIS IS DEPRECATED: $credentialclass has no new() method - Attempting to use uninstantiated");
-        $app->auth_realms->{$realmname}{'credential'} = $credentialclass;
-    }
+    return $realm;
 }
 
 sub auth_realms {
@@ -309,15 +268,12 @@ sub authenticate {
     
     ## note to self - make authenticate throw an exception if realm is invalid.
     
-    if ($realm && exists($realm->{'credential'})) {
-        my $user = $realm->{'credential'}->authenticate($app, $realm->{store}, $userinfo);
-        if (ref($user)) {
-            $app->set_authenticated($user, $realmname);
-            return $user;
-        }
+    if ($realm) {
+        return $realm->authenticate($app, $userinfo);
     } else {
-        $app->log->debug("The realm requested, '$realmname' does not exist," .
-                         " or there is no credential associated with it.")
+        Catalyst::Exception->throw(
+                "authenticate called with nonexistant realm: '$realmname'.");
+
     }
     return undef;
 }
@@ -349,8 +305,12 @@ sub get_user {
 sub default_auth_store {
     my $self = shift;
 
+    my $realm = $self->get_auth_realm('default');
+    if (!$realm) {
+        $realm = $self->setup_auth_realm('default', { class => "Catalyst::Plugin::Authentication::Realm::Compatibility" });
+    }
     if ( my $new = shift ) {
-        $self->auth_realms->{'default'}{'store'} = $new;
+        $realm->store($new);
         
         my $storeclass;
         if (ref($new)) {
@@ -372,7 +332,7 @@ sub default_auth_store {
         }
     }
 
-    return $self->get_auth_realm('default')->{'store'};
+    return $self->get_auth_realm('default')->store;
 }
 
 ## BACKWARDS COMPATIBILITY
@@ -381,7 +341,7 @@ sub default_auth_store {
 sub auth_store_names {
     my $self = shift;
 
-    my %hash = (  $self->get_auth_realm('default')->{'store'} => 'default' );
+    my %hash = (  $self->get_auth_realm('default')->store => 'default' );
 }
 
 sub get_auth_store {
@@ -403,7 +363,7 @@ sub get_auth_store_name {
 sub auth_stores {
     my $self = shift;
 
-    my %hash = ( 'default' => $self->get_auth_realm('default')->{'store'});
+    my %hash = ( 'default' => $self->get_auth_realm('default')->store);
 }
 
 __PACKAGE__;
