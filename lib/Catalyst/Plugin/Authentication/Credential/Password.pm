@@ -9,14 +9,16 @@ use Catalyst::Exception ();
 use Digest              ();
 
 BEGIN {
-    __PACKAGE__->mk_accessors(qw/_config/);
+    __PACKAGE__->mk_accessors(qw/_config realm/);
 }
 
 sub new {
-    my ($class, $config, $app) = @_;
+    my ($class, $config, $app, $realm) = @_;
     
     my $self = { _config => $config };
     bless $self, $class;
+    
+    $self->realm($realm);
     
     $self->_config->{'password_field'} ||= 'password';
     $self->_config->{'password_type'}  ||= 'clear';
@@ -30,7 +32,7 @@ sub new {
 }
 
 sub authenticate {
-    my ( $self, $c, $authstore, $authinfo ) = @_;
+    my ( $self, $c, $realm, $authinfo ) = @_;
 
     ## because passwords may be in a hashed format, we have to make sure that we remove the 
     ## password_field before we pass it to the user routine, as some auth modules use 
@@ -38,7 +40,7 @@ sub authenticate {
     my $userfindauthinfo = {%{$authinfo}};
     delete($userfindauthinfo->{$self->_config->{'password_field'}});
     
-    my $user_obj = $authstore->find_user($userfindauthinfo, $c);
+    my $user_obj = $realm->find_user($userfindauthinfo, $c);
     if (ref($user_obj)) {
         if ($self->check_password($user_obj, $authinfo)) {
             return $user_obj;
