@@ -93,7 +93,7 @@ sub find_user {
           $res = $self->store->auto_create($authinfo, $c);
       }
     } elsif ($self->config->{'auto_update'} && $self->store->can('auto_update')) {
-        $res = $self->store->auto_update($authinfo, $c);
+        $res = $self->store->auto_update($authinfo, $c, $res);
     } 
     
     return $res;
