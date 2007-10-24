@@ -2,8 +2,8 @@ package Catalyst::Plugin::Authentication::Realm::Compatibility;
 
 use strict;
 use warnings;
-use base qw/Catalyst::Plugin::Authentication::Realm/;
 
+use base qw/Catalyst::Plugin::Authentication::Realm/;
 
 ## very funky - the problem here is that we can't do real realm initialization
 ## but we need a real realm object to function.  So - we kinda fake it - we 
@@ -22,3 +22,25 @@ sub new {
 __PACKAGE__;
 
 __END__
+
+=pod
+
+=head1 NAME
+
+Catalyst::Plugin::Authentication::Realm::Compatibility - Compatibility realm object
+
+=head1 DESCRIPTION
+
+An empty realm object for compatibility reasons.
+
+=head1 METHODS
+
+=over 4
+
+=item new
+
+Returns a, basically empty, realm object.
+
+=back
+
+=cut
