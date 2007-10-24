@@ -3,7 +3,7 @@ Revision history for Perl extension Catalyst::Plugin::Authentication
 0.10003 2007-XX-XX
         - Added a "Null" store for credentials that don't require real stores.
         - Make realms bonafide objects
-        - Added auto_update and auto_create options to the Realm object
+        - Added auto_update_user and auto_create_user options to the Realm object
 
 0.10002 2007-07-22
         - $user->store() should NOT be set by C::P::Auth - if it's needed - it

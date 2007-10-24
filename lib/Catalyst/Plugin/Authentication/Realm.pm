@@ -88,11 +88,11 @@ sub find_user {
     my $res = $self->store->find_user($authinfo, $c);
     
     if (!$res) {
-      if ($self->config->{'auto_create'} && $self->store->can('auto_create') ) {
-          $res = $self->store->auto_create($authinfo, $c);
+      if ($self->config->{'auto_create_user'} && $self->store->can('auto_create_user') ) {
+          $res = $self->store->auto_create_user($authinfo, $c);
       }
-    } elsif ($self->config->{'auto_update'} && $self->store->can('auto_update')) {
-        $res = $self->store->auto_update($authinfo, $c, $res);
+    } elsif ($self->config->{'auto_update_user'} && $self->store->can('auto_update_user')) {
+        $res = $self->store->auto_update_user($authinfo, $c, $res);
     } 
     
     return $res;
