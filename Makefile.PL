@@ -1,5 +1,9 @@
 use inc::Module::Install 0.67;
 
+if( -e 'MANIFEST.SKIP' ) {
+    system( 'pod2text lib/Catalyst/Plugin/Authentication.pm > README' );
+}
+
 name 'Catalyst-Plugin-Authentication';
 all_from 'lib/Catalyst/Plugin/Authentication.pm';
 
