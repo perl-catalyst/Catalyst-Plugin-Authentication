@@ -18,13 +18,12 @@ sub new {
     $self->name($realmname);
     
     $app->log->debug("Setting up auth realm $realmname") if $app->debug;
-    if (!exists($config->{'store'}{'class'})) {
-        Carp::croak "Couldn't setup the authentication realm named '$realmname', no class defined";
+
+    # use the Null store as a default
+    if( ! exists $config->{store}{class} ) {
+        $config->{store}{class} = '+Catalyst::Plugin::Authentication::Store::Null';
+        $app->log->debug( qq(No Store specified for realm "$realmname", using the Null store.) );
     } 
-        
-    $config->{store}{class} ||= '+Catalyst::Plugin::Authentication::Store::Null';
-    
-    # use the 
     my $storeclass = $config->{'store'}{'class'};
     
     ## follow catalyst class naming - a + prefix means a fully qualified class, otherwise it's
@@ -34,7 +33,6 @@ sub new {
     } else {
         $storeclass = $1;
     }
-    
 
     # a little niceness - since most systems seem to use the password credential class, 
     # if no credential class is specified we use password.
