@@ -2,6 +2,7 @@ package Catalyst::Plugin::Authentication::Realm;
 
 use strict;
 use warnings;
+
 use base qw/Class::Accessor::Fast/;
 
 BEGIN {
@@ -136,3 +137,31 @@ sub from_session {
 __PACKAGE__;
 
 __END__
+
+=pod
+
+=head1 NAME
+
+Catalyst::Plugin::Authentication::Realm - Base class for realm objects.
+
+=head1 DESCRIPTION
+
+=head1 METHODS
+
+=over 4
+
+=item new
+
+=item find_user
+
+=item authenticate
+
+=item save_user_in_session
+
+=item from_session
+
+=back
+
+=cut
+
+
