@@ -1,8 +1,9 @@
 package Catalyst::Plugin::Authentication::Credential::Password;
-use base qw/Class::Accessor::Fast/;
 
 use strict;
 use warnings;
+
+use base qw/Class::Accessor::Fast/;
 
 use Scalar::Util        ();
 use Catalyst::Exception ();
@@ -358,9 +359,7 @@ There are no publicly exported routines in the Password module (or indeed in
 most credential modules.)  However, below is a description of the routines 
 required by L<Catalyst::Plugin::Authentication> for all credential modules.
 
-=over 4
-
-=item new ( $config, $app )
+=head2 new( $config, $app )
 
 Instantiate a new Password object using the configuration hash provided in
 $config. A reference to the application is provided as the second argument.
@@ -369,9 +368,9 @@ plugin setup phase, which is before the application specific controllers are
 loaded. The practical upshot of this is that things like $c->model(...) will
 not function as expected.
 
-=item authenticate ( $authinfo, $c )
+=head2 authenticate( $authinfo, $c )
 
 Try to log a user in, receives a hashref containing authentication information
 as the first argument, and the current context as the second.
 
-=back
+=cut

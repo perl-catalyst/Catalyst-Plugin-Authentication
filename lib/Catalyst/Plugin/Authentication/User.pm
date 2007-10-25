@@ -93,25 +93,18 @@ This is the base class for authenticated
 
 =head1 METHODS
 
-=over 4
-
-=item id
+=head2 id( )
 
 A unique ID by which a user can be retrieved from the store.
 
-=item store
+=head2 store( )
 
 Should return a class name that can be used to refetch the user using it's
 ID.
 
-=item supports
+=head2 supports( )
 
 An introspection method used to determine what features a user object has, to support credential and authorization plugins.
 
-=item 
-
-=back
-
 =cut
-
 

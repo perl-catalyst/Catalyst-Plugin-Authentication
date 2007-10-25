@@ -35,12 +35,8 @@ An empty realm object for compatibility reasons.
 
 =head1 METHODS
 
-=over 4
-
-=item new
+=head2 new( )
 
 Returns a, basically empty, realm object.
-
-=back
 
 =cut

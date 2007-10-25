@@ -12,7 +12,7 @@ BEGIN {
 }
 
 sub new {
-    my ( $class, $config, $app) = @_;
+    my ( $class, $config, $app, $realm ) = @_;
     bless { _config => $config }, $class;
 }
 

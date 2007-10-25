@@ -1,8 +1,9 @@
 package Catalyst::Plugin::Authentication::User::Hash;
-use base qw/Catalyst::Plugin::Authentication::User/;
 
 use strict;
 use warnings;
+
+use base qw/Catalyst::Plugin::Authentication::User/;
 
 sub new {
     my $class = shift;
@@ -123,35 +124,31 @@ hand with L<Catalyst::Plugin::Authentication::Store::Minimal>.
 
 =head1 METHODS
 
-=over 4
-
-=item new @pairs
+=head2 new( @pairs )
 
 Create a new object with the key-value-pairs listed in the arg list.
 
-=item supports
+=head2 supports( )
 
 Checks for existence of keys that correspond with features.
 
-=item for_session
+=head2 for_session( )
 
 Just returns $self, expecting it to be serializable.
 
-=item from_session
+=head2 from_session( )
 
 Just passes returns the unserialized object, hoping it's intact.
 
-=item AUTOLOAD
+=head2 AUTOLOAD( )
 
 Accessor for the key whose name is the method.
 
-=item id
+=head2 id( )
 
-=item store
+=head2 store( )
 
 Accessors that override superclass's dying virtual methods.
-
-=back
 
 =head1 SEE ALSO
 
