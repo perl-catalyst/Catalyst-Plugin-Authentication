@@ -211,6 +211,10 @@ Delegates to C<get_user>.
 
 Chooses a random user from the hash and delegates to it.
 
+=head2 get_user( )
+
+=head2 setup( )
+
 =cut
 
 

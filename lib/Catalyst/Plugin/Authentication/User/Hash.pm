@@ -144,11 +144,13 @@ Just passes returns the unserialized object, hoping it's intact.
 
 Accessor for the key whose name is the method.
 
-=head2 id( )
-
 =head2 store( )
 
 Accessors that override superclass's dying virtual methods.
+
+=head2 id( )
+
+=head2 can( )
 
 =head1 SEE ALSO
 

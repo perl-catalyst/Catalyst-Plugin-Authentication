@@ -654,8 +654,6 @@ new source. The rest of your application is completely unchanged.
 
 =head1 CONFIGURATION
 
-=over 4
-
     # example
     __PACKAGE__->config->{authentication} = 
                 {  
@@ -687,6 +685,8 @@ new source. The rest of your application is completely unchanged.
             	        
                 	}
                 };
+
+=over 4
 
 =item use_session
 
@@ -903,6 +903,14 @@ A hash keyed by name, with the stores registered in the app.
 =head2 register_auth_stores( %stores_by_name )
 
 Register stores into the application.
+
+=head2 auth_store_names( )
+
+=head2 get_user( )
+
+=head2 setup( )
+
+=head2 setup_auth_realm( )
 
 =head1 AUTHORS
 

@@ -196,7 +196,5 @@ Delegates to the store object.
 
 Delegates to the store object.
 
-=back
-
 =cut
 
