@@ -12,7 +12,7 @@ BEGIN {
 }
 
 sub new {
-    my ( $class, $config, $app) = @_;
+    my ( $class, $config, $app, $realm) = @_;
 
     bless { userhash => $config->{'users'} }, $class;
 }
@@ -189,14 +189,12 @@ There are no publicly exported routines in the Minimal store (or indeed in
 most authentication stores)  However, below is a description of the routines 
 required by L<Catalyst::Plugin::Authentication> for all authentication stores.
 
-=over 4
-
-=item new ( $config, $app )
+=head2 new( $config, $app, $realm )
 
 Constructs a new store object, which uses the user element of the supplied config 
 hash ref as it's backing structure.
 
-=item find_user ( $authinfo, $c ) 
+=head2 find_user( $authinfo, $c ) 
 
 Keys the hash by the 'id' or 'username' element in the authinfo hash and returns the user.
 
@@ -205,15 +203,13 @@ Keys the hash by the 'id' or 'username' element in the authinfo hash and returns
 If the return value is unblessed it will be blessed as
 L<Catalyst::Plugin::Authentication::User::Hash>.
 
-=item from_session $id
+=head2 from_session( $id )
 
 Delegates to C<get_user>.
 
-=item user_supports
+=head2 user_supports( )
 
 Chooses a random user from the hash and delegates to it.
-
-=back
 
 =cut
 

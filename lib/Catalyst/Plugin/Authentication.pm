@@ -450,7 +450,8 @@ authentication, or it may be facilitated by a number of plugins.
 
 Configuration of the Catalyst::Plugin::Authentication framework is done in
 terms of realms. In simplest terms, a realm is a pairing of a Credential
-verifier and a User storage (Store) backend.
+verifier and a User storage (Store) backend. As of version 0.10003, realms are
+now objects that you can create and customize.
 
 An application can have any number of Realms, each of which operates
 independant of the others. Each realm has a name, which is used to identify it
@@ -704,6 +705,9 @@ This contains the series of realm configurations you want to use for your app.
 The only rule here is that there must be at least one.  A realm consists of a
 name, which is used to reference the realm, a credential and a store.  
 
+You can also specify as realm class to instantiate instead of the default
+L<Catalyst::Plugin::Authentication::Realm> class.
+
 Each realm config contains two hashes, one called 'credential' and one called 
 'store', each of which provide configuration details to the respective modules.
 The contents of these hashes is specific to the module being used, with the 
@@ -718,25 +722,21 @@ Catalyst::Plugin::Authentication::Credential::B<Password>. For stores, the
 classname 'B<storename>' is expanded to:
 Catalyst::Plugin::Authentication::Store::B<storename>.
 
-
 =back
-
 
 =head1 METHODS
 
-=over 4 
-
-=item authenticate( $userinfo, $realm )
+=head2 authenticate( $userinfo, $realm )
 
 Attempts to authenticate the user using the information in the $userinfo hash
 reference using the realm $realm. $realm may be omitted, in which case the
 default realm is checked.
 
-=item user
+=head2 user( )
 
 Returns the currently logged in user or undef if there is none.
 
-=item user_exists
+=head2 user_exists( )
 
 Returns true if a user is logged in right now. The difference between
 user_exists and user is that user_exists will return true if a user is logged
@@ -744,21 +744,19 @@ in, even if it has not been yet retrieved from the storage backend. If you only
 need to know if the user is logged in, depending on the storage mechanism this
 can be much more efficient.
 
-=item user_in_realm ( $realm )
+=head2 user_in_realm( $realm )
 
 Works like user_exists, except that it only returns true if a user is both 
 logged in right now and was retrieved from the realm provided.  
 
-=item logout
+=head2 logout( )
 
 Logs the user out, Deletes the currently logged in user from $c->user and the session.
 
-=item find_user( $userinfo, $realm )
+=head2 find_user( $userinfo, $realm )
 
 Fetch a particular users details, matching the provided user info, from the realm 
 specified in $realm.
-
-=back
 
 =head1 INTERNAL METHODS
 
@@ -768,42 +766,40 @@ store modules. If you do, you will very likely get the nasty shock of having
 to fix / rewrite your code when things change. They are documented here only
 for reference.
 
-=over 4
-
-=item set_authenticated ( $user, $realmname )
+=head2 set_authenticated( $user, $realmname )
 
 Marks a user as authenticated. This is called from within the authenticate
 routine when a credential returns a user. $realmname defaults to 'default'
 
-=item auth_restore_user ( $user, $realmname )
+=head2 auth_restore_user( $user, $realmname )
 
 Used to restore a user from the session. In most cases this is called without
 arguments to restore the user via the session. Can be called with arguments
 when restoring a user from some other method.  Currently not used in this way.
 
-=item save_user_in_session ( $user, $realmname )
+=head2 save_user_in_session( $user, $realmname )
 
 Used to save the user in a session. Saves $user in session, marked as
 originating in $realmname. Both arguments are required.
 
-=item auth_realms
+=head2 auth_realms( )
 
 Returns a hashref containing realmname -> realm instance pairs. Realm
 instances contain an instantiated store and credential object as the 'store'
 and 'credential' elements, respectively
 
-=item get_auth_realm ( $realmname )
+=head2 get_auth_realm( $realmname )
 
 Retrieves the realm instance for the realmname provided.
-
-=item 
-
-=back
 
 =head1 SEE ALSO
 
 This list might not be up to date.  Below are modules known to work with the updated
 API of 0.10 and are therefore compatible with realms.  
+
+=head2 Realms
+
+L<Catalyst::Plugin::Authentication::Realm>
 
 =head2 User Storage Backends
 
@@ -872,16 +868,14 @@ These routines should not be used in any application using realms
 functionality or any of the methods described above. These are for reference
 purposes only.
 
-=over 4
-
-=item login
+=head2 login( )
 
 This method is used to initiate authentication and user retrieval. Technically
 this is part of the old Password credential module and it still resides in the
 L<Password|Catalyst::Plugin::Authentication::Credential::Password> class. It is
 included here for reference only.
 
-=item default_auth_store
+=head2 default_auth_store( )
 
 Return the store whose name is 'default'.
 
@@ -894,25 +888,21 @@ or by using a Store plugin:
 Sets the default store to
 L<Catalyst::Plugin::Authentication::Store::Minimal>.
 
-=item get_auth_store $name
+=head2 get_auth_store( $name )
 
 Return the store whose name is $name.
 
-=item get_auth_store_name $store
+=head2 get_auth_store_name( $store )
 
 Return the name of the store $store.
 
-=item auth_stores
+=head2 auth_stores( )
 
 A hash keyed by name, with the stores registered in the app.
 
-=item register_auth_stores %stores_by_name
+=head2 register_auth_stores( %stores_by_name )
 
 Register stores into the application.
-
-=back
-
-
 
 =head1 AUTHORS
 
@@ -923,7 +913,6 @@ Jay Kuri, C<jayk@cpan.org>
 Jess Robinson
 
 David Kamholz
-
 
 =head1 COPYRIGHT & LICENSE
 

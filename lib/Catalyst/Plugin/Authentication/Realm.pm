@@ -144,22 +144,31 @@ Catalyst::Plugin::Authentication::Realm - Base class for realm objects.
 
 =head1 DESCRIPTION
 
-=head1 METHODS
+=head1 CONFIGURATION
 
 =over 4
 
-=item new
+=item class
 
-=item find_user
+=item auto_create_user
 
-=item authenticate
+=item auto_update_user
 
-=item save_user_in_session
+=back
 
-=item from_session
+=head1 METHODS
+
+=head2 new( )
+
+=head2 find_user( )
+
+=head2 authenticate( )
+
+=head2 save_user_in_session( )
+
+=head2 from_session( )
 
 =back
 
 =cut
-
 
