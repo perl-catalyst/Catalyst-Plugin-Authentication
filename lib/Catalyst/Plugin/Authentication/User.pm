@@ -106,5 +106,9 @@ ID.
 
 An introspection method used to determine what features a user object has, to support credential and authorization plugins.
 
+=head2 get( )
+
+=head2 get_object( )
+
 =cut
 

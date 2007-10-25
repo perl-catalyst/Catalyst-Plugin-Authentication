@@ -373,4 +373,8 @@ not function as expected.
 Try to log a user in, receives a hashref containing authentication information
 as the first argument, and the current context as the second.
 
+=head2 check_password( )
+
+=head2 login( )
+
 =cut
