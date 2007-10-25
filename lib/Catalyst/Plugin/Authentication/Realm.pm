@@ -150,9 +150,18 @@ Catalyst::Plugin::Authentication::Realm - Base class for realm objects.
 
 =item class
 
+By default this class is the default realm class. You can specify a custom
+realm class with this config parameter.
+
 =item auto_create_user
 
+Set this to true if you wish this realm to auto-create user accounts when the
+user doesn't exist (most useful for remote authentication schemes).
+
 =item auto_update_user
+
+Set this to true if you wish this realm to auto-update user accounts after
+authentication (most useful for remote authentication schemes).
 
 =back
 
@@ -160,13 +169,32 @@ Catalyst::Plugin::Authentication::Realm - Base class for realm objects.
 
 =head2 new( )
 
+Instantiantes this realm, plus the specified store and credential classes.
+
+=head2 store( )
+
+Holds an instance of the store object for this realm.
+
+=head2 credential( )
+
+Holds an instance of the credential object for this realm.
+
 =head2 find_user( )
+
+Delegates to the store object. Will also re-delegate auto_create_user and
+auto_update_user at this time, if necessary.
 
 =head2 authenticate( )
 
+Delegates to the credential objects and sets the authenticated user on success.
+
 =head2 save_user_in_session( )
 
+Delegates to the store object.
+
 =head2 from_session( )
+
+Delegates to the store object.
 
 =back
 
