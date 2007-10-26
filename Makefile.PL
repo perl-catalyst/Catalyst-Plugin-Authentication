@@ -13,5 +13,7 @@ requires 'Catalyst::Runtime';
 requires 'Class::Inspector';
 requires 'Catalyst::Plugin::Session' => '0.10';
 
+test_requires 'Test::More';
+
 auto_install;
 WriteAll;

@@ -47,7 +47,7 @@ sub authenticate {
             return $user_obj;
         }
     } else {
-        $c->log->debug("Unable to locate user matching user info provided");
+        $c->log->debug("Unable to locate user matching user info provided") if $c->debug;
         return;
     }
 }
