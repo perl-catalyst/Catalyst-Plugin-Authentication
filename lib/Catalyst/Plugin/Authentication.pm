@@ -218,11 +218,18 @@ sub _authentication_initialize {
 sub setup_auth_realm {
     my ($app, $realmname, $config) = @_;
     
-    my $realmclass = 'Catalyst::Plugin::Authentication::Realm';
-    if (defined($config->{'class'})) {
-        $realmclass = $config->{'class'};
-        Catalyst::Utils::ensure_class_loaded( $realmclass );
+    my $realmclass = $config->{class};
+
+    if( !$realmclass ) {
+        $realmclass = 'Catalyst::Plugin::Authentication::Realm';
+    } elsif ($realmclass !~ /^\+(.*)$/ ) {
+        $realmclass = "Catalyst::Plugin::Authentication::Realm::${realmclass}";
+    } else {
+        $realmclass = $1;
     }
+
+    Catalyst::Utils::ensure_class_loaded( $realmclass );
+
     my $realm = $realmclass->new($realmname, $config, $app);
     if ($realm) {
         $app->auth_realms->{$realmname} = $realm;
@@ -307,7 +314,7 @@ sub default_auth_store {
 
     my $realm = $self->get_auth_realm('default');
     if (!$realm) {
-        $realm = $self->setup_auth_realm('default', { class => "Catalyst::Plugin::Authentication::Realm::Compatibility" });
+        $realm = $self->setup_auth_realm('default', { class => 'Compatibility' });
     }
     if ( my $new = shift ) {
         $realm->store($new);
