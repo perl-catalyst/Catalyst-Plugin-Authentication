@@ -179,7 +179,7 @@ sub _authentication_initialize {
     ## make classdata where it is used.  
     $app->mk_classdata( '_auth_realms' => {});
     
-    my $cfg = $app->config->{'authentication'} ||= {};
+    my $cfg = $app->config->{'Plugin::Authentication'} ||= $app->config->{'authentication'} ||= {};
 
     $cfg->{use_session} = 1;
     
