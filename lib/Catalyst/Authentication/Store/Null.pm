@@ -1,9 +1,9 @@
-package Catalyst::Plugin::Authentication::Store::Null;
+package Catalyst::Authentication::Store::Null;
 
 use strict;
 use warnings;
 
-use Catalyst::Plugin::Authentication::User::Hash;
+use Catalyst::Authentication::User::Hash;
 
 use base qw( Class::Accessor::Fast );
 
@@ -28,12 +28,12 @@ sub from_session {
 
 sub find_user {
     my ( $self, $userinfo, $c ) = @_;
-    return bless $userinfo, 'Catalyst::Plugin::Authentication::User::Hash';
+    return bless $userinfo, 'Catalyst::Authentication::User::Hash';
 }
 
 sub user_supports {
     my $self = shift;
-    Catalyst::Plugin::Authentication::User::Hash->supports(@_);
+    Catalyst::Authentication::User::Hash->supports(@_);
 }
 
 1;
@@ -44,7 +44,7 @@ __END__
 
 =head1 NAME
 
-Catalyst::Plugin::Authentication::Store::Null - Null authentication store
+Catalyst::Authentication::Store::Null - Null authentication store
 
 =head1 SYNOPSIS
 
@@ -91,11 +91,11 @@ Returns the user object passed to the method.
 =head2 find_user( )
 
 Since this store isn't tied to any real set of users, this method just returns
-the user info bless as a L<Catalyst::Plugin::Authentication::User::Hash>
+the user info bless as a L<Catalyst::Authentication::User::Hash>
 object.
 
 =head2 user_supports( )
 
-Delegates to L<Catalyst::Plugin::Authentication::User::Hash>.
+Delegates to L<Catalyst::Authentication::User::Hash>.
 
 =cut

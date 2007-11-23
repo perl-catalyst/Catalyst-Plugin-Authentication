@@ -4,7 +4,7 @@ use warnings;
 use Test::More tests => 6;
 use Test::Exception;
 
-my $m; BEGIN { use_ok($m = "Catalyst::Plugin::Authentication::User") }
+my $m; BEGIN { use_ok($m = "Catalyst::Authentication::User") }
 
 {
 	package SomeUser;

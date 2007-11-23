@@ -1,4 +1,4 @@
-package Catalyst::Plugin::Authentication::User;
+package Catalyst::Authentication::User;
 
 use strict;
 use warnings;
@@ -80,12 +80,12 @@ __END__
 
 =head1 NAME
 
-Catalyst::Plugin::Authentication::User - Base class for user objects.
+Catalyst::Authentication::User - Base class for user objects.
 
 =head1 SYNOPSIS
 
 	package MyStore::User;
-	use base qw/Catalyst::Plugin::Authentication::User/;
+	use base qw/Catalyst::Authentication::User/;
 
 =head1 DESCRIPTION
 

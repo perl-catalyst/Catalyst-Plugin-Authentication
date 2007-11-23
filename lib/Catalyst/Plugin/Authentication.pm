@@ -11,7 +11,7 @@ use warnings;
 
 use Tie::RefHash;
 use Class::Inspector;
-use Catalyst::Plugin::Authentication::Realm;
+use Catalyst::Authentication::Realm;
 
 # this optimization breaks under Template::Toolkit
 # use user_exists instead
@@ -221,9 +221,9 @@ sub setup_auth_realm {
     my $realmclass = $config->{class};
 
     if( !$realmclass ) {
-        $realmclass = 'Catalyst::Plugin::Authentication::Realm';
+        $realmclass = 'Catalyst::Authentication::Realm';
     } elsif ($realmclass !~ /^\+(.*)$/ ) {
-        $realmclass = "Catalyst::Plugin::Authentication::Realm::${realmclass}";
+        $realmclass = "Catalyst::Authentication::Realm::${realmclass}";
     } else {
         $realmclass = $1;
     }
@@ -611,7 +611,7 @@ verification as user_exists, with the added requirement that if there is a
 user, it must have come from the realm specified.)
 
 The above example is somewhat similar to role based access control.  
-L<Catalyst::Plugin::Authentication::Store::Minimal> treats the roles field as
+L<Catalyst::Authentication::Store::Minimal> treats the roles field as
 an array of role names. Let's leverage this. Add the role authorization
 plugin:
 
@@ -713,7 +713,7 @@ The only rule here is that there must be at least one.  A realm consists of a
 name, which is used to reference the realm, a credential and a store.  
 
 You can also specify as realm class to instantiate instead of the default
-L<Catalyst::Plugin::Authentication::Realm> class.
+L<Catalyst::Authentication::Realm> class.
 
 Each realm config contains two hashes, one called 'credential' and one called 
 'store', each of which provide configuration details to the respective modules.
@@ -725,9 +725,9 @@ The 'class' element follows the standard Catalyst mechanism of class
 specification. If a class is prefixed with a +, it is assumed to be a complete
 class name. Otherwise it is considered to be a portion of the class name. For
 credentials, the classname 'B<Password>', for example, is expanded to
-Catalyst::Plugin::Authentication::Credential::B<Password>. For stores, the
+Catalyst::Authentication::Credential::B<Password>. For stores, the
 classname 'B<storename>' is expanded to:
-Catalyst::Plugin::Authentication::Store::B<storename>.
+Catalyst::Authentication::Store::B<storename>.
 
 =back
 
@@ -806,16 +806,16 @@ API of 0.10 and are therefore compatible with realms.
 
 =head2 Realms
 
-L<Catalyst::Plugin::Authentication::Realm>
+L<Catalyst::Authentication::Realm>
 
 =head2 User Storage Backends
 
-L<Catalyst::Plugin::Authentication::Store::Minimal>,
-L<Catalyst::Plugin::Authentication::Store::DBIx::Class>,
+L<Catalyst::Authentication::Store::Minimal>,
+L<Catalyst::Authentication::Store::DBIx::Class>,
 
 =head2 Credential verification
 
-L<Catalyst::Plugin::Authentication::Credential::Password>,
+L<Catalyst::Authentication::Credential::Password>,
 
 =head2 Authorization
 

@@ -1,9 +1,9 @@
-package Catalyst::Plugin::Authentication::User::Hash;
+package Catalyst::Authentication::User::Hash;
 
 use strict;
 use warnings;
 
-use base qw/Catalyst::Plugin::Authentication::User/;
+use base qw/Catalyst::Authentication::User/;
 
 sub new {
     my $class = shift;
@@ -106,21 +106,21 @@ __END__
 
 =head1 NAME
 
-Catalyst::Plugin::Authentication::User::Hash - An easy authentication user
+Catalyst::Authentication::User::Hash - An easy authentication user
 object based on hashes.
 
 =head1 SYNOPSIS
 
-	use Catalyst::Plugin::Authentication::User::Hash;
+	use Catalyst::Authentication::User::Hash;
 	
-	Catalyst::Plugin::Authentication::User::Hash->new(
+	Catalyst::Authentication::User::Hash->new(
 		password => "s3cr3t",
 	);
 
 =head1 DESCRIPTION
 
 This implementation of authentication user handles is supposed to go hand in
-hand with L<Catalyst::Plugin::Authentication::Store::Minimal>.
+hand with L<Catalyst::Authentication::Store::Minimal>.
 
 =head1 METHODS
 
