@@ -1,9 +1,9 @@
-package Catalyst::Plugin::Authentication::Realm::Compatibility;
+package Catalyst::Authentication::Realm::Compatibility;
 
 use strict;
 use warnings;
 
-use base qw/Catalyst::Plugin::Authentication::Realm/;
+use base qw/Catalyst::Authentication::Realm/;
 
 ## very funky - the problem here is that we can't do real realm initialization
 ## but we need a real realm object to function.  So - we kinda fake it - we 
@@ -27,7 +27,7 @@ __END__
 
 =head1 NAME
 
-Catalyst::Plugin::Authentication::Realm::Compatibility - Compatibility realm object
+Catalyst::Authentication::Realm::Compatibility - Compatibility realm object
 
 =head1 DESCRIPTION
 

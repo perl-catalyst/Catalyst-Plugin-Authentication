@@ -1,4 +1,4 @@
-package Catalyst::Plugin::Authentication::Realm;
+package Catalyst::Authentication::Realm;
 
 use strict;
 use warnings;
@@ -162,7 +162,7 @@ __END__
 
 =head1 NAME
 
-Catalyst::Plugin::Authentication::Realm - Base class for realm objects.
+Catalyst::Authentication::Realm - Base class for realm objects.
 
 =head1 DESCRIPTION
 
