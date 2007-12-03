@@ -712,8 +712,9 @@ This contains the series of realm configurations you want to use for your app.
 The only rule here is that there must be at least one.  A realm consists of a
 name, which is used to reference the realm, a credential and a store.  
 
-You can also specify as realm class to instantiate instead of the default
-L<Catalyst::Authentication::Realm> class.
+You can also specify a realm class to instantiate instead of the default
+L<Catalyst::Authentication::Realm> class using the 'class' element within the
+realm config.
 
 Each realm config contains two hashes, one called 'credential' and one called 
 'store', each of which provide configuration details to the respective modules.
