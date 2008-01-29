@@ -481,13 +481,18 @@ realms is available in the configuration section.
 
 =head3 Credential Verifiers
 
-When user input is transferred to the L<Catalyst> application (typically via
-form inputs) the application may pass this information into the authentication
-system through the $c->authenticate() method.  From there, it is passed to the
-appropriate Credential verifier.
+When user input is transferred to the L<Catalyst> application
+(typically via form inputs) the application may pass this information
+into the authentication system through the C<<$c->authenticate()>>
+method.  From there, it is passed to the appropriate Credential
+verifier.
 
 These plugins check the data, and ensure that it really proves the user is who
 they claim to be.
+
+Credential verifiers compatible with versions of this module 0.10x and
+upwards should be in the namespace
+C<Catalyst::Authentication::Credential>.
 
 =head3 Storage Backends
 
@@ -499,6 +504,10 @@ When a user is retrieved from a store it is not necessarily authenticated.
 Credential verifiers accept a set of authentication data and use this
 information to retrieve the user from the store they are paired with.
 
+storage backends compatible with versions of this module 0.10x and
+upwards should be in the namespace
+C<Catalyst::Authentication::Store>.
+
 =head3 The Core Plugin
 
 This plugin on its own is the glue, providing realm configuration, session
@@ -508,7 +517,7 @@ integration, and other goodness for the other plugins.
 
 More layers of plugins can be stacked on top of the authentication code. For
 example, L<Catalyst::Plugin::Session::PerUser> provides an abstraction of
-browser sessions that is more persistent per users.
+browser sessions that is more persistent per user.
 L<Catalyst::Plugin::Authorization::Roles> provides an accepted way to separate
 and group users into categories, and then check which categories the current
 user belongs to.
@@ -566,7 +575,7 @@ To show an example of this, let's create an authentication controller:
     sub login : Local {
         my ( $self, $c ) = @_;
 
-        if (    my $user = $c->req->param("user")
+        if (    my $user     = $c->req->param("user")
             and my $password = $c->req->param("password") )
         {
             if ( $c->authenticate( { username => $user, 
@@ -581,23 +590,23 @@ To show an example of this, let's create an authentication controller:
         }
     }
 
-This code should be very readable. If all the necessary fields are supplied,
-call the "authenticate" method from the controller. If it succeeds the 
+This code should be self-explanatory. If all the necessary fields are supplied,
+call the C<authenticate> method on the context object. If it succeeds the 
 user is logged in.
 
-The credential verifier will attempt to retrieve the user whose details match
-the authentication information provided to $c->authenticate(). Once it fetches
-the user the password is checked and if it matches the user will be
-B<authenticated> and C<< $c->user >> will contain the user object retrieved
-from the store.
+The credential verifier will attempt to retrieve the user whose
+details match the authentication information provided to
+C<<$c->authenticate()>>. Once it fetches the user the password is
+checked and if it matches the user will be B<authenticated> and
+C<<$c->user>> will contain the user object retrieved from the store.
 
 In the above case, the default realm is checked, but we could just as easily
 check an alternate realm. If this were an admin login, for example, we could
-authenticate on the admin realm by simply changing the $c->authenticate()
+authenticate on the admin realm by simply changing the C<<$c->authenticate()>>
 call:
 
     if ( $c->authenticate( { username => $user, 
-                             password => $password }, 'admin' )l ) {
+                             password => $password }, 'admin' ) ) {
         $c->res->body( "hello " . $c->user->get("name") );
     } ...
 
@@ -617,10 +626,11 @@ The restricted action might look like this:
         # do something restricted here
     }
 
-(Note that if you have multiple realms, you can use $c->user_in_realm('realmname')
-in place of $c->user_exists(); This will essentially perform the same 
-verification as user_exists, with the added requirement that if there is a 
-user, it must have come from the realm specified.)
+(Note that if you have multiple realms, you can use
+C<<$c->user_in_realm('realmname')>>) in place of
+C<<$c->user_exists();>> This will essentially perform the same
+verification as user_exists, with the added requirement that if there
+is a user, it must have come from the realm specified.)
 
 The above example is somewhat similar to role based access control.  
 L<Catalyst::Authentication::Store::Minimal> treats the roles field as
@@ -645,7 +655,7 @@ role interface is consistent.
 
 Let's say your app grew, and you now have 10000 users. It's no longer
 efficient to maintain a hash of users, so you move this data to a database.
-You can accomplish this simply by installing the DBIx::Class Store and
+You can accomplish this simply by installing the L<DBIx::Class|Catalyst::Authentication::Store::DBIx::Class> Store and
 changing your config:
 
     __PACKAGE__->config->{'Plugin::Authentication'} = 
@@ -746,17 +756,17 @@ Catalyst::Authentication::Store::B<storename>.
 
 =head1 METHODS
 
-=head2 authenticate( $userinfo, $realm )
+=head2 $c->authenticate( $userinfo, [ $realm ])
 
 Attempts to authenticate the user using the information in the $userinfo hash
 reference using the realm $realm. $realm may be omitted, in which case the
 default realm is checked.
 
-=head2 user( )
+=head2 $c->user( )
 
 Returns the currently logged in user or undef if there is none.
 
-=head2 user_exists( )
+=head2 $c->user_exists( )
 
 Returns true if a user is logged in right now. The difference between
 user_exists and user is that user_exists will return true if a user is logged
@@ -764,16 +774,16 @@ in, even if it has not been yet retrieved from the storage backend. If you only
 need to know if the user is logged in, depending on the storage mechanism this
 can be much more efficient.
 
-=head2 user_in_realm( $realm )
+=head2 $c->user_in_realm( $realm )
 
 Works like user_exists, except that it only returns true if a user is both 
 logged in right now and was retrieved from the realm provided.  
 
-=head2 logout( )
+=head2 $c->logout( )
 
-Logs the user out, Deletes the currently logged in user from $c->user and the session.
+Logs the user out, Deletes the currently logged in user from C<<$c->user>> and the session.
 
-=head2 find_user( $userinfo, $realm )
+=head2 $c->find_user( $userinfo, $realm )
 
 Fetch a particular users details, matching the provided user info, from the realm 
 specified in $realm.
@@ -786,29 +796,29 @@ store modules. If you do, you will very likely get the nasty shock of having
 to fix / rewrite your code when things change. They are documented here only
 for reference.
 
-=head2 set_authenticated( $user, $realmname )
+=head2 $c->set_authenticated( $user, $realmname )
 
 Marks a user as authenticated. This is called from within the authenticate
 routine when a credential returns a user. $realmname defaults to 'default'
 
-=head2 auth_restore_user( $user, $realmname )
+=head2 $c->auth_restore_user( $user, $realmname )
 
 Used to restore a user from the session. In most cases this is called without
 arguments to restore the user via the session. Can be called with arguments
 when restoring a user from some other method.  Currently not used in this way.
 
-=head2 save_user_in_session( $user, $realmname )
+=head2 $c->save_user_in_session( $user, $realmname )
 
 Used to save the user in a session. Saves $user in session, marked as
 originating in $realmname. Both arguments are required.
 
-=head2 auth_realms( )
+=head2 $c->auth_realms( )
 
 Returns a hashref containing realmname -> realm instance pairs. Realm
 instances contain an instantiated store and credential object as the 'store'
 and 'credential' elements, respectively
 
-=head2 get_auth_realm( $realmname )
+=head2 $c->get_auth_realm( $realmname )
 
 Retrieves the realm instance for the realmname provided.
 
@@ -888,14 +898,14 @@ These routines should not be used in any application using realms
 functionality or any of the methods described above. These are for reference
 purposes only.
 
-=head2 login( )
+=head2 $c->login( )
 
 This method is used to initiate authentication and user retrieval. Technically
 this is part of the old Password credential module and it still resides in the
 L<Password|Catalyst::Plugin::Authentication::Credential::Password> class. It is
 included here for reference only.
 
-=head2 default_auth_store( )
+=head2 $c->default_auth_store( )
 
 Return the store whose name is 'default'.
 
@@ -908,29 +918,29 @@ or by using a Store plugin:
 Sets the default store to
 L<Catalyst::Plugin::Authentication::Store::Minimal>.
 
-=head2 get_auth_store( $name )
+=head2 $c->get_auth_store( $name )
 
 Return the store whose name is $name.
 
-=head2 get_auth_store_name( $store )
+=head2 $c->get_auth_store_name( $store )
 
 Return the name of the store $store.
 
-=head2 auth_stores( )
+=head2 $c->auth_stores( )
 
 A hash keyed by name, with the stores registered in the app.
 
-=head2 register_auth_stores( %stores_by_name )
+=head2 $c->register_auth_stores( %stores_by_name )
 
 Register stores into the application.
 
-=head2 auth_store_names( )
+=head2 $c->auth_store_names( )
 
-=head2 get_user( )
+=head2 $c->get_user( )
 
-=head2 setup( )
+=head2 $c->setup( )
 
-=head2 setup_auth_realm( )
+=head2 $c->setup_auth_realm( )
 
 =head1 AUTHORS
 
