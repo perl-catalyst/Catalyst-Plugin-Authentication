@@ -20,7 +20,13 @@ use Catalyst::Authentication::Realm;
 #	constant->import(have_want => eval { require Want });
 #}
 
-our $VERSION = "0.10005";
+## NOTE TO SELF:
+## move user persistence into realm.  
+## basically I'll provide 'persist_user' which will save the currently auth'd user.  
+## 'restore_user' which will restore the user, and 'user_is_restorable' which is a 
+## true/false on whether there is a user to restore.  
+
+our $VERSION = "0.11000";
 
 sub set_authenticated {
     my ( $c, $user, $realmname ) = @_;
@@ -37,14 +43,9 @@ sub set_authenticated {
         Catalyst::Exception->throw(
                 "set_authenticated called with nonexistant realm: '$realmname'.");
     }
-    
-    if (    $c->isa("Catalyst::Plugin::Session")
-        and $c->config->{'Plugin::Authentication'}{'use_session'}
-        and $user->supports("session") )
-    {
-        $realm->save_user_in_session($c, $user);
-    }
     $user->auth_realm($realm->name);
+
+    $c->persist_user();    
     
     $c->NEXT::set_authenticated($user, $realmname);
 }
@@ -64,10 +65,10 @@ sub user {
 }
 
 # change this to allow specification of a realm - to verify the user is part of that realm
-# in addition to verifying that they exist. 
+# in addition to verifying that they exist.
 sub user_exists {
 	my $c = shift;
-	return defined($c->_user) || defined($c->_user_in_session);
+	return defined($c->_user) || defined($c->_find_realm_for_persisted_user);
 }
 
 # works like user_exists - except only returns true if user 
@@ -77,10 +78,13 @@ sub user_in_realm {
 
     if (defined($c->_user)) {
         return ($c->_user->auth_realm eq $realmname);
-    } elsif (defined($c->_user_in_session)) {
-        return ($c->session->{__user_realm} eq $realmname);  
     } else {
-        return undef;
+        my $realm = $c->_find_realm_for_persisted_user;
+        if ($realm) {
+            return ($realm->name eq $realmname);
+        } else {
+            return undef;
+        }
     }
 }
 
@@ -100,17 +104,45 @@ sub __old_save_user_in_session {
     }
 }
 
+sub persist_user {
+    my $c = shift;
+
+    if ($c->user_exists) {
+        
+        ## if we have a valid session handler - we store the 
+        ## realm in the session.  If not - we have to hope that 
+        ## the realm can recognize it's frozen user somehow.
+        if ($c->isa("Catalyst::Plugin::Session") && 
+            $c->config->{'Plugin::Authentication'}{'use_session'} && 
+            $c->session_is_valid) {
+        
+            $c->session->{'__user_realm'} = $c->_user->auth_realm; 
+        }
+        
+        my $realm = $c->get_auth_realm($c->_user->auth_realm);
+        
+        # used to call $realm->save_user_in_session
+        $realm->persist_user($c, $c->user);
+    }
+}
+
+
+## this was a short lived method to update user information - 
+## you should use persist_user instead.
+sub update_user_in_session {
+    my $c = shift;
+
+    return $c->persist_user;
+}
+
 sub logout {
     my $c = shift;
 
     $c->user(undef);
 
-    if (
-        $c->isa("Catalyst::Plugin::Session")
-        and $c->config->{'Plugin::Authentication'}{'use_session'}
-        and $c->session_is_valid
-    ) {
-        delete @{ $c->session }{qw/__user __user_realm/};
+    my $realm = $c->_find_realm_for_persisted_user;
+    if ($realm) {
+        $realm->remove_persisted_user($c);
     }
     
     $c->NEXT::logout(@_);
@@ -130,31 +162,46 @@ sub find_user {
 }
 
 
-sub _user_in_session {
+sub _find_realm_for_persisted_user {
     my $c = shift;
-
-    return unless
-        $c->isa("Catalyst::Plugin::Session")
+    
+    my $realm;
+    if ($c->isa("Catalyst::Plugin::Session")
         and $c->config->{'Plugin::Authentication'}{'use_session'}
-        and $c->session_is_valid;
-
-    return $c->session->{__user};
+        and $c->session_is_valid 
+        and exists($c->session->{'__user_realm'})) {
+    
+        $realm = $c->auth_realms->{$c->session->{'__user_realm'}};
+        if ($realm->user_is_restorable($c)) {
+            return $realm; 
+        }
+    } else {
+        ## we have no choice but to ask each realm whether it has a persisted user.
+        foreach my $realmname (@{$c->_auth_realm_restore_order}) {
+            my $ret = $c->auth_realms->{$realmname}->user_is_restorable($c);
+            if ($ret) {
+                return $c->auth_realms->{$realmname};
+            }
+        }
+    }
+    return undef;
 }
 
 sub auth_restore_user {
     my ( $c, $frozen_user, $realmname ) = @_;
 
-    $frozen_user ||= $c->_user_in_session;
-    return unless defined($frozen_user);
+    my $realm;
+    if (defined($realmname)) {
+        $realm = $c->get_auth_realm($realmname); 
+    } else {
+        $realm = $c->_find_realm_for_persisted_user;
+    }
+    return unless $realm; # FIXME die unless? This is an internal inconsistency
 
-    $realmname  ||= $c->session->{__user_realm};
-    return unless $realmname; # FIXME die unless? This is an internal inconsistency
-
-    my $realm = $c->get_auth_realm($realmname);
-    $c->_user( my $user = $realm->from_session( $c, $frozen_user ) );
+    $c->_user( my $user = $realm->restore_user( $c, $frozen_user ) );
     
     # this sets the realm the user originated in.
-    $user->auth_realm($realmname);
+    $user->auth_realm($realm->name);
         
     return $user;
 
@@ -179,6 +226,19 @@ sub _authentication_initialize {
     ## make classdata where it is used.  
     $app->mk_classdata( '_auth_realms' => {});
     
+    ## the order to attempt restore in - If we don't have session - we have 
+    ## no way to be sure where a frozen user came from - so we have to 
+    ## ask each realm if it can restore the user.  Unfortunately it is possible 
+    ## that multiple realms could restore the user from the data we have - 
+    ## So we have to determine at setup time what order to ask the realms in.  
+    ## The default is to use the user_restore_priority values defined in the realm
+    ## config. if they are not defined - we go by alphabetical order.   Note that 
+    ## the 'default' realm always gets first chance at it unless it is explicitly
+    ## placed elsewhere by user_restore_priority.  Remember this only comes
+    ## into play if session is disabled. 
+    
+    $app->mk_classdata( '_auth_realm_restore_order' => []);
+    
     my $cfg = $app->config->{'Plugin::Authentication'};
     if (!defined($cfg)) {
         if (exists($app->config->{'authentication'})) {
@@ -196,14 +256,39 @@ sub _authentication_initialize {
     }
     
     if (exists($cfg->{'realms'})) {
-        foreach my $realm (keys %{$cfg->{'realms'}}) {
+        
+        my %auth_restore_order;
+        my $authcount = 2;
+        my $defaultrealm = 'default';
+        
+        foreach my $realm (sort keys %{$cfg->{'realms'}}) {
+            
             $app->setup_auth_realm($realm, $cfg->{'realms'}{$realm});
+            
+            if (exists($cfg->{'realms'}{$realm}{'user_restore_priority'})) {
+                $auth_restore_order{$realm} = $cfg->{'realms'}{$realm}{'user_restore_priority'};
+            } else {
+                $auth_restore_order{$realm} = $authcount++;
+            }
         }
-        #  if we have a 'default_realm' in the config hash and we don't already 
+        
+        # if we have a 'default_realm' in the config hash and we don't already 
         # have a realm called 'default', we point default at the realm specified
         if (exists($cfg->{'default_realm'}) && !$app->get_auth_realm('default')) {
-            $app->_set_default_auth_realm($cfg->{'default_realm'});
+            if ($app->_set_default_auth_realm($cfg->{'default_realm'})) {
+                $defaultrealm = $cfg->{'default_realm'};
+                $auth_restore_order{'default'} = $auth_restore_order{$cfg->{'default_realm'}};
+                delete($auth_restore_order{$cfg->{'default_realm'}});
+            }
         }
+        
+        ## if the default realm did not have a defined priority in it's config - we put it at the front.
+        if (!exists($cfg->{'realms'}{$defaultrealm}{'user_restore_priority'})) {
+            $auth_restore_order{'default'} = 1;
+        }
+        
+        @{$app->_auth_realm_restore_order} = sort { $auth_restore_order{$a} <=> $auth_restore_order{$b} } keys %auth_restore_order;
+        
     } else {
         
         ## BACKWARDS COMPATIBILITY - if realms is not defined - then we are probably dealing
@@ -216,13 +301,14 @@ sub _authentication_initialize {
             $cfg->{'stores'}{'default'} = $cfg->{'store'};
         }
 
+        push @{$app->_auth_realm_restore_order}, 'default';
         foreach my $storename (keys %{$cfg->{'stores'}}) {
             my $realmcfg = {
                 store => { class => $cfg->{'stores'}{$storename} },
             };
             $app->setup_auth_realm($storename, $realmcfg);
         }
-    }
+    } 
     
 }
 
@@ -258,7 +344,9 @@ sub auth_realms {
 
 sub get_auth_realm {
     my ($app, $realmname) = @_;
+    
     return $app->auth_realms->{$realmname};
+    
 }
 
 
@@ -788,6 +876,15 @@ Logs the user out, Deletes the currently logged in user from C<<$c->user>> and t
 Fetch a particular users details, matching the provided user info, from the realm 
 specified in $realm.
 
+=head2 persist_user()
+
+Under normal circumstances the user data is only saved to the session during
+initial authentication.  This call causes the auth system to save the 
+currently authenticated users data across requests.  Useful if you have
+changed the user data and want to ensure that future requests reflect the
+most current data.  Assumes that at the time of this call, $c->user 
+contains the most current data.
+
 =head1 INTERNAL METHODS
 
 These methods are for Catalyst::Plugin::Authentication B<INTERNAL USE> only.
@@ -806,11 +903,6 @@ routine when a credential returns a user. $realmname defaults to 'default'
 Used to restore a user from the session. In most cases this is called without
 arguments to restore the user via the session. Can be called with arguments
 when restoring a user from some other method.  Currently not used in this way.
-
-=head2 $c->save_user_in_session( $user, $realmname )
-
-Used to save the user in a session. Saves $user in session, marked as
-originating in $realmname. Both arguments are required.
 
 =head2 $c->auth_realms( )
 
