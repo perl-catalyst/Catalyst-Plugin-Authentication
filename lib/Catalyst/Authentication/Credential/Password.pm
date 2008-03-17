@@ -275,7 +275,9 @@ The field in the user object that contains the password. This will vary
 depending on the storage class used, but is most likely something like
 'password'. In fact, this is so common that if this is left out of the config,
 it defaults to 'password'. This field is obtained from the user object using
-the get() method. Essentially: $user->get('passwordfieldname');
+the get() method. Essentially: $user->get('passwordfieldname'); 
+B<NOTE> If the password_field is something other than 'password', you must 
+be sure to use that same field name when calling $c->authenticate(). 
 
 =item password_type 
 
@@ -359,7 +361,7 @@ There are no publicly exported routines in the Password module (or indeed in
 most credential modules.)  However, below is a description of the routines 
 required by L<Catalyst::Plugin::Authentication> for all credential modules.
 
-=head2 new( $config, $app )
+=head2 new( $config, $app, $realm )
 
 Instantiate a new Password object using the configuration hash provided in
 $config. A reference to the application is provided as the second argument.
