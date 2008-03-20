@@ -9,6 +9,8 @@ BEGIN {
     __PACKAGE__->mk_accessors(qw/store credential name config/);
 };
 
+## Add use_session config item to realm.
+
 sub new {
     my ($class, $realmname, $config, $app) = @_;
 
@@ -17,6 +19,14 @@ sub new {
     
     $self->name($realmname);
     
+    if (!exists($self->config->{'use_session'})) {
+        if (exists($app->config->{'Plugin::Authentication'}{'use_session'})) {
+            $self->config->{'use_session'} = $app->config->{'Plugin::Authentication'}{'use_session'};
+        } else {
+            $self->config->{'use_session'} = 1;
+        }
+    }
+    print STDERR "use session is " . $self->config->{'use_session'} . "\n";
     $app->log->debug("Setting up auth realm $realmname") if $app->debug;
 
     # use the Null store as a default
@@ -150,7 +160,7 @@ sub user_is_restorable {
     
     return unless
          $c->isa("Catalyst::Plugin::Session")
-         and $c->config->{'Plugin::Authentication'}{'use_session'}
+         and $self->config->{'use_session'}
          and $c->session_is_valid;
 
     return $c->session->{__user};
@@ -175,7 +185,7 @@ sub persist_user {
     
     if (
         $c->isa("Catalyst::Plugin::Session")
-        and $c->config->{'Plugin::Authentication'}{'use_session'}
+        and $self->config->{'use_session'}
         and $user->supports("session") 
     ) {
         $c->session->{__user_realm} = $self->name;
@@ -197,7 +207,7 @@ sub remove_persisted_user {
     
     if (
         $c->isa("Catalyst::Plugin::Session")
-        and $c->config->{'Plugin::Authentication'}{'use_session'}
+        and $self->config->{'use_session'}
         and $c->session_is_valid
     ) {
         delete @{ $c->session }{qw/__user __user_realm/};
