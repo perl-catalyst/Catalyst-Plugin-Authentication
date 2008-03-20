@@ -13,18 +13,6 @@ use Tie::RefHash;
 use Class::Inspector;
 use Catalyst::Authentication::Realm;
 
-# this optimization breaks under Template::Toolkit
-# use user_exists instead
-#BEGIN {
-#	require constant;
-#	constant->import(have_want => eval { require Want });
-#}
-
-## NOTE TO SELF:
-## move user persistence into realm.  
-## basically I'll provide 'persist_user' which will save the currently auth'd user.  
-## 'restore_user' which will restore the user, and 'user_is_restorable' which is a 
-## true/false on whether there is a user to restore.  
 
 our $VERSION = "0.11000";
 
@@ -306,6 +294,7 @@ sub _authentication_initialize {
             my $realmcfg = {
                 store => { class => $cfg->{'stores'}{$storename} },
             };
+            print STDERR "Foo, ok?\n";
             $app->setup_auth_realm($storename, $realmcfg);
         }
     } 
@@ -733,7 +722,7 @@ plugin:
     sub edit : Local {
         my ( $self, $c ) = @_;
 
-        $c->detach("unauthorized") unless $c->check_roles("edit");
+        $c->detach("unauthorized") unless $c->check_user_roles("edit");
 
         # do something restricted here
     }
