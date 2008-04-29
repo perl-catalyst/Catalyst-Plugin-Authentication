@@ -624,7 +624,7 @@ This means that our application will begin like this:
                             },
                             store => {
                                 class => 'Minimal',
-            	                users = {
+            	                users => {
             	                    bob => {
             	                        password => "s00p3r",                	                    
             	                        editor => 'yes',
@@ -652,8 +652,8 @@ To show an example of this, let's create an authentication controller:
     sub login : Local {
         my ( $self, $c ) = @_;
 
-        if (    my $user     = $c->req->param("user")
-            and my $password = $c->req->param("password") )
+        if (    my $user     = $c->req->params->{user}
+            and my $password = $c->req->params->{password"} )
         {
             if ( $c->authenticate( { username => $user, 
                                      password => $password } ) ) {
