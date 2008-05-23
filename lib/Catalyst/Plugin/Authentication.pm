@@ -14,7 +14,7 @@ use Class::Inspector;
 use Catalyst::Authentication::Realm;
 
 
-our $VERSION = "0.11000";
+our $VERSION = "0.10007";
 
 sub set_authenticated {
     my ( $c, $user, $realmname ) = @_;

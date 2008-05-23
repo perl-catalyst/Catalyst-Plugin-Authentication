@@ -292,7 +292,7 @@ Performs the authentication process for the current realm.  The default
 realm class simply delegates this to the credential and sets 
 the authenticated user on success.  Returns the authenticated user object;
 
-=head save_user_in_session($c, $user)
+=head2 save_user_in_session($c, $user)
 
 Used to save the user in a session. Saves $user in the current session, 
 marked as originating in the current realm.  Calls $store->for_session() by 
