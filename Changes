@@ -5,7 +5,7 @@ Revision history for Perl extension Catalyst::Plugin::Authentication
         - Decouple Authentication system from session.  The realm class
           now allows complete control over how a user is persisted across
           requests.
-        - pod fix (RT #36062)
+        - pod fixes (RT #36062, RT #36063)
 
 0.10006 2008-02-15
         - Additional documentation for Realms
