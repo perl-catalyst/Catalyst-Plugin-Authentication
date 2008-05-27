@@ -299,6 +299,22 @@ marked as originating in the current realm.  Calls $store->for_session() by
 default.  If for_session is not available in the store class, will attempt
 to call $user->for_session().
 
+=head2 persist_user($c, $user)
+
+Takes the user data and persists it in the sessi.on
+
+=head2 remove_persisted_user($c)
+
+Removes any persisted user data in the session.
+
+=head2 restore_user($c, [$frozen_user])
+
+Restores the user from parameter, or the session by default.
+
+=head2 user_is_restorable( $c )
+
+Predicate to tell you if the current session has restorable user data.
+
 =head2 from_session($c, $frozenuser )
 
 Triggers restoring of the user from data in the session. The default realm
