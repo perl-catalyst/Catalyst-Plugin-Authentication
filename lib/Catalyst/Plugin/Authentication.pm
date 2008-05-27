@@ -903,6 +903,10 @@ and 'credential' elements, respectively
 
 Retrieves the realm instance for the realmname provided.
 
+=head2 $c->update_user_in_session
+
+This was a short lived method to update user information - you should use persist_user instead.
+
 =head1 SEE ALSO
 
 This list might not be up to date.  Below are modules known to work with the updated
