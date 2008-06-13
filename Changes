@@ -1,5 +1,8 @@
 Revision history for Perl extension Catalyst::Plugin::Authentication
 
+0.1XXX  XXXX
+        - Update tests prereqs to include Test::Exception (RT #36339)
+
 0.10007_01 2008-06-05
         - Some documentation fixes (including RT #36062)
         - Compatibility fix where the use of new style config and old
