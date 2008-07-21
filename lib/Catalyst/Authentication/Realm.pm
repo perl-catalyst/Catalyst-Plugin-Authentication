@@ -26,7 +26,7 @@ sub new {
             $self->config->{'use_session'} = 1;
         }
     }
-    print STDERR "use session is " . $self->config->{'use_session'} . "\n";
+
     $app->log->debug("Setting up auth realm $realmname") if $app->debug;
 
     # use the Null store as a default
@@ -172,11 +172,17 @@ sub restore_user {
     $frozen_user ||= $self->user_is_restorable($c);
     return unless defined($frozen_user);
 
-    $c->_user( my $user = $self->from_session( $c, $frozen_user ) );
+    my $user = $self->from_session( $c, $frozen_user );
     
-    # this sets the realm the user originated in.
-    $user->auth_realm($self->name);
+    if ($user) {
+        $c->_user( $user );
     
+        # this sets the realm the user originated in.
+        $user->auth_realm($self->name);
+    } else {
+		Catalyst::Exception->throw("Store claimed to have a restorable user, but restoration failed.  Did you change the user's id_field?");
+	}
+	 
     return $user;
 }
 
