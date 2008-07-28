@@ -947,7 +947,6 @@ L<Catalyst::Plugin::Authentication::CDBI>.
 
 At the time of writing these plugins have not yet been replaced or updated, but
 should be eventually: L<Catalyst::Plugin::Authentication::OpenID>,
-L<Catalyst::Plugin::Authentication::LDAP>,
 L<Catalyst::Plugin::Authentication::CDBI::Basic>,
 L<Catalyst::Plugin::Authentication::Basic::Remote>.
 
