@@ -99,7 +99,7 @@ sub persist_user {
         
         ## if we have a valid session handler - we store the 
         ## realm in the session.  If not - we have to hope that 
-        ## the realm can recognize it's frozen user somehow.
+        ## the realm can recognize its frozen user somehow.
         if ($c->isa("Catalyst::Plugin::Session") && 
             $c->config->{'Plugin::Authentication'}{'use_session'} && 
             $c->session_is_valid) {
@@ -238,7 +238,7 @@ sub _authentication_initialize {
     }
 
     # old default was to force use_session on.  This must remain for that
-    # reason - but if use_session is already in the config, we respect it's setting.
+    # reason - but if use_session is already in the config, we respect its setting.
     if (!exists($cfg->{'use_session'})) {
         $cfg->{'use_session'} = 1;
     }
@@ -270,7 +270,7 @@ sub _authentication_initialize {
             }
         }
         
-        ## if the default realm did not have a defined priority in it's config - we put it at the front.
+        ## if the default realm did not have a defined priority in its config - we put it at the front.
         if (!exists($cfg->{'realms'}{$defaultrealm}{'user_restore_priority'})) {
             $auth_restore_order{'default'} = 1;
         }
