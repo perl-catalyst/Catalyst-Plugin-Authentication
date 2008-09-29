@@ -550,7 +550,7 @@ verifier and a User storage (Store) backend. As of version 0.10003, realms are
 now objects that you can create and customize.
 
 An application can have any number of Realms, each of which operates
-independant of the others. Each realm has a name, which is used to identify it
+independent of the others. Each realm has a name, which is used to identify it
 as the target of an authentication request. This name can be anything, such as
 'users' or 'members'. One realm must be defined as the default_realm, which is
 used when no realm name is specified. More information about configuring
@@ -581,7 +581,7 @@ When a user is retrieved from a store it is not necessarily authenticated.
 Credential verifiers accept a set of authentication data and use this
 information to retrieve the user from the store they are paired with.
 
-storage backends compatible with versions of this module 0.10x and
+Storage backends compatible with versions of this module 0.10x and
 upwards should be in the namespace
 C<Catalyst::Authentication::Store>.
 
@@ -601,7 +601,7 @@ user belongs to.
 
 =head1 EXAMPLE
 
-Let's say we were storing users in a simple perl hash. Users are
+Let's say we were storing users in a simple Perl hash. Users are
 verified by supplying a password which is matched within the hash.
 
 This means that our application will begin like this:
@@ -653,7 +653,7 @@ To show an example of this, let's create an authentication controller:
         my ( $self, $c ) = @_;
 
         if (    my $user     = $c->req->params->{user}
-            and my $password = $c->req->params->{password"} )
+            and my $password = $c->req->params->{password} )
         {
             if ( $c->authenticate( { username => $user, 
                                      password => $password } ) ) {
@@ -730,7 +730,7 @@ plugin:
 This is somewhat simpler and will work if you change your store, too, since the
 role interface is consistent.
 
-Let's say your app grew, and you now have 10000 users. It's no longer
+Let's say your app grows, and you now have 10,000 users. It's no longer
 efficient to maintain a hash of users, so you move this data to a database.
 You can accomplish this simply by installing the L<DBIx::Class|Catalyst::Authentication::Store::DBIx::Class> Store and
 changing your config:
@@ -833,7 +833,7 @@ Catalyst::Authentication::Store::B<storename>.
 
 =head1 METHODS
 
-=head2 $c->authenticate( $userinfo, [ $realm ])
+=head2 $c->authenticate( $userinfo [, $realm ])
 
 Attempts to authenticate the user using the information in the $userinfo hash
 reference using the realm $realm. $realm may be omitted, in which case the
@@ -841,7 +841,7 @@ default realm is checked.
 
 =head2 $c->user( )
 
-Returns the currently logged in user or undef if there is none.
+Returns the currently logged in user, or undef if there is none.
 
 =head2 $c->user_exists( )
 
@@ -858,7 +858,7 @@ logged in right now and was retrieved from the realm provided.
 
 =head2 $c->logout( )
 
-Logs the user out, Deletes the currently logged in user from C<<$c->user>> and the session.
+Logs the user out. Deletes the currently logged in user from C<<$c->user>> and the session.
 
 =head2 $c->find_user( $userinfo, $realm )
 
@@ -869,7 +869,7 @@ specified in $realm.
 
 Under normal circumstances the user data is only saved to the session during
 initial authentication.  This call causes the auth system to save the 
-currently authenticated users data across requests.  Useful if you have
+currently authenticated user's data across requests.  Useful if you have
 changed the user data and want to ensure that future requests reflect the
 most current data.  Assumes that at the time of this call, $c->user 
 contains the most current data.
@@ -905,7 +905,7 @@ Retrieves the realm instance for the realmname provided.
 
 =head2 $c->update_user_in_session
 
-This was a short lived method to update user information - you should use persist_user instead.
+This was a short-lived method to update user information - you should use persist_user instead.
 
 =head1 SEE ALSO
 
@@ -952,12 +952,12 @@ L<Catalyst::Plugin::Authentication::Basic::Remote>.
 
 =head1 INCOMPATABILITIES
 
-The realms based configuration and functionality of the 0.10 update 
+The realms-based configuration and functionality of the 0.10 update 
 of L<Catalyst::Plugin::Authentication> required a change in the API used by
 credentials and stores.  It has a compatibility mode which allows use of
 modules that have not yet been updated. This, however, completely mimics the
-older api and disables the new realm-based features. In other words you can
-not mix the older credential and store modules with realms, or realm-based
+older api and disables the new realm-based features. In other words you cannot 
+mix the older credential and store modules with realms, or realm-based
 configs. The changes required to update modules are relatively minor and are
 covered in L<Catalyst::Plugin::Authentication::Internals>.  We hope that most
 modules will move to the compatible list above very quickly.
