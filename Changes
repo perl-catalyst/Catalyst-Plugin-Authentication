@@ -2,6 +2,8 @@ Revision history for Perl extension Catalyst::Plugin::Authentication
 
 0.1XXX  XXXX
         - Update tests prereqs to include Test::Exception (RT #36339)
+        - Update live tests to have plans, so that smoke tests against
+	  5.80 don't give false positives (t0m)
 
 0.10007_01 2008-06-05
         - Some documentation fixes (including RT #36062)
