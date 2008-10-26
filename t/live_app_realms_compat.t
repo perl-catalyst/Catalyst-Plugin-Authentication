@@ -1,7 +1,11 @@
 use strict;
 use warnings;
 
-use Test::More tests => 1;
+use Test::More;
+
+BEGIN {
+    plan "no_plan";
+}
 
 use lib 't/lib';
 use Catalyst::Test qw/AuthRealmTestAppCompat/;

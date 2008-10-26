@@ -13,8 +13,7 @@ use Tie::RefHash;
 use Class::Inspector;
 use Catalyst::Authentication::Realm;
 
-
-our $VERSION = "0.10007_01";
+our $VERSION = "0.10008";
 
 sub set_authenticated {
     my ( $c, $user, $realmname ) = @_;
@@ -56,7 +55,7 @@ sub user {
 # in addition to verifying that they exist.
 sub user_exists {
 	my $c = shift;
-	return defined($c->_user) || defined($c->_find_realm_for_persisted_user);
+	return defined($c->_user) || defined($c->find_realm_for_persisted_user);
 }
 
 # works like user_exists - except only returns true if user 
@@ -67,7 +66,7 @@ sub user_in_realm {
     if (defined($c->_user)) {
         return ($c->_user->auth_realm eq $realmname);
     } else {
-        my $realm = $c->_find_realm_for_persisted_user;
+        my $realm = $c->find_realm_for_persisted_user;
         if ($realm) {
             return ($realm->name eq $realmname);
         } else {
@@ -128,7 +127,7 @@ sub logout {
 
     $c->user(undef);
 
-    my $realm = $c->_find_realm_for_persisted_user;
+    my $realm = $c->find_realm_for_persisted_user;
     if ($realm) {
         $realm->remove_persisted_user($c);
     }
@@ -149,8 +148,9 @@ sub find_user {
     return $realm->find_user($userinfo, $c);
 }
 
-
-sub _find_realm_for_persisted_user {
+## Consider making this a public method. - would make certain things easier when 
+## dealing with things pre-auth restore.
+sub find_realm_for_persisted_user {
     my $c = shift;
     
     my $realm;
@@ -182,10 +182,10 @@ sub auth_restore_user {
     if (defined($realmname)) {
         $realm = $c->get_auth_realm($realmname); 
     } else {
-        $realm = $c->_find_realm_for_persisted_user;
+        $realm = $c->find_realm_for_persisted_user;
     }
-    return unless $realm; # FIXME die unless? This is an internal inconsistency
-
+    return undef unless $realm; # FIXME die unless? This is an internal inconsistency
+	
     $c->_user( my $user = $realm->restore_user( $c, $frozen_user ) );
     
     # this sets the realm the user originated in.
@@ -226,8 +226,9 @@ sub _authentication_initialize {
     ## into play if session is disabled. 
     
     $app->mk_classdata( '_auth_realm_restore_order' => []);
-    
+
     my $cfg = $app->config->{'Plugin::Authentication'};
+	my $realmshash;
     if (!defined($cfg)) {
         if (exists($app->config->{'authentication'})) {
             $cfg = $app->config->{'authentication'};
@@ -235,7 +236,17 @@ sub _authentication_initialize {
         } else {
             $cfg = {};
         }
-    }
+    } else {
+		# the realmshash contains the various configured realms.  By default this is
+		# the main $app->config->{'Plugin::Authentication'} hash - but if that is 
+		# not defined, or there is a subkey {'realms'} then we use that.
+		$realmshash = $cfg;
+	}
+	
+	## If we have a sub-key of {'realms'} then we use that for realm configuration
+	if (exists($cfg->{'realms'})) {
+		$realmshash = $cfg->{'realms'};
+	}
 
     # old default was to force use_session on.  This must remain for that
     # reason - but if use_session is already in the config, we respect its setting.
@@ -243,21 +254,25 @@ sub _authentication_initialize {
         $cfg->{'use_session'} = 1;
     }
     
-    if (exists($cfg->{'realms'})) {
+    ## if we have a realms hash  
+    if (ref($realmshash) eq 'HASH') {
         
         my %auth_restore_order;
         my $authcount = 2;
         my $defaultrealm = 'default';
-        
-        foreach my $realm (sort keys %{$cfg->{'realms'}}) {
+		
+        foreach my $realm (sort keys %{$realmshash}) {
+            if (ref($realmshash->{$realm}) eq 'HASH' &&
+				(exists($realmshash->{$realm}{credential}) || exists($realmshash->{$realm}{class}))) {
+					
+	            $app->setup_auth_realm($realm, $realmshash->{$realm});
             
-            $app->setup_auth_realm($realm, $cfg->{'realms'}{$realm});
-            
-            if (exists($cfg->{'realms'}{$realm}{'user_restore_priority'})) {
-                $auth_restore_order{$realm} = $cfg->{'realms'}{$realm}{'user_restore_priority'};
-            } else {
-                $auth_restore_order{$realm} = $authcount++;
-            }
+	            if (exists($realmshash->{$realm}{'user_restore_priority'})) {
+	                $auth_restore_order{$realm} = $realmshash->{$realm}{'user_restore_priority'};
+	            } else {
+	                $auth_restore_order{$realm} = $authcount++;
+	            }
+			}
         }
         
         # if we have a 'default_realm' in the config hash and we don't already 
@@ -271,7 +286,7 @@ sub _authentication_initialize {
         }
         
         ## if the default realm did not have a defined priority in its config - we put it at the front.
-        if (!exists($cfg->{'realms'}{$defaultrealm}{'user_restore_priority'})) {
+        if (!exists($realmshash->{$defaultrealm}{'user_restore_priority'})) {
             $auth_restore_order{'default'} = 1;
         }
         
@@ -614,30 +629,27 @@ This means that our application will begin like this:
 
     __PACKAGE__->config->{'Plugin::Authentication'} = 
                 {  
-                    default_realm => 'members',
-                    realms => {
-                        members => {
-                            credential => {
-                                class => 'Password',
-                                password_field => 'password',
-                                password_type => 'clear'
-                            },
-                            store => {
-                                class => 'Minimal',
-            	                users => {
-            	                    bob => {
-            	                        password => "s00p3r",                	                    
-            	                        editor => 'yes',
-            	                        roles => [qw/edit delete/],
-            	                    },
-            	                    william => {
-            	                        password => "s3cr3t",
-            	                        roles => [qw/comment/],
-            	                    }
-            	                }	                
-            	            }
-            	        }
-                	}
+                    default => {
+                        credential => {
+                            class => 'Password',
+                            password_field => 'password',
+                            password_type => 'clear'
+                        },
+                        store => {
+                            class => 'Minimal',
+        	                users => {
+        	                    bob => {
+        	                        password => "s00p3r",                	                    
+        	                        editor => 'yes',
+        	                        roles => [qw/edit delete/],
+        	                    },
+        	                    william => {
+        	                        password => "s3cr3t",
+        	                        roles => [qw/comment/],
+        	                    }
+        	                }	                
+        	            }
+        	        }
                 };
     
 
@@ -738,20 +750,18 @@ changing your config:
     __PACKAGE__->config->{'Plugin::Authentication'} = 
                     {  
                         default_realm => 'members',
-                        realms => {
-                            members => {
-                                credential => {
-                                    class => 'Password',
-                                    password_field => 'password',
-                                    password_type => 'clear'
-                                },
-                                store => {
-                                    class => 'DBIx::Class',
-            	                    user_class => 'MyApp::Users',
-            	                    role_column => 'roles'	                
-            	                }
-                	        }
-                    	}
+                        members => {
+                            credential => {
+                                class => 'Password',
+                                password_field => 'password',
+                                password_type => 'clear'
+                            },
+                            store => {
+                                class => 'DBIx::Class',
+        	                    user_class => 'MyApp::Users',
+        	                    role_column => 'roles'	                
+        	                }
+            	        }
                     };
 
 The authentication system works behind the scenes to load your data from the
@@ -764,32 +774,30 @@ new source. The rest of your application is completely unchanged.
     __PACKAGE__->config->{'Plugin::Authentication'} = 
                 {  
                     default_realm => 'members',
-                    realms => {
-                        members => {
-                            credential => {
-                                class => 'Password',
-                                password_field => 'password',
-                                password_type => 'clear'
-                            },
-                            store => {
-                                class => 'DBIx::Class',
-        	                    user_class => 'MyApp::Users',
-        	                    role_column => 'roles'	                
-        	                }
-            	        },
-            	        admins => {
-            	            credential => {
-            	                class => 'Password',
-            	                password_field => 'password',
-                                password_type => 'clear'
-            	            },
-            	            store => {
-            	                class => '+MyApp::Authentication::Store::NetAuth',
-            	                authserver => '192.168.10.17'
-            	            }
-            	        }
-            	        
-                	}
+
+                    members => {
+                        credential => {
+                            class => 'Password',
+                            password_field => 'password',
+                            password_type => 'clear'
+                        },
+                        store => {
+                            class => 'DBIx::Class',
+    	                    user_class => 'MyApp::Users',
+    	                    role_column => 'roles'	                
+    	                }
+        	        },
+        	        admins => {
+        	            credential => {
+        	                class => 'Password',
+        	                password_field => 'password',
+                            password_type => 'clear'
+        	            },
+        	            store => {
+        	                class => '+MyApp::Authentication::Store::NetAuth',
+        	                authserver => '192.168.10.17'
+        	            }
+        	        }
                 };
 
 =over 4
@@ -805,11 +813,15 @@ value is set to true per default.
 This defines which realm should be used as when no realm is provided to methods
 that require a realm such as authenticate or find_user.
 
-=item realms
+=item realm refs
 
-This contains the series of realm configurations you want to use for your app.
-The only rule here is that there must be at least one.  A realm consists of a
-name, which is used to reference the realm, a credential and a store.  
+The Plugin::Authentication config hash contains the series of realm 
+configurations you want to use for your app. The only rule here is 
+that there must be at least one. A realm consists of a name, which is used 
+to reference the realm, a credential and a store.  You may also put your 
+realm configurations within a subelement called 'realms' if you desire to 
+separate them from the remainder of your configuration.  Note that if you use
+a 'realms' subelement, you must put ALL of your realms within it.   
 
 You can also specify a realm class to instantiate instead of the default
 L<Catalyst::Authentication::Realm> class using the 'class' element within the
