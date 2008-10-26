@@ -43,7 +43,6 @@ sub moose : Local {
 
 __PACKAGE__->config->{'Plugin::Authentication'} = {  
     default_realm => 'members',
-    realms => {
         members => {
             credential => {
                 class => 'Password',
@@ -55,7 +54,7 @@ __PACKAGE__->config->{'Plugin::Authentication'} = {
                 users => $members,
             }
         },
-    }
+    
 };
 
 __PACKAGE__->setup;

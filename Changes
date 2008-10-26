@@ -1,17 +1,15 @@
 Revision history for Perl extension Catalyst::Plugin::Authentication
 
-0.1XXX  XXXX
-        - Update tests prereqs to include Test::Exception (RT #36339)
-        - Update live tests to have plans, so that smoke tests against
-	  5.80 don't give false positives (t0m)
+0.10007 2008-10-23
+		- Updating config to allow for inclusion of realm ref's in the main
+		  config hash rather than in a subref called 'realms'
 
-0.10007_01 2008-06-05
+0.10007 2008-08-17
+	- Update tests prereqs to include Test::Exception (RT #36339)
         - Some documentation fixes (including RT #36062)
         - Compatibility fix where the use of new style config and old
           style Authentication::Store::Minimal would cause a crash 
           (Reported & fixed by Jos Boumans C<kane@cpan.org>)
- 
-0.10007 2008-03-17
         - Documentation update on Password - to indicate proper field naming
         - Decouple Authentication system from session.  The realm class
           now allows complete control over how a user is persisted across
