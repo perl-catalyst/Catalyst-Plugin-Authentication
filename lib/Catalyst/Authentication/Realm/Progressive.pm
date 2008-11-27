@@ -12,12 +12,17 @@ Catalyst::Authentication::Realm::Progressive - Authenticate against multiple rea
 
 =head1 SYNOPSIS
 
-This Realm allows an application to be built so that multiple realms are 
-supported and tried incrementally until a successful authentication.
+This Realm allows an application to use a single authenticate() call during
+which multiple realms are used and tried incrementally until one performs 
+a successful authentication is accomplished. 
 
-A simple use case is a Temporary Password that looks and acts exactly as a 
-regular password.  Without changing the authentication code, you can 
+A simple use case is a Temporary Password that looks and acts exactly as a
+regular password. Without changing the authentication code, you can
 authenticate against multiple realms.
+
+Another use might be to support a legacy website authentication system, trying
+the current auth system first, and upon failure, attempting authentication against
+the legacy system.
 
 =head2 EXAMPLE
 
@@ -36,8 +41,8 @@ the normal realm.
                 # Modify the authinfo passed into authenticate by merging
                 # these hashes into the realm's authenticate call:
                 authinfo_munge => {
-                    'local'     => { 'realm' => 'normal' },
-                    'temp'      => { 'realm' => 'temp' },
+                    'local'     => { 'type' => 'normal' },
+                    'temp'      => { 'type' => 'temporary' },
                 }
             },
             'normal' => {
@@ -74,7 +79,7 @@ Then, in your controller code, to attempt authentication against both realms
 you just have to do a simple authenticate call:
 
  if ( $c->authenticate({ id => $username, password => $password }) ) {
-     if ( $c->user->realm eq 'temp' ) {
+     if ( $c->user->type eq 'temporary' ) {
          # Force user to change password
      }
  }
