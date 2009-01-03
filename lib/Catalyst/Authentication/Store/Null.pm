@@ -8,12 +8,12 @@ use Catalyst::Authentication::User::Hash;
 use base qw( Class::Accessor::Fast );
 
 BEGIN {
-    __PACKAGE__->mk_accessors( qw( _config ) );
+    __PACKAGE__->mk_accessors( qw( __config ) );
 }
 
 sub new {
     my ( $class, $config, $app, $realm ) = @_;
-    bless { _config => $config }, $class;
+    bless { __config => $config }, $class;
 }
 
 sub for_session {

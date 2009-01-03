@@ -10,24 +10,24 @@ use Catalyst::Exception ();
 use Digest              ();
 
 BEGIN {
-    __PACKAGE__->mk_accessors(qw/_config realm/);
+    __PACKAGE__->mk_accessors(qw/__config realm/);
 }
 
 sub new {
     my ($class, $config, $app, $realm) = @_;
     
-    my $self = { _config => $config };
+    my $self = { __config => $config };
     bless $self, $class;
     
     $self->realm($realm);
     
-    $self->_config->{'password_field'} ||= 'password';
-    $self->_config->{'password_type'}  ||= 'clear';
-    $self->_config->{'password_hash_type'} ||= 'SHA-1';
+    $self->__config->{'password_field'} ||= 'password';
+    $self->__config->{'password_type'}  ||= 'clear';
+    $self->__config->{'password_hash_type'} ||= 'SHA-1';
     
-    my $passwordtype = $self->_config->{'password_type'};
+    my $passwordtype = $self->__config->{'password_type'};
     if (!grep /$passwordtype/, ('none', 'clear', 'hashed', 'salted_hash', 'crypted', 'self_check')) {
-        Catalyst::Exception->throw(__PACKAGE__ . " used with unsupported password type: " . $self->_config->{'password_type'});
+        Catalyst::Exception->throw(__PACKAGE__ . " used with unsupported password type: " . $self->__config->{'password_type'});
     }
     return $self;
 }
@@ -39,7 +39,7 @@ sub authenticate {
     ## password_field before we pass it to the user routine, as some auth modules use 
     ## all data passed to them to find a matching user... 
     my $userfindauthinfo = {%{$authinfo}};
-    delete($userfindauthinfo->{$self->_config->{'password_field'}});
+    delete($userfindauthinfo->{$self->__config->{'password_field'}});
     
     my $user_obj = $realm->find_user($userfindauthinfo, $c);
     if (ref($user_obj)) {
@@ -55,29 +55,29 @@ sub authenticate {
 sub check_password {
     my ( $self, $user, $authinfo ) = @_;
     
-    if ($self->_config->{'password_type'} eq 'self_check') {
-        return $user->check_password($authinfo->{$self->_config->{'password_field'}});
+    if ($self->__config->{'password_type'} eq 'self_check') {
+        return $user->check_password($authinfo->{$self->__config->{'password_field'}});
     } else {
-        my $password = $authinfo->{$self->_config->{'password_field'}};
-        my $storedpassword = $user->get($self->_config->{'password_field'});
+        my $password = $authinfo->{$self->__config->{'password_field'}};
+        my $storedpassword = $user->get($self->__config->{'password_field'});
         
-        if ($self->_config->{'password_type'} eq 'none') {
+        if ($self->__config->{'password_type'} eq 'none') {
             return 1;
-        } elsif ($self->_config->{'password_type'} eq 'clear') {
+        } elsif ($self->__config->{'password_type'} eq 'clear') {
             return $password eq $storedpassword;
-        } elsif ($self->_config->{'password_type'} eq 'crypted') {            
+        } elsif ($self->__config->{'password_type'} eq 'crypted') {            
             return $storedpassword eq crypt( $password, $storedpassword );
-        } elsif ($self->_config->{'password_type'} eq 'salted_hash') {
+        } elsif ($self->__config->{'password_type'} eq 'salted_hash') {
             require Crypt::SaltedHash;
-            my $salt_len = $self->_config->{'password_salt_len'} ? $self->_config->{'password_salt_len'} : 0;
+            my $salt_len = $self->__config->{'password_salt_len'} ? $self->__config->{'password_salt_len'} : 0;
             return Crypt::SaltedHash->validate( $storedpassword, $password,
                 $salt_len );
-        } elsif ($self->_config->{'password_type'} eq 'hashed') {
+        } elsif ($self->__config->{'password_type'} eq 'hashed') {
 
-             my $d = Digest->new( $self->_config->{'password_hash_type'} );
-             $d->add( $self->_config->{'password_pre_salt'} || '' );
+             my $d = Digest->new( $self->__config->{'password_hash_type'} );
+             $d->add( $self->__config->{'password_pre_salt'} || '' );
              $d->add($password);
-             $d->add( $self->_config->{'password_post_salt'} || '' );
+             $d->add( $self->__config->{'password_post_salt'} || '' );
 
              my $computed    = $d->clone()->digest;
              my $b64computed = $d->clone()->b64digest;
