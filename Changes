@@ -1,5 +1,14 @@
 Revision history for Perl extension Catalyst::Plugin::Authentication
 
+0.10010
+        - Change config data storage to be __config in null store and password 
+          credential, to not conflict with the Catalyst class data called 
+          _config. When these are composed as a plugin (for back-compat) then 
+          calls to MyApp->_config would only work due to an implementation 
+          detail of Class::Data::Inheritable, and the ordering of method 
+          calls. This no longer works for Catalyst 5.80, ergo the accessor 
+          rename.
+
 0.10009 2008-11-27
         - Including progressive realm for multiple authentication attempts
           in a single request.
