@@ -30,3 +30,7 @@
 
 # Module::Bane
 \bBuild.PL$
+
+# ShipIt config
+.shipit
+
