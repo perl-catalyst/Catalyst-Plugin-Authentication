@@ -1051,6 +1051,8 @@ Jess Robinson
 
 David Kamholz
 
+Tomas Doran (t0m), C<bobtfish@bobtfish.net> 
+
 =head1 COPYRIGHT & LICENSE
 
         Copyright (c) 2005 the aforementioned authors. All rights
