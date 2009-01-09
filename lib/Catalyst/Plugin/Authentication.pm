@@ -885,6 +885,10 @@ changed the user data and want to ensure that future requests reflect the
 most current data.  Assumes that at the time of this call, $c->user 
 contains the most current data.
 
+=head2 find_realm_for_persisted_user()
+
+Private method, do not call from user code!
+
 =head1 INTERNAL METHODS
 
 These methods are for Catalyst::Plugin::Authentication B<INTERNAL USE> only.
