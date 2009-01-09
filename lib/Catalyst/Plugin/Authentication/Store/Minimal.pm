@@ -62,3 +62,20 @@ B<DO NOT USE IT IN ANY NEW CODE!>
 
 Please see L<Catalyst::Authentication::Store::Minimal> for more information.
 
+=head1 METHODS
+
+=over
+
+=item find_user
+
+=item from_session
+
+=item get_user
+
+=item setup
+
+=item user_supports
+
+=back
+
+=cut
