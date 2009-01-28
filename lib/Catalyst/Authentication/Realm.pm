@@ -71,12 +71,18 @@ sub new {
     };
     
     if ($@) {
+        # If the file is missing, then try the old-style fallback, 
+        # but re-throw anything else for the user to deal with.
+        die unless $@ =~ /^Can't locate/;
         $app->log->warn( qq(Credential class "$credentialclass" not found, trying deprecated ::Plugin:: style naming. ) );
         my $origcredentialclass = $credentialclass;
         $credentialclass =~ s/Catalyst::Authentication/Catalyst::Plugin::Authentication/;
 
         eval { Catalyst::Utils::ensure_class_loaded( $credentialclass ); };
         if ($@) {
+            # Likewise this croak is useful if the second exception is also "not found",
+            # but would be confusing if it's anything else.
+            die unless $@ =~ /^Can't locate/;
             Carp::croak "Unable to load credential class, " . $origcredentialclass . " OR " . $credentialclass . 
                         " in realm " . $self->name;
         }
@@ -87,11 +93,17 @@ sub new {
     };
     
     if ($@) {
+        # If the file is missing, then try the old-style fallback, 
+        # but re-throw anything else for the user to deal with.
+        die unless $@ =~ /^Can't locate/;
         $app->log->warn( qq(Store class "$storeclass" not found, trying deprecated ::Plugin:: style naming. ) );
         my $origstoreclass = $storeclass;
         $storeclass =~ s/Catalyst::Authentication/Catalyst::Plugin::Authentication/;
         eval { Catalyst::Utils::ensure_class_loaded( $storeclass ); };
         if ($@) {
+            # Likewise this croak is useful if the second exception is also "not found",
+            # but would be confusing if it's anything else.
+            die unless $@ =~ /^Can't locate/;
             Carp::croak "Unable to load store class, " . $origstoreclass . " OR " . $storeclass . 
                         " in realm " . $self->name;
         }
