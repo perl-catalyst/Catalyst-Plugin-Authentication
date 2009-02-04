@@ -192,7 +192,7 @@ sub restore_user {
         # this sets the realm the user originated in.
         $user->auth_realm($self->name);
     } else {
-		$app->log->error("Store claimed to have a restorable user, but restoration failed.  Did you change the user's id_field?");
+		$c->log->error("Store claimed to have a restorable user, but restoration failed.  Did you change the user's id_field?");
 		$self->failed_user_restore($c);
 	}
 	 
