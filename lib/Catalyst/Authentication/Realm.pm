@@ -191,9 +191,10 @@ sub restore_user {
     
         # this sets the realm the user originated in.
         $user->auth_realm($self->name);
-    } else {
-		$c->log->error("Store claimed to have a restorable user, but restoration failed.  Did you change the user's id_field?");
-		$self->failed_user_restore($c);
+    } 
+    else {
+        $self->failed_user_restore($c) ||
+            $c->error("Store claimed to have a restorable user, but restoration failed.  Did you change the user's id_field?");
 	}
 	 
     return $user;
@@ -201,10 +202,12 @@ sub restore_user {
 
 ## this occurs if there is a session but the thing the session refers to
 ## can not be found.  Do what you must do here.
+## Return true if you can fix the situation and find a user, false otherwise
 sub failed_user_restore {
 	my ($self, $c) = @_;
 	
 	$self->remove_persisted_user($c);
+	return;
 }
 
 sub persist_user {
