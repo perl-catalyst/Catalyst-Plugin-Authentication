@@ -358,6 +358,11 @@ Restores the user from the given frozen_user parameter, or if not provided,
 using the response from $self->user_is_restorable();  Uses $self->from_session()
 to decode the frozen user.
 
+=head2 failed_user_restore($c)
+
+If there is a session to restore, but the restore fails for any reason then this method 
+is called. This method supplied just removes the persisted user, but can be overridden
+if required to have more complex logic (e.g. finding a the user by their 'old' username).
 
 =head2 from_session($c, $frozenuser )
 
