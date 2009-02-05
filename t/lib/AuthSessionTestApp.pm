@@ -48,7 +48,8 @@ sub yak : Local {
     my ( $self, $c ) = @_;
     ok( $c->sessionid, "session ID was restored after user renamed" );
     ok( $c->user_exists, "user appears to exist" );
-    ok( !$c->user, "try to restore - user was not restored");
+    ok( !$c->user, "user was not restored");
+    ok(scalar(@{ $c->error }), 'Error recorded');
     ok( !$c->user_exists, "user no longer appears to exist" );
 }
 
