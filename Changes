@@ -3,6 +3,8 @@ Revision history for Perl extension Catalyst::Plugin::Authentication
 0.10011 *UNRELEASED*
       - Update t/live_app_session.t to skip unless you have a newer, more
         reliable version of TWMC (RT#43817)
+      - Change check for isa Catalyst::Plugin::Session to just check the
+        existance of a session method. (Edmund von der Burg)
 
 0.10010
       - Change from NEXT to MRO::Compat
