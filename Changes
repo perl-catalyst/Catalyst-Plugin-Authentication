@@ -1,8 +1,12 @@
 Revision history for Perl extension Catalyst::Plugin::Authentication
 
+0.10011 *UNRELEASED*
+      - Update t/live_app_session.t to skip unless you have a newer, more
+        reliable version of TWMC (RT#43817)
+
 0.10010
       - Change from NEXT to MRO::Compat
-      - Chop a number off the versions to get back to the correct 0.10000 
+      - Chop a number off the versions to get back to the correct 0.10000
         version scheme.
 
 0.100092_01
