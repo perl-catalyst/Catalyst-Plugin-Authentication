@@ -8,8 +8,6 @@ BEGIN {
 	plan skip_all => "This test needs Test::WWW::Mechanize::Catalyst, Catalyst::Plugin::Session and Catalyst::Plugin::Session::State::Cookie installed" if $@;
     plan skip_all => "This test needs Test::WWW::Mechanize::Catalyst >= 0.50, you have only $Test::WWW::Mechanize::Catalyst::VERSION"
         unless $Test::WWW::Mechanize::Catalyst::VERSION >= 0.50;
-    # There is something fishy going on here. When you run this from make test,
-    # there are 29 tests, when you run it from prove, there are 26 - WTF FIXME (t0m)
     plan tests => 29;
 }
 
