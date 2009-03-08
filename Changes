@@ -1,6 +1,6 @@
 Revision history for Perl extension Catalyst::Plugin::Authentication
 
-0.10011 *UNRELEASED*
+0.10011 Sun Mar  8 23:32:12 GMT 2009
       - Update t/live_app_session.t to skip unless you have a newer, more
         reliable version of TWMC (RT#43817)
       - Change check for isa Catalyst::Plugin::Session to just check the
