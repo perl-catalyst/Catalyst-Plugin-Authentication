@@ -798,6 +798,9 @@ new source. The rest of your application is completely unchanged.
         	        }
                 };
 
+NOTE: Until version 0.10008 of this module, you would need to put all the
+realms inside a "realms" key in the configuration. That is not required anymore.
+
 =over 4
 
 =item use_session
