@@ -924,6 +924,12 @@ Retrieves the realm instance for the realmname provided.
 
 This was a short-lived method to update user information - you should use persist_user instead.
 
+=head2 $c->setup_auth_realm( )
+
+=head1 OVERRIDDEN METHODS
+
+=head2 $c->setup( )
+
 =head1 SEE ALSO
 
 This list might not be up to date.  Below are modules known to work with the updated
@@ -935,12 +941,43 @@ L<Catalyst::Authentication::Realm>
 
 =head2 User Storage Backends
 
-L<Catalyst::Authentication::Store::Minimal>,
-L<Catalyst::Authentication::Store::DBIx::Class>,
+=over
+
+=item L<Catalyst::Authentication::Store::Minimal>
+
+=item L<Catalyst::Authentication::Store::DBIx::Class>
+
+=item L<Catalyst::Authentication::Store::LDAP>
+
+=item L<Catalyst::Authentication::Store::RDBO>
+
+=item L<Catalyst::Authentication::Store::Model::KiokuDB>
+
+=item L<Catalyst::Authentication::Store::Jifty::DBI>
+
+=item L<Catalyst::Authentication::Store::Htpasswd>
+
+=back
 
 =head2 Credential verification
 
-L<Catalyst::Authentication::Credential::Password>,
+=over
+
+=item L<Catalyst::Authentication::Credential::Password>
+
+=item L<Catalyst::Authentication::Credential::HTTP>
+
+=item L<Catalyst::Authentication::Credential::OpenID>
+
+=item L<Catalyst::Authentication::Credential::Authen::Simple>
+
+=item L<Catalyst::Authentication::Credential::Flickr>
+
+=item L<Catalyst::Authentication::Credential::Testing>
+
+=item L<Catalyst::Authentication::Credential::AuthTkt>
+
+=item L<Catalyst::Authentication::Credential::Kerberos>
 
 =head2 Authorization
 
@@ -961,11 +998,6 @@ L<Catalyst::Plugin::Session::PerUser>
 This module along with its sub plugins deprecate a great number of other
 modules. These include L<Catalyst::Plugin::Authentication::Simple>,
 L<Catalyst::Plugin::Authentication::CDBI>.
-
-At the time of writing these plugins have not yet been replaced or updated, but
-should be eventually: L<Catalyst::Plugin::Authentication::OpenID>,
-L<Catalyst::Plugin::Authentication::CDBI::Basic>,
-L<Catalyst::Plugin::Authentication::Basic::Remote>.
 
 =head1 INCOMPATABILITIES
 
@@ -1038,10 +1070,6 @@ Register stores into the application.
 =head2 $c->auth_store_names( )
 
 =head2 $c->get_user( )
-
-=head2 $c->setup( )
-
-=head2 $c->setup_auth_realm( )
 
 =head1 AUTHORS
 
