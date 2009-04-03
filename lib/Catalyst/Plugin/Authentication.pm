@@ -799,7 +799,8 @@ new source. The rest of your application is completely unchanged.
                 };
 
 NOTE: Until version 0.10008 of this module, you would need to put all the
-realms inside a "realms" key in the configuration. That is not required anymore.
+realms inside a "realms" key in the configuration. Please see 
+L</COMPATIBILITY CONFIGURATION> for more information
 
 =over 4
 
@@ -1010,6 +1011,25 @@ mix the older credential and store modules with realms, or realm-based
 configs. The changes required to update modules are relatively minor and are
 covered in L<Catalyst::Plugin::Authentication::Internals>.  We hope that most
 modules will move to the compatible list above very quickly.
+
+=head1 COMPATIBILITY CONFIGURATION
+
+Until version 0.10008 of this module, you needed to put all the
+realms inside a "realms" key in the configuration. 
+
+    # example
+    __PACKAGE__->config->{'Plugin::Authentication'} = 
+                {  
+                    default_realm => 'members',
+                    realms => {
+                        members => {
+                            ...
+                        },
+                    },
+                };
+
+If you use the old, deprecated C<< __PACKAGE__->config->{'authentication'} >>
+configuration key, then the realms key is still required.
 
 =head1 COMPATIBILITY ROUTINES
 
