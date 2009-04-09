@@ -807,8 +807,14 @@ L</COMPATIBILITY CONFIGURATION> for more information
 =item use_session
 
 Whether or not to store the user's logged in state in the session, if the
-application is also using L<Catalyst::Plugin::Session>. This 
+application is also using L<Catalyst::Plugin::Session>. This
 value is set to true per default.
+
+However, even if use_session is disabled, if any code touches $c->session, a session
+object will be auto-vivified and session Cookies will be sent in the headers. To
+prevent accidental session creation, check if a session already exists with
+if ($c->sessionid) { ... }. If the session doesn't exist, then don't place
+anything in the session to prevent an unecessary session from being created.
 
 =item default_realm
 

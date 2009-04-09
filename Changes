@@ -1,5 +1,7 @@
 Revision history for Perl extension Catalyst::Plugin::Authentication
 
+      - Note about session auto-vification even when use_session is set
+        to false (robert).
       - Note about how a realms key used to be needed to unconfuse people
         running an old version, but browsing the docs on search.cpan (ruoso)
 
