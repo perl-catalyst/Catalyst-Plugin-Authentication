@@ -108,6 +108,10 @@ Identity record for that realm.
 
 =head1 METHODS
 
+=head2 new ($realmname, $config, $app)
+
+Constructs an instance of this realm.
+
 =head2 authenticate
 
 This method iteratively calls each realm listed in the C<realms> configuration
