@@ -986,6 +986,8 @@ L<Catalyst::Authentication::Realm>
 
 =item L<Catalyst::Authentication::Credential::Kerberos>
 
+=back
+
 =head2 Authorization
 
 L<Catalyst::Plugin::Authorization::ACL>,
