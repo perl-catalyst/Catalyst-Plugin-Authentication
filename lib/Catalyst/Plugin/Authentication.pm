@@ -626,7 +626,7 @@ This means that our application will begin like this:
         Authentication
     /;
 
-    __PACKAGE__->config->{'Plugin::Authentication'} = 
+    __PACKAGE__->config( 'Plugin::Authentication' => 
                 {  
                     default => {
                         credential => {
@@ -649,7 +649,8 @@ This means that our application will begin like this:
         	                }	                
         	            }
         	        }
-                };
+                }
+    );
 
 This tells the authentication plugin what realms are available, which
 credential and store modules are used, and the configuration of each. With
@@ -745,7 +746,7 @@ efficient to maintain a hash of users, so you move this data to a database.
 You can accomplish this simply by installing the L<DBIx::Class|Catalyst::Authentication::Store::DBIx::Class> Store and
 changing your config:
 
-    __PACKAGE__->config->{'Plugin::Authentication'} = 
+    __PACKAGE__->config( 'Plugin::Authentication'} => 
                     {  
                         default_realm => 'members',
                         members => {
@@ -760,7 +761,8 @@ changing your config:
         	                    role_column => 'roles'	                
         	                }
             	        }
-                    };
+                    }
+    );
 
 The authentication system works behind the scenes to load your data from the
 new source. The rest of your application is completely unchanged.
@@ -769,7 +771,7 @@ new source. The rest of your application is completely unchanged.
 =head1 CONFIGURATION
 
     # example
-    __PACKAGE__->config->{'Plugin::Authentication'} = 
+    __PACKAGE__->config( 'Plugin::Authentication' => 
                 {  
                     default_realm => 'members',
 
@@ -796,7 +798,8 @@ new source. The rest of your application is completely unchanged.
         	                authserver => '192.168.10.17'
         	            }
         	        }
-                };
+                }
+    );
 
 NOTE: Until version 0.10008 of this module, you would need to put all the
 realms inside a "realms" key in the configuration. Please see 
@@ -1026,7 +1029,7 @@ Until version 0.10008 of this module, you needed to put all the
 realms inside a "realms" key in the configuration. 
 
     # example
-    __PACKAGE__->config->{'Plugin::Authentication'} = 
+    __PACKAGE__->config( 'Plugin::Authentication'} => 
                 {  
                     default_realm => 'members',
                     realms => {
@@ -1034,9 +1037,10 @@ realms inside a "realms" key in the configuration.
                             ...
                         },
                     },
-                };
+                }
+    );
 
-If you use the old, deprecated C<< __PACKAGE__->config->{'authentication'} >>
+If you use the old, deprecated C<< __PACKAGE__->config( 'authentication' ) >>
 configuration key, then the realms key is still required.
 
 =head1 COMPATIBILITY ROUTINES
@@ -1070,7 +1074,7 @@ included here for reference only.
 
 Return the store whose name is 'default'.
 
-This is set to C<< $c->config->{'Plugin::Authentication'}{store} >> if that value exists,
+This is set to C<< $c->config( 'Plugin::Authentication' => { store => # Store} ) >> if that value exists,
 or by using a Store plugin:
 
     # load the Minimal authentication store.
