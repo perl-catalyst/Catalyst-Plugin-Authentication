@@ -1,19 +1,13 @@
 package Catalyst::Authentication::Store::Null;
-
-use strict;
-use warnings;
-
+use Moose;
 use Catalyst::Authentication::User::Hash;
+use namespace::autoclean;
 
-use base qw( Class::Accessor::Fast );
+has _config => ( is => 'rw' );
 
-BEGIN {
-    __PACKAGE__->mk_accessors( qw( _config ) );
-}
-
-sub new {
+sub BUILDARGS {
     my ( $class, $config, $app, $realm ) = @_;
-    bless { _config => $config }, $class;
+    { _config => $config };
 }
 
 sub for_session {

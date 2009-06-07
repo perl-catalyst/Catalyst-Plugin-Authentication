@@ -1,14 +1,13 @@
 package Catalyst::Authentication::User::Hash;
+use Moose;
+use namespace::autoclean;
 
-use strict;
-use warnings;
+extends qw/Catalyst::Authentication::User/;
 
-use base qw/Catalyst::Authentication::User/;
+sub BUILD {
+    my ($self, $args) = @_;
 
-sub new {
-    my $class = shift;
-
-    bless { ( @_ > 1 ) ? @_ : %{ $_[0] } }, $class;
+    %$self = %$args;
 }
 
 sub AUTOLOAD {

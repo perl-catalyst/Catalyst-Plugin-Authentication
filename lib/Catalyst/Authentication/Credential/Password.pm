@@ -1,26 +1,21 @@
 package Catalyst::Authentication::Credential::Password;
-
-use strict;
-use warnings;
-
-use base qw/Class::Accessor::Fast/;
+use Moose;
+use namespace::autoclean;
 
 use Scalar::Util        ();
 use Catalyst::Exception ();
 use Digest              ();
 
-BEGIN {
-    __PACKAGE__->mk_accessors(qw/_config realm/);
-}
+has [qw/_config realm/] => ( is => 'rw' );
 
-sub new {
+sub BUILDARGS {
     my ($class, $config, $app, $realm) = @_;
     
-    my $self = { _config => $config };
-    bless $self, $class;
-    
-    $self->realm($realm);
-    
+    { realm => $realm, _config => $config };
+}
+
+sub BUILD {
+    my ($self, $args) = @_;    
     $self->_config->{'password_field'} ||= 'password';
     $self->_config->{'password_type'}  ||= 'clear';
     $self->_config->{'password_hash_type'} ||= 'SHA-1';
@@ -29,7 +24,6 @@ sub new {
     if (!grep /$passwordtype/, ('none', 'clear', 'hashed', 'salted_hash', 'crypted', 'self_check')) {
         Catalyst::Exception->throw(__PACKAGE__ . " used with unsupported password type: " . $self->_config->{'password_type'});
     }
-    return $self;
 }
 
 sub authenticate {
@@ -92,7 +86,7 @@ sub check_password {
     }
 }
 
-__PACKAGE__;
+__PACKAGE__->meta->make_immutable;
 
 __END__
 

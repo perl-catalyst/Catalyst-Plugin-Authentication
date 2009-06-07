@@ -1,24 +1,26 @@
 package Catalyst::Authentication::Realm;
+use Moose;
+use namespace::autoclean;
 
-use strict;
-use warnings;
-
-use base qw/Class::Accessor::Fast/;
-
-BEGIN {
-    __PACKAGE__->mk_accessors(qw/store credential name config/);
-};
+foreach my $attr (qw/store credential name config/) {
+    has $attr => ( is => 'rw' );
+}
 
 ## Add use_session config item to realm.
 
-sub new {
+sub BUILDARGS {
     my ($class, $realmname, $config, $app) = @_;
 
-    my $self = { config => $config };
-    bless $self, $class;
+    return { __app => $app, name => $realmname, config => $config };
+}
+
+sub BUILD {
+    my ($self, $args) = @_;
     
-    $self->name($realmname);
-    
+    my $app = $args->{__app};
+    my $realmname = $self->name;
+    my $config = $self->config;
+
     if (!exists($self->config->{'use_session'})) {
         if (exists($app->config->{'Plugin::Authentication'}{'use_session'})) {
             $self->config->{'use_session'} = $app->config->{'Plugin::Authentication'}{'use_session'};
@@ -138,8 +140,6 @@ sub new {
         $app->log->error("THIS IS DEPRECATED: $credentialclass has no new() method - Attempting to use uninstantiated");
         $self->credential($credentialclass);
     }
-    
-    return $self;
 }
 
 sub find_user {
@@ -262,7 +262,7 @@ sub from_session {
 }
 
 
-__PACKAGE__;
+__PACKAGE__->meta->make_immutable;
 
 __END__
 

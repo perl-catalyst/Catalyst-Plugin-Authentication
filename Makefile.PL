@@ -9,7 +9,9 @@ perl_version '5.008001';
 name 'Catalyst-Plugin-Authentication';
 all_from 'lib/Catalyst/Plugin/Authentication.pm';
 
-requires 'Catalyst::Runtime';
+requires 'Moose' => '0.78';
+requires 'namespace::autoclean' => '0.05';
+requires 'Catalyst::Runtime' => '5.80004';
 requires 'Class::Inspector';
 requires 'MRO::Compat';
 requires 'Catalyst::Plugin::Session' => '0.10';

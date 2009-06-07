@@ -1,20 +1,14 @@
 package Catalyst::Authentication::Store::Minimal;
-
-use strict;
-use warnings;
-
+use Moose;
 use Catalyst::Authentication::User::Hash;
-use Scalar::Util qw( blessed );
-use base qw/Class::Accessor::Fast/;
+use namespace::autoclean;
 
-BEGIN {
-    __PACKAGE__->mk_accessors(qw/userhash/);
-}
+has userhash => ( is => 'rw');
 
-sub new {
+sub BUILDARGS {
     my ( $class, $config, $app, $realm) = @_;
 
-    bless { userhash => $config->{'users'} }, $class;
+    { userhash => $config->{'users'} };
 }
 
 sub from_session {

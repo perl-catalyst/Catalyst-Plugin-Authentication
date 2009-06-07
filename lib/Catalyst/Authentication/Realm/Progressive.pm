@@ -1,10 +1,9 @@
 package Catalyst::Authentication::Realm::Progressive;
-
+use Moose;
 use Carp;
-use warnings;
-use strict;
+use namespace::autoclean;
 
-use base 'Catalyst::Authentication::Realm';
+extends 'Catalyst::Authentication::Realm';
 
 =head1 NAME
 
@@ -148,15 +147,7 @@ sub authenticate {
 ## standard realm.  So we have to create our realm object, set our name
 ## and return $self in order to avoid nasty warnings.
 
-sub new {
-    my ($class, $realmname, $config, $app) = @_;
-
-    my $self = { config => $config };
-    bless $self, $class;
-    
-    $self->name($realmname);
-    return $self;
-}
+sub BUILD { }
 
 =head1 AUTHORS
 

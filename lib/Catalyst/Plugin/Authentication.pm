@@ -1,16 +1,12 @@
 package Catalyst::Plugin::Authentication;
-
-use base qw/Class::Accessor::Fast Class::Data::Inheritable/;
-
-__PACKAGE__->mk_accessors(qw/_user/);
-
-use strict;
-use warnings;
-
+use Moose::Role;
 use MRO::Compat;
 use Tie::RefHash;
 use Class::Inspector;
 use Catalyst::Authentication::Realm;
+use namespace::autoclean;
+
+has _user => ( is => 'rw' );
 
 our $VERSION = "0.10012";
 

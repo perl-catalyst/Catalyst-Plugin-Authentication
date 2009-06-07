@@ -1,13 +1,9 @@
 package Catalyst::Authentication::User;
-
-use strict;
-use warnings;
-use base qw/Class::Accessor::Fast/;
+use Moose;
+use namespace::autoclean;
 
 ## auth_realm is the realm this user came from. 
-BEGIN {
-    __PACKAGE__->mk_accessors(qw/auth_realm store/);
-}
+has [qw/auth_realm store/] => ( is => 'rw' );
 
 ## THIS IS NOT A COMPLETE CLASS! it is intended to provide base functionality only.  
 ## translation - it won't work if you try to use it directly.
@@ -79,7 +75,7 @@ sub obj {
 ##    return $self->auth_realm->{store};
 ##}
 
-__PACKAGE__;
+__PACKAGE__->meta->make_immutable;
 
 __END__
 
