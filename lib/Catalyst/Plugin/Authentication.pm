@@ -165,10 +165,10 @@ sub find_realm_for_persisted_user {
     } else {
         ## we have no choice but to ask each realm whether it has a persisted user.
         foreach my $realmname (@{$c->_auth_realm_restore_order}) {
-            my $ret = $c->auth_realms->{$realmname}->user_is_restorable($c);
-            if ($ret) {
-                return $c->auth_realms->{$realmname};
-            }
+            my $realm = $c->auth_realms->{$realmname}
+                || Catalyst::Exception->throw("Could not find authentication realm '$realmname'");
+            return $realm
+                if $realm->user_is_restorable($c);
         }
     }
     return undef;
