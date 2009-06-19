@@ -1113,7 +1113,11 @@ Jess Robinson
 
 David Kamholz
 
-Tomas Doran (t0m), C<bobtfish@bobtfish.net> 
+Tomas Doran (t0m), C<bobtfish@bobtfish.net>
+
+kmx
+
+Nigel Metheringham
 
 =head1 COPYRIGHT & LICENSE
 
