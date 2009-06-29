@@ -342,14 +342,13 @@ sub setup_auth_realm {
 
 sub auth_realms {
     my $self = shift;
+    $self->_authentication_initialize(); # Ensure _auth_realms created!
     return($self->_auth_realms);
 }
 
 sub get_auth_realm {
     my ($app, $realmname) = @_;
-    
     return $app->auth_realms->{$realmname};
-    
 }
 
 
