@@ -35,7 +35,7 @@ sub new {
     }
     $self->source($config->{source} || 'REMOTE_USER');
     $self->realm($realm);
-    $self->username_field($config->{username_field} || 'username');
+    $self->username_field($config->{username_field} || 'id');
     return $self;
 }
 
@@ -104,9 +104,8 @@ sub authenticate {
             $usr = $1;
         }
     }
-    
-    $authinfo->{id} = $authinfo->{ $self->username_field } = $usr;
-    $authinfo->{remote_user} = $remuser; # just to keep the original value
+
+    $authinfo->{ $self->username_field } = $usr;
     my $user_obj = $realm->find_user( $authinfo, $c );
     return ref($user_obj) ? $user_obj : undef;
 }
