@@ -35,7 +35,7 @@ sub new {
     }
     $self->source($config->{source} || 'REMOTE_USER');
     $self->realm($realm);
-    $self->username_field($config->{username_field} || 'id');
+    $self->username_field($config->{username_field} || 'username');
     return $self;
 }
 
