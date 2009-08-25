@@ -34,3 +34,5 @@
 # ShipIt config
 .shipit
 
+# Ignore build dirs..
+^Catalyst-Plugin-Authentication
