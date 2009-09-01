@@ -190,14 +190,14 @@ sub auth_restore_user {
 
 }
 
-# we can't actually do our setup in setup because the model has not yet been loaded.  
-# So we have to trigger off of setup_finished.  :-(
-sub setup {
+# We can't actually do our setup in setup because the model has not yet been loaded.  
+# So we have to trigger before 'setup_finalize'.
+before 'setup_finalize' => sub {
     my $app = shift;
 
+    $app->mk_classdata('_auth_initialized');
     $app->_authentication_initialize();
-    $app->next::method(@_);
-}
+};
 
 ## the actual initialization routine. whee.
 sub _authentication_initialize {
