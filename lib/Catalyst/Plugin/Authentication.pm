@@ -745,7 +745,7 @@ efficient to maintain a hash of users, so you move this data to a database.
 You can accomplish this simply by installing the L<DBIx::Class|Catalyst::Authentication::Store::DBIx::Class> Store and
 changing your config:
 
-    __PACKAGE__->config( 'Plugin::Authentication'} =>
+    __PACKAGE__->config( 'Plugin::Authentication' =>
                     {
                         default_realm => 'members',
                         members => {
@@ -1028,7 +1028,7 @@ Until version 0.10008 of this module, you needed to put all the
 realms inside a "realms" key in the configuration.
 
     # example
-    __PACKAGE__->config( 'Plugin::Authentication'} =>
+    __PACKAGE__->config( 'Plugin::Authentication' =>
                 {
                     default_realm => 'members',
                     realms => {
