@@ -1,5 +1,7 @@
 Revision history for Perl extension Catalyst::Plugin::Authentication
 
+     - Fix typos in documentation (RT#49476)
+
 0.10015 Tue Sep 1 01:40:36 BST 2009
 
      - Remove (undeclared) dependency on Class::Data::Inhertiable (RT#49086)
