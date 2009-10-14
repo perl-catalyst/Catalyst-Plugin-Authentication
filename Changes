@@ -1,6 +1,7 @@
 Revision history for Perl extension Catalyst::Plugin::Authentication
 
      - Fix typos in documentation (RT#49476)
+     - Fix compatibilty with Catalyst 5.70 (RT#50466)
 
 0.10015 Tue Sep 1 01:40:36 BST 2009
 
