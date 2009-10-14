@@ -756,8 +756,8 @@ changing your config:
                             },
                             store => {
                                 class => 'DBIx::Class',
-        	                    user_class => 'MyApp::Users',
-        	                    role_column => 'roles'	
+        	                    user_model => 'MyApp::Users',
+        	                    role_column => 'roles',
         	                }
             	        }
                     }
@@ -782,8 +782,8 @@ new source. The rest of your application is completely unchanged.
                         },
                         store => {
                             class => 'DBIx::Class',
-    	                    user_class => 'MyApp::Users',
-    	                    role_column => 'roles'	
+    	                    user_model => 'MyApp::Users',
+    	                    role_column => 'roles',
     	                }
         	        },
         	        admins => {

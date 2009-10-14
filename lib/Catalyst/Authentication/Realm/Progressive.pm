@@ -54,7 +54,7 @@ the normal realm.
                 },
                 store => {
                     class      => 'DBIx::Class',
-                    user_class => 'Schema::Person::Identity',
+                    user_model => 'Schema::Person::Identity',
                     id_field   => 'id',
                 }
             },
@@ -67,7 +67,7 @@ the normal realm.
                 },
                 store => {
                     class    => 'DBIx::Class',
-                    user_class => 'Schema::Person::Identity',
+                    user_model => 'Schema::Person::Identity',
                     id_field   => 'id',
                 }
             },
