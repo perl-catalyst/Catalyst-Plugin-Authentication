@@ -13,7 +13,8 @@ __PACKAGE__->mk_accessors(qw/_config realm/);
 
 sub new {
     my ($class, $config, $app, $realm) = @_;
-    
+
+    # Note _config is horrible back compat hackery!
     my $self = { _config => $config };
     bless $self, $class;
     
