@@ -9,9 +9,7 @@ use Scalar::Util        ();
 use Catalyst::Exception ();
 use Digest              ();
 
-BEGIN {
-    __PACKAGE__->mk_accessors(qw/_config realm/);
-}
+__PACKAGE__->mk_accessors(qw/_config realm/);
 
 sub new {
     my ($class, $config, $app, $realm) = @_;
