@@ -1,5 +1,8 @@
 Revision history for Perl extension Catalyst::Plugin::Authentication
 
+     - Add AUTOLOAD method to the default user class so that methods are
+       delegated down onto the underlieing user object retrieved from
+       the store (if present)
      - Fix typos in documentation (RT#49476)
      - Fix compatibilty with Catalyst 5.70 (RT#50466)
 
