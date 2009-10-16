@@ -1,5 +1,7 @@
 Revision history for Perl extension Catalyst::Plugin::Authentication
 
+     - Move root actions out of applcation class in tests to remove
+       warnings in the latest Catalyst.
      - Add AUTOLOAD method to the default user class so that methods are
        delegated down onto the underlieing user object retrieved from
        the store (if present)
