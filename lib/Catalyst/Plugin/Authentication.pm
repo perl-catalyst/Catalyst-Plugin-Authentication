@@ -308,7 +308,6 @@ sub _authentication_initialize {
             my $realmcfg = {
                 store => { class => $cfg->{'stores'}{$storename} },
             };
-            print STDERR "Foo, ok?\n";
             $app->setup_auth_realm($storename, $realmcfg);
         }
     }
