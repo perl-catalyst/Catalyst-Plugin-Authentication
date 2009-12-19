@@ -879,7 +879,8 @@ logged in right now and was retrieved from the realm provided.
 
 =head2 $c->logout( )
 
-Logs the user out. Deletes the currently logged in user from C<< $c->user >> and the session.
+Logs the user out. Deletes the currently logged in user from C<< $c->user >>
+and the session.  It does not delete the session.
 
 =head2 $c->find_user( $userinfo, $realm )
 
