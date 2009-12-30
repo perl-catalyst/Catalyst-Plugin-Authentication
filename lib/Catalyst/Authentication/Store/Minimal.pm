@@ -104,7 +104,7 @@ Catalyst::Authentication::Store::Minimal - Minimal authentication store
                                 },
                                 store => {
                                     class => 'Minimal',
-                	                users = {
+									users => {
                 	                    bob => {
                 	                        password => "s00p3r",                	                    
                 	                        editor => 'yes',
