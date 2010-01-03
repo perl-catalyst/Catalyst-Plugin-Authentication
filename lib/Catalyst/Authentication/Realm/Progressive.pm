@@ -41,11 +41,11 @@ the normal realm.
                 # Modify the authinfo passed into authenticate by merging
                 # these hashes into the realm's authenticate call:
                 authinfo_munge => {
-                    'local'     => { 'type' => 'normal' },
+                    'normal'     => { 'type' => 'normal' },
                     'temp'      => { 'type' => 'temporary' },
                 }
             },
-            'normal' => {
+            normal => {
                 credential => {
                     class => 'Password',
                     password_field => 'secret',
