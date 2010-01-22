@@ -132,7 +132,7 @@ sub authenticate {
             unless $realm;
         my $auth = { %$authinfo };
         $auth->{realm} ||= $realm->name;
-        if ( my $info = $realm->config->{authinfo_munge}->{$realm->name} ) {
+        if ( my $info = $self->config->{authinfo_munge}->{$realm->name} ) {
             $auth = Catalyst::Utils::merge_hashes($auth, $info);
         }
         if ( my $obj = $realm->authenticate( $c, $auth ) ) {
