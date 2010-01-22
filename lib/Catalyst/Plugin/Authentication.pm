@@ -53,8 +53,8 @@ sub user {
 # change this to allow specification of a realm - to verify the user is part of that realm
 # in addition to verifying that they exist.
 sub user_exists {
-	my $c = shift;
-	return defined($c->_user) || defined($c->find_realm_for_persisted_user);
+    my $c = shift;
+    return defined($c->_user) || defined($c->find_realm_for_persisted_user);
 }
 
 # works like user_exists - except only returns true if user
@@ -227,7 +227,7 @@ sub _authentication_initialize {
     $app->mk_classdata( '_auth_realm_restore_order' => []);
 
     my $cfg = $app->config->{'Plugin::Authentication'};
-	my $realmshash;
+    my $realmshash;
     if (!defined($cfg)) {
         if (exists($app->config->{'authentication'})) {
             $cfg = $app->config->{'authentication'};
@@ -236,16 +236,16 @@ sub _authentication_initialize {
             $cfg = {};
         }
     } else {
-		# the realmshash contains the various configured realms.  By default this is
-		# the main $app->config->{'Plugin::Authentication'} hash - but if that is
-		# not defined, or there is a subkey {'realms'} then we use that.
-		$realmshash = $cfg;
-	}
+        # the realmshash contains the various configured realms.  By default this is
+        # the main $app->config->{'Plugin::Authentication'} hash - but if that is
+        # not defined, or there is a subkey {'realms'} then we use that.
+        $realmshash = $cfg;
+    }
 
-	## If we have a sub-key of {'realms'} then we use that for realm configuration
-	if (exists($cfg->{'realms'})) {
-		$realmshash = $cfg->{'realms'};
-	}
+    ## If we have a sub-key of {'realms'} then we use that for realm configuration
+    if (exists($cfg->{'realms'})) {
+        $realmshash = $cfg->{'realms'};
+    }
 
     # old default was to force use_session on.  This must remain for that
     # reason - but if use_session is already in the config, we respect its setting.
@@ -262,16 +262,16 @@ sub _authentication_initialize {
 
         foreach my $realm (sort keys %{$realmshash}) {
             if (ref($realmshash->{$realm}) eq 'HASH' &&
-				(exists($realmshash->{$realm}{credential}) || exists($realmshash->{$realm}{class}))) {
+                (exists($realmshash->{$realm}{credential}) || exists($realmshash->{$realm}{class}))) {
 
-	            $app->setup_auth_realm($realm, $realmshash->{$realm});
+                $app->setup_auth_realm($realm, $realmshash->{$realm});
 
-	            if (exists($realmshash->{$realm}{'user_restore_priority'})) {
-	                $auth_restore_order{$realm} = $realmshash->{$realm}{'user_restore_priority'};
-	            } else {
-	                $auth_restore_order{$realm} = $authcount++;
-	            }
-			}
+                if (exists($realmshash->{$realm}{'user_restore_priority'})) {
+                    $auth_restore_order{$realm} = $realmshash->{$realm}{'user_restore_priority'};
+                } else {
+                    $auth_restore_order{$realm} = $authcount++;
+                }
+            }
         }
 
         # if we have a 'default_realm' in the config hash and we don't already
@@ -634,19 +634,19 @@ This means that our application will begin like this:
                         },
                         store => {
                             class => 'Minimal',
-        	                users => {
-        	                    bob => {
-        	                        password => "s00p3r",                	
-        	                        editor => 'yes',
-        	                        roles => [qw/edit delete/],
-        	                    },
-        	                    william => {
-        	                        password => "s3cr3t",
-        	                        roles => [qw/comment/],
-        	                    }
-        	                }	
-        	            }
-        	        }
+                            users => {
+                                bob => {
+                                    password => "s00p3r",
+                                    editor => 'yes',
+                                    roles => [qw/edit delete/],
+                                },
+                                william => {
+                                    password => "s3cr3t",
+                                    roles => [qw/comment/],
+                                }
+                            }
+                        }
+                    }
                 }
     );
 
@@ -755,10 +755,10 @@ changing your config:
                             },
                             store => {
                                 class => 'DBIx::Class',
-        	                    user_model => 'MyApp::Users',
-        	                    role_column => 'roles',
-        	                }
-            	        }
+                                user_model => 'MyApp::Users',
+                                role_column => 'roles',
+                            }
+                        }
                     }
     );
 
@@ -781,21 +781,21 @@ new source. The rest of your application is completely unchanged.
                         },
                         store => {
                             class => 'DBIx::Class',
-    	                    user_model => 'MyApp::Users',
-    	                    role_column => 'roles',
-    	                }
-        	        },
-        	        admins => {
-        	            credential => {
-        	                class => 'Password',
-        	                password_field => 'password',
+                            user_model => 'MyApp::Users',
+                            role_column => 'roles',
+                        }
+                    },
+                    admins => {
+                        credential => {
+                            class => 'Password',
+                            password_field => 'password',
                             password_type => 'clear'
-        	            },
-        	            store => {
-        	                class => '+MyApp::Authentication::Store::NetAuth',
-        	                authserver => '192.168.10.17'
-        	            }
-        	        }
+                        },
+                        store => {
+                            class => '+MyApp::Authentication::Store::NetAuth',
+                            authserver => '192.168.10.17'
+                        }
+                    }
                 }
     );
 
@@ -1077,7 +1077,7 @@ This is set to C<< $c->config( 'Plugin::Authentication' => { store => # Store} )
 or by using a Store plugin:
 
     # load the Minimal authentication store.
-	use Catalyst qw/Authentication Authentication::Store::Minimal/;
+    use Catalyst qw/Authentication Authentication::Store::Minimal/;
 
 Sets the default store to
 L<Catalyst::Plugin::Authentication::Store::Minimal>.
