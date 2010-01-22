@@ -1118,6 +1118,10 @@ kmx
 
 Nigel Metheringham
 
+Florian Ragwitz C<rafl@debian.org>
+
+Stephan Jauernick C<stephanj@cpan.org>
+
 =head1 COPYRIGHT & LICENSE
 
 Copyright (c) 2005 - 2009
