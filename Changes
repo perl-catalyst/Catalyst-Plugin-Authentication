@@ -7,6 +7,8 @@ Revision history for Perl extension Catalyst::Plugin::Authentication
        the store (if present)
      - Fix typos in documentation (RT#49476)
      - Fix compatibilty with Catalyst 5.70 (RT#50466)
+     - Various documentation improvements
+     - Fix Realm::Processive's authinfo_mungle option (RT#47106)
 
 0.10015 Tue Sep 1 01:40:36 BST 2009
 
