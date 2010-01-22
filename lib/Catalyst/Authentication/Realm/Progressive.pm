@@ -13,8 +13,8 @@ Catalyst::Authentication::Realm::Progressive - Authenticate against multiple rea
 =head1 SYNOPSIS
 
 This Realm allows an application to use a single authenticate() call during
-which multiple realms are used and tried incrementally until one performs 
-a successful authentication is accomplished. 
+which multiple realms are used and tried incrementally until one performs
+a successful authentication is accomplished.
 
 A simple use case is a Temporary Password that looks and acts exactly as a
 regular password. Without changing the authentication code, you can
@@ -41,8 +41,8 @@ the normal realm.
                 # Modify the authinfo passed into authenticate by merging
                 # these hashes into the realm's authenticate call:
                 authinfo_munge => {
-                    'normal'     => { 'type' => 'normal' },
-                    'temp'      => { 'type' => 'temporary' },
+                    normal => { 'type' => 'normal' },
+                    temp   => { 'type' => 'temporary' },
                 }
             },
             normal => {
@@ -73,7 +73,7 @@ the normal realm.
             },
         }
     }
- ); 
+ );
 
 Then, in your controller code, to attempt authentication against both realms
 you just have to do a simple authenticate call:
@@ -90,7 +90,7 @@ you just have to do a simple authenticate call:
 
 =item realms
 
-An array reference consisting of each realm to attempt authentication against, 
+An array reference consisting of each realm to attempt authentication against,
 in the order listed.  If the realm does not exist, calling authenticate will
 die.
 
@@ -99,7 +99,7 @@ die.
 A hash reference keyed by realm names, with values being hash references to
 merge into the authinfo call that is subsequently passed into the realm's
 authenticate method.  This is useful if your store uses the same class for each
-realm, separated by some other token (in the L<EXAMPLE> authinfo_mungesection, 
+realm, separated by some other token (in the L<EXAMPLE> authinfo_mungesection,
 the 'realm' is a column on C<Schema::Person::Identity> that will be either
 'temp' or 'local', to ensure the query to fetch the user finds the right
 Identity record for that realm.
@@ -128,7 +128,7 @@ sub authenticate {
         unless ref $realms eq 'ARRAY';
     foreach my $realm_name ( @$realms ) {
         my $realm = $c->get_auth_realm( $realm_name );
-        carp "Unable to find realm: $realm_name, check configuration" 
+        carp "Unable to find realm: $realm_name, check configuration"
             unless $realm;
         my $auth = { %$authinfo };
         $auth->{realm} ||= $realm->name;
@@ -143,8 +143,8 @@ sub authenticate {
     return;
 }
 
-## we can not rely on inheriting new() because in this case we do not 
-## load a credential or store, which is what new() sets up in the 
+## we can not rely on inheriting new() because in this case we do not
+## load a credential or store, which is what new() sets up in the
 ## standard realm.  So we have to create our realm object, set our name
 ## and return $self in order to avoid nasty warnings.
 
@@ -153,7 +153,7 @@ sub new {
 
     my $self = { config => $config };
     bless $self, $class;
-    
+
     $self->name($realmname);
     return $self;
 }
