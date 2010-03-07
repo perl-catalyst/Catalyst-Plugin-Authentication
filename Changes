@@ -1,5 +1,6 @@
 Revision history for Perl extension Catalyst::Plugin::Authentication
 
+0.10016 22 Jan 2010
      - Move root actions out of applcation class in tests to remove
        warnings in the latest Catalyst.
      - Add AUTOLOAD method to the default user class so that methods are
