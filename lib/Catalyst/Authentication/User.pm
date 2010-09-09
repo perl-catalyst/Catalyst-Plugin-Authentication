@@ -72,6 +72,8 @@ sub AUTOLOAD {
     my $self = shift;
     (my $method) = (our $AUTOLOAD =~ /([^:]+)$/);
     return if $method eq "DESTROY";
+    $self->get_object->$method(@_);
+}
 
 __PACKAGE__->meta->make_immutable;
 __PACKAGE__;
