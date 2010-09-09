@@ -6,7 +6,8 @@ use warnings;
 use base 'Class::Accessor::Fast';
 
 BEGIN {
-    __PACKAGE__->mk_accessors(qw/allow_re deny_re cutname_re source realm/);
+    __PACKAGE__->mk_accessors(
+        qw/allow_re deny_re cutname_re source realm username_field/);
 }
 
 sub new {
@@ -14,7 +15,7 @@ sub new {
 
     my $self = { };
     bless $self, $class;
-    
+
     # we are gonna compile regular expresions defined in config parameters
     # and explicitly throw an exception saying what parameter was invalid 
     if (defined($config->{allow_regexp}) && ($config->{allow_regexp} ne "")) { 
@@ -34,6 +35,7 @@ sub new {
     }
     $self->source($config->{source} || 'REMOTE_USER');
     $self->realm($realm);
+    $self->username_field($config->{username_field} || 'username');
     return $self;
 }
 
@@ -43,7 +45,7 @@ sub authenticate {
     my $remuser;
     if ($self->source eq "REMOTE_USER") {    
         # compatibility hack:
-        if (defined($c->engine->env)) {
+        if ($c->engine->can('env') && defined($c->engine->env)) {
             # BEWARE: $c->engine->env was broken prior 5.80005
             $remuser = $c->engine->env->{REMOTE_USER};
         }
@@ -102,9 +104,8 @@ sub authenticate {
             $usr = $1;
         }
     }
-    
-    $authinfo->{id} = $authinfo->{username} = $usr; 
-    $authinfo->{remote_user} = $remuser; # just to keep the original value
+
+    $authinfo->{ $self->username_field } = $usr;
     my $user_obj = $realm->find_user( $authinfo, $c );
     return ref($user_obj) ? $user_obj : undef;
 }
@@ -175,7 +176,7 @@ is able to handle.
 Besides the common methods like HTTP Basic and Digest authentication you can
 also use sophisticated ones like so called "integrated authentication" via
 NTLM or Kerberos (popular in corporate intranet applications running in Windows
-Active Directory enviroment) or even the SSL authentication when users 
+Active Directory environment) or even the SSL authentication when users 
 authenticate themself using their client SSL certificates.   
 
 The main idea of this module is based on a fact that webserver passes the name
@@ -253,7 +254,7 @@ The order deny-allow is fixed.
 This config item is B<OPTIONAL> - no default value.
 
 If param B<cutname_regexp> is specified we try to cut the final usename passed to
-Catalyst application as a substring from WEBUSER. This is usefull for 
+Catalyst application as a substring from WEBUSER. This is useful for 
 example in case of SSL authentication when WEBUSER looks like this 
 'CN=john, OU=Unit Name, O=Company, C=CZ' - from this format we can simply cut
 pure usename by cutname_regexp set to 'CN=(.*), OU=Unit Name, O=Company, C=CZ'.
@@ -261,6 +262,14 @@ pure usename by cutname_regexp set to 'CN=(.*), OU=Unit Name, O=Company, C=CZ'.
 Substring is always taken as '$1' regexp substring. If WEBUSER does not
 match cutname_regexp at all or if '$1' regexp substring is empty we pass the
 original WEBUSER value (without cutting) to Catalyst application.
+
+=head2 username_field
+
+This config item is B<OPTIONAL> - default is I<username>
+
+The key name in the authinfo hash that the user's username is mapped into.
+This is useful for using a store which requires a specific unusual field name
+for the username.  The username is additionally mapped onto the I<id> key.
 
 =head1 METHODS
 

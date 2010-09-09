@@ -1,4 +1,6 @@
 package RemoteTestApp2;
+use strict;
+use warnings;
 
 use Catalyst qw/
    Authentication
@@ -17,6 +19,7 @@ __PACKAGE__->config(
                     deny_regexp=> 'denied',
                     cutname_regexp=> 'CN=(.*)/OU=Test',
                     source => 'SSL_CLIENT_S_DN',
+                    username_field => 'my_user_name',
                 },
                 store => {
                     class => 'Null',
@@ -26,21 +29,7 @@ __PACKAGE__->config(
     },
 );
 
-sub default : Local {
-    my ( $self, $c ) = @_;
-    if ($c->authenticate()) {
-        $c->res->body('User:' . $c->user->{id});
-    }
-    else {
-        $c->res->body('FAIL');
-        $c->res->status(403);
-    }
-}
-
-sub public : Local {
-    my ( $self, $c ) = @_;
-    $c->res->body('OK');
-}
-
 __PACKAGE__->setup;
+
+1;
 

@@ -10,7 +10,8 @@ has [qw/_config realm/] => ( is => 'rw' );
 
 sub BUILDARGS {
     my ($class, $config, $app, $realm) = @_;
-    
+
+    # Note _config is horrible back compat hackery!
     { realm => $realm, _config => $config };
 }
 
@@ -41,7 +42,10 @@ sub authenticate {
             return $user_obj;
         }
     } else {
-        $c->log->debug("Unable to locate user matching user info provided") if $c->debug;
+        $c->log->debug(
+            'Unable to locate user matching user info provided in realm: '
+            . $realm->name
+            ) if $c->debug;
         return;
     }
 }
@@ -121,7 +125,7 @@ provided against the user retrieved from the store.
 =head1 CONFIGURATION
 
     # example
-    __PACKAGE__->config->{'Plugin::Authentication'} = 
+    __PACKAGE__->config('Plugin::Authentication' => 
                 {  
                     default_realm => 'members',
                     realms => {

@@ -1,5 +1,6 @@
 package Catalyst::Authentication::User;
 use Moose;
+use Scalar::Util qw/refaddr/;
 use namespace::autoclean;
 
 ## auth_realm is the realm this user came from. 
@@ -41,7 +42,7 @@ sub supports {
 ## you most likely want to write this yourself.
 sub get {
     my ($self, $field) = @_;
-    
+
     my $object;
     if ($object = $self->get_object and $object->can($field)) {
         return $object->$field();
@@ -67,15 +68,13 @@ sub obj {
     return $self->get_object(@_);
 }
 
-## Backwards Compatibility
-## you probably want auth_realm, in fact.  but this does work for backwards compatibility.
-## store should be a read-write accessor - so it was moved to mk_accessors
-##sub store { 
-##    my ($self) = @_;
-##    return $self->auth_realm->{store};
-##}
+sub AUTOLOAD {
+    my $self = shift;
+    (my $method) = (our $AUTOLOAD =~ /([^:]+)$/);
+    return if $method eq "DESTROY";
 
 __PACKAGE__->meta->make_immutable;
+__PACKAGE__;
 
 __END__
 
@@ -92,7 +91,17 @@ Catalyst::Authentication::User - Base class for user objects.
 
 =head1 DESCRIPTION
 
-This is the base class for authenticated 
+This is the base class for authentication user objects.
+
+THIS IS NOT A COMPLETE CLASS! it is intended to provide base functionality only.
+
+It provides the base methods listed below, and any additional methods
+are proxied onto the user object fetched from the underlieing store.
+
+=head1 NOTES TO STORE IMPLEMENTORS
+
+Please read the comments in the source code of this class to work out
+which methods you should override.
 
 =head1 METHODS
 
@@ -115,12 +124,17 @@ Returns the value for the $field provided.
 
 =head2 get_object( )
 
-Returns the underlying object storing the user data.  The return value of this function will vary depending
+Returns the underlying object storing the user data.  The return value of this
+method will vary depending
 on the storage module used.
 
 =head2 obj( )
 
 Shorthand for get_object( )
+
+=head2 AUTOLOAD
+
+Delegates any unknown methods onto the user object returned by ->obj
 
 =cut
 
