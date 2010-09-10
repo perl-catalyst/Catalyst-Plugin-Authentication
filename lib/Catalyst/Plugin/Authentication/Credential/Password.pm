@@ -2,8 +2,13 @@ package Catalyst::Plugin::Authentication::Credential::Password;
 
 use strict;
 use warnings;
+use MRO::Compat;
 
-use Catalyst::Authentication::Credential::Password ();
+sub setup {
+    my $app = shift;
+    $app->log->error("Loaded deprecated " . __PACKAGE__ . " please update your Catalyst::Plugin::Authentication config");
+    $app->next::method(@_);
+}
 
 ## BACKWARDS COMPATIBILITY - all subs below here are deprecated 
 ## They are here for compatibility with older modules that use / inherit from C::P::A::Password 
@@ -80,7 +85,7 @@ sub _check_password {
         return $crypted eq crypt( $password, $crypted );
     }
     elsif ( $user->supports(qw/password hashed/) ) {
-
+        require Digest;
         my $d = Digest->new( $user->hash_algorithm );
         $d->add( $user->password_pre_salt || '' );
         $d->add($password);

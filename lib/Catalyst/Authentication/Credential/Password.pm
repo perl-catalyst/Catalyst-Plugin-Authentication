@@ -8,22 +8,38 @@ use Digest              ();
 
 has [qw/_config realm/] => ( is => 'rw' );
 
+has password_field => (
+    is => 'ro',
+    default => 'password',
+);
+
+has password_type => (
+    is => 'ro',
+    default => 'clear',
+);
+
+has password_hash_type => (
+    is => 'ro',
+    default => 'SHA-1',
+);
+
+foreach my $name (qw/ pre_salt post_salt hash_type salt_len /) {
+    has "password_${name}" => ( is => 'ro' );
+}
+
 sub BUILDARGS {
     my ($class, $config, $app, $realm) = @_;
 
     # Note _config is horrible back compat hackery!
-    { realm => $realm, _config => $config };
+    { %$config, realm => $realm, _config => $config };
 }
 
 sub BUILD {
-    my ($self, $args) = @_;    
-    $self->_config->{'password_field'} ||= 'password';
-    $self->_config->{'password_type'}  ||= 'clear';
-    $self->_config->{'password_hash_type'} ||= 'SHA-1';
-    
-    my $passwordtype = $self->_config->{'password_type'};
+    my ($self, $args) = @_;
+
+    my $passwordtype = $self->password_type;
     if (!grep /$passwordtype/, ('none', 'clear', 'hashed', 'salted_hash', 'crypted', 'self_check')) {
-        Catalyst::Exception->throw(__PACKAGE__ . " used with unsupported password type: " . $self->_config->{'password_type'});
+        Catalyst::Exception->throw(__PACKAGE__ . " used with unsupported password type: " . $self->password_type);
     }
 }
 
@@ -34,7 +50,7 @@ sub authenticate {
     ## password_field before we pass it to the user routine, as some auth modules use 
     ## all data passed to them to find a matching user... 
     my $userfindauthinfo = {%{$authinfo}};
-    delete($userfindauthinfo->{$self->_config->{'password_field'}});
+    delete($userfindauthinfo->{$self->password_field});
     
     my $user_obj = $realm->find_user($userfindauthinfo, $c);
     if (ref($user_obj)) {
@@ -53,32 +69,32 @@ sub authenticate {
 sub check_password {
     my ( $self, $user, $authinfo ) = @_;
     
-    if ($self->_config->{'password_type'} eq 'self_check') {
-        return $user->check_password($authinfo->{$self->_config->{'password_field'}});
+    if ($self->password_type eq 'self_check') {
+        return $user->check_password($authinfo->{$self->password_field});
     } else {
-        my $password = $authinfo->{$self->_config->{'password_field'}};
-        my $storedpassword = $user->get($self->_config->{'password_field'});
+        my $password = $authinfo->{$self->password_field};
+        my $storedpassword = $user->get($self->password_field);
         
-        if ($self->_config->{'password_type'} eq 'none') {
+        if ($self->password_type eq 'none') {
             return 1;
-        } elsif ($self->_config->{'password_type'} eq 'clear') {
+        } elsif ($self->password_type eq 'clear') {
             # FIXME - Should we warn in the $storedpassword undef case, 
             #         as the user probably fluffed the config?
             return unless defined $storedpassword;
             return $password eq $storedpassword;
-        } elsif ($self->_config->{'password_type'} eq 'crypted') {            
+        } elsif ($self->password_type eq 'crypted') {            
             return $storedpassword eq crypt( $password, $storedpassword );
-        } elsif ($self->_config->{'password_type'} eq 'salted_hash') {
+        } elsif ($self->password_type eq 'salted_hash') {
             require Crypt::SaltedHash;
-            my $salt_len = $self->_config->{'password_salt_len'} ? $self->_config->{'password_salt_len'} : 0;
+            my $salt_len = 0; #$self->password_salt_len ? $self->password_salt_len : 0;
             return Crypt::SaltedHash->validate( $storedpassword, $password,
                 $salt_len );
-        } elsif ($self->_config->{'password_type'} eq 'hashed') {
+        } elsif ($self->password_type eq 'hashed') {
 
-             my $d = Digest->new( $self->_config->{'password_hash_type'} );
-             $d->add( $self->_config->{'password_pre_salt'} || '' );
+             my $d = Digest->new( $self->password_hash_type );
+             $d->add( $self->password_pre_salt || '' );
              $d->add($password);
-             $d->add( $self->_config->{'password_post_salt'} || '' );
+             $d->add( $self->password_post_salt || '' );
 
              my $computed    = $d->clone()->digest;
              my $b64computed = $d->clone()->b64digest;
@@ -91,6 +107,7 @@ sub check_password {
 }
 
 __PACKAGE__->meta->make_immutable;
+__PACKAGE__
 
 __END__
 

@@ -7,7 +7,7 @@ has _config => ( is => 'rw' );
 
 sub BUILDARGS {
     my ( $class, $config, $app, $realm ) = @_;
-    { _config => $config };
+    { %$config, _config => $config };
 }
 
 sub for_session {

@@ -1,8 +1,7 @@
 package Catalyst::Plugin::Authentication::Store::Minimal;
-
-use strict;
-use warnings;
+use Moose;
 use MRO::Compat;
+use namespace::autoclean;
 
 use Catalyst::Authentication::Store::Minimal ();
 
@@ -40,8 +39,7 @@ sub setup {
 }
 
 foreach my $method (qw/ get_user user_supports find_user from_session /) {
-    no strict 'refs';
-    *{$method} = sub { __PACKAGE__->default_auth_store->$method( @_ ) };
+    __PACKAGE__->meta->add_method($method => sub { __PACKAGE__->default_auth_store->$method( @_ ) });
 }
 
 __PACKAGE__;

@@ -1,9 +1,94 @@
 package Catalyst::Authentication::Realm;
 use Moose;
+use String::RewritePrefix;
+use Try::Tiny qw/ try catch /;
 use namespace::autoclean;
 
-foreach my $attr (qw/store credential name config/) {
+foreach my $attr (qw/name config/) {
     has $attr => ( is => 'rw' );
+}
+
+has [qw/ auto_create_user auto_update_user /] => (
+    is => 'ro',
+    default => 0,
+);
+
+has __app => (
+    is => 'ro',
+    required => 1,
+    handles => {
+        __app_config => 'config',
+        log => 'log',
+    },
+);
+sub __auth_config { shift->__app_config->{'Plugin::Authentication'} }
+
+has use_session => (
+    is => 'ro',
+    lazy => 1,
+    default => sub {
+        my $self = shift;
+        exists $self->__auth_config->{use_sessuion} ? $self->__auth_config->{use_sessuion} : 1;
+    },
+);
+
+foreach my $name (qw/ store credential /) {
+
+    has "${name}_config" => (
+        init_arg => $name,
+        is => 'ro',
+        default => sub { {} },
+    );
+
+    has "${name}_class" => (
+        init_arg => undef,
+        is => 'ro',
+        lazy => 1,
+        builder => "_build_${name}_class",
+    );
+
+    has $name => (
+        init_arg => undef,
+        is => 'rw',
+        lazy => 1,
+        default => sub {
+            my $self = shift;
+            my $get_class = "${name}_class";
+            my $get_config = "${name}_config";
+            $self->_build_store_or_credential($self->$get_class(), $self->$get_config)
+        },
+    );
+}
+
+sub _build_store_class {
+    my $self = shift;
+    $self->_load_class_with_deprecated(String::RewritePrefix->rewrite(
+        { '' => 'Catalyst::Authentication::Store::', '+' => '' },
+        $self->store_config->{class}
+            || do {
+                $self->log->debug( q(No Store specified for realm ") . $self->name . q(", using the Null store.) );
+                'Null';
+            },
+    ));
+}
+
+sub _build_credential_class {
+    my $self = shift;
+    $self->_load_class_with_deprecated(String::RewritePrefix->rewrite(
+        { '' => 'Catalyst::Authentication::Credential::', '+' => '' },
+        $self->credential_config->{class} || 'Password'
+    ));
+}
+
+sub _build_store_or_credential {
+    my ($self, $class, $config) = @_;
+    ## a little cruft to stay compatible with some poorly written stores / credentials
+    ## we'll remove this soon.
+    if ($class->can('new')) {
+        return $class->new($config, $self->__app, $self);
+    }
+    $self->log->error("THIS IS DEPRECATED: $class has no new() method - Attempting to use uninstantiated");
+    return $class;
 }
 
 ## Add use_session config item to realm.
@@ -11,109 +96,44 @@ foreach my $attr (qw/store credential name config/) {
 sub BUILDARGS {
     my ($class, $realmname, $config, $app) = @_;
 
-    return { __app => $app, name => $realmname, config => $config };
+    return {  %$config, __app => $app, name => $realmname, config => $config };
+}
+
+sub _load_class_with_deprecated {
+    my ($self, $class) = @_;
+    try {
+        Catalyst::Utils::ensure_class_loaded( $class );
+    }
+    catch {
+        # If the file is missing, then try the old-style fallback, 
+        # but re-throw anything else for the user to deal with.
+        die unless $@ =~ /^Can't locate/;
+        $self->log->warn( qq(Class "$class" not found, trying deprecated ::Plugin:: style naming. ) );
+        my $origclass = $class;
+        $class =~ s/Catalyst::Authentication/Catalyst::Plugin::Authentication/;
+
+        try { Catalyst::Utils::ensure_class_loaded( $class ); }
+        catch {
+            # Likewise this croak is useful if the second exception is also "not found",
+            # but would be confusing if it's anything else.
+            die $_ unless /^Can't locate/;
+            Carp::croak "Unable to load class, " . $origclass . " OR " . $class .
+                        " in realm " . $self->name;
+        };
+    };
+    return $class;
 }
 
 sub BUILD {
     my ($self, $args) = @_;
-    
-    my $app = $args->{__app};
+
+    my $app = $self->__app;
     my $realmname = $self->name;
     my $config = $self->config;
 
-    if (!exists($self->config->{'use_session'})) {
-        if (exists($app->config->{'Plugin::Authentication'}{'use_session'})) {
-            $self->config->{'use_session'} = $app->config->{'Plugin::Authentication'}{'use_session'};
-        } else {
-            $self->config->{'use_session'} = 1;
-        }
-    }
-
     $app->log->debug("Setting up auth realm $realmname") if $app->debug;
 
-    # use the Null store as a default - Don't complain if the realm class is being overridden, 
-    # as the new realm may behave differently.
-    if( ! exists($config->{store}{class}) ) {
-        $config->{store}{class} = '+Catalyst::Authentication::Store::Null';
-        if (! exists($config->{class})) {
-            $app->log->debug( qq(No Store specified for realm "$realmname", using the Null store.) );
-        }
-    } 
-    my $storeclass = $config->{'store'}{'class'};
-    
-    ## follow catalyst class naming - a + prefix means a fully qualified class, otherwise it's
-    ## taken to mean C::P::A::Store::(specifiedclass)
-    if ($storeclass !~ /^\+(.*)$/ ) {
-        $storeclass = "Catalyst::Authentication::Store::${storeclass}";
-    } else {
-        $storeclass = $1;
-    }
-
-    # a little niceness - since most systems seem to use the password credential class, 
-    # if no credential class is specified we use password.
-    $config->{credential}{class} ||= '+Catalyst::Authentication::Credential::Password';
-
-    my $credentialclass = $config->{'credential'}{'class'};
-    
-    ## follow catalyst class naming - a + prefix means a fully qualified class, otherwise it's
-    ## taken to mean C::A::Credential::(specifiedclass)
-    if ($credentialclass !~ /^\+(.*)$/ ) {
-        $credentialclass = "Catalyst::Authentication::Credential::${credentialclass}";
-    } else {
-        $credentialclass = $1;
-    }
-    
-    # if we made it here - we have what we need to load the classes
-    
-    ### BACKWARDS COMPATIBILITY - DEPRECATION WARNING:  
-    ###  we must eval the ensure_class_loaded - because we might need to try the old-style
-    ###  ::Plugin:: module naming if the standard method fails. 
-    
-    ## Note to self - catch second exception and bitch in detail?
-    
-    eval {
-        Catalyst::Utils::ensure_class_loaded( $credentialclass );
-    };
-    
-    if ($@) {
-        # If the file is missing, then try the old-style fallback, 
-        # but re-throw anything else for the user to deal with.
-        die unless $@ =~ /^Can't locate/;
-        $app->log->warn( qq(Credential class "$credentialclass" not found, trying deprecated ::Plugin:: style naming. ) );
-        my $origcredentialclass = $credentialclass;
-        $credentialclass =~ s/Catalyst::Authentication/Catalyst::Plugin::Authentication/;
-
-        eval { Catalyst::Utils::ensure_class_loaded( $credentialclass ); };
-        if ($@) {
-            # Likewise this croak is useful if the second exception is also "not found",
-            # but would be confusing if it's anything else.
-            die unless $@ =~ /^Can't locate/;
-            Carp::croak "Unable to load credential class, " . $origcredentialclass . " OR " . $credentialclass . 
-                        " in realm " . $self->name;
-        }
-    }
-    
-    eval {
-        Catalyst::Utils::ensure_class_loaded( $storeclass );
-    };
-    
-    if ($@) {
-        # If the file is missing, then try the old-style fallback, 
-        # but re-throw anything else for the user to deal with.
-        die unless $@ =~ /^Can't locate/;
-        $app->log->warn( qq(Store class "$storeclass" not found, trying deprecated ::Plugin:: style naming. ) );
-        my $origstoreclass = $storeclass;
-        $storeclass =~ s/Catalyst::Authentication/Catalyst::Plugin::Authentication/;
-        eval { Catalyst::Utils::ensure_class_loaded( $storeclass ); };
-        if ($@) {
-            # Likewise this croak is useful if the second exception is also "not found",
-            # but would be confusing if it's anything else.
-            die unless $@ =~ /^Can't locate/;
-            Carp::croak "Unable to load store class, " . $origstoreclass . " OR " . $storeclass . 
-                        " in realm " . $self->name;
-        }
-    }
-    
+    my $storeclass = $self->store_class;
     # BACKWARDS COMPATIBILITY - if the store class does not define find_user, we define it in terms 
     # of get_user and add it to the class.  this is because the auth routines use find_user, 
     # and rely on it being present. (this avoids per-call checks)
@@ -125,21 +145,9 @@ sub BUILD {
                                                 $self->get_user($info->{id}, @rest);
                                             };
     }
-    
-    ## a little cruft to stay compatible with some poorly written stores / credentials
-    ## we'll remove this soon.
-    if ($storeclass->can('new')) {
-        $self->store($storeclass->new($config->{'store'}, $app, $self));
-    } else {
-        $app->log->error("THIS IS DEPRECATED: $storeclass has no new() method - Attempting to use uninstantiated");
-        $self->store($storeclass);
-    }
-    if ($credentialclass->can('new')) {
-        $self->credential($credentialclass->new($config->{'credential'}, $app, $self));
-    } else {
-        $app->log->error("THIS IS DEPRECATED: $credentialclass has no new() method - Attempting to use uninstantiated");
-        $self->credential($credentialclass);
-    }
+    # Actually build the store and credential instances.
+    $self->store;
+    $self->credential;
 }
 
 sub find_user {
@@ -148,10 +156,10 @@ sub find_user {
     my $res = $self->store->find_user($authinfo, $c);
     
     if (!$res) {
-      if ($self->config->{'auto_create_user'} && $self->store->can('auto_create_user') ) {
+      if ($self->auto_create_user && $self->store->can('auto_create_user') ) {
           $res = $self->store->auto_create_user($authinfo, $c);
       }
-    } elsif ($self->config->{'auto_update_user'} && $self->store->can('auto_update_user')) {
+    } elsif ($self->auto_update_user && $self->store->can('auto_update_user')) {
         $res = $self->store->auto_update_user($authinfo, $c, $res);
     } 
     

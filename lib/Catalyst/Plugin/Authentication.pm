@@ -195,7 +195,6 @@ sub auth_restore_user {
 sub setup {
     my $app = shift;
 
-    $app->mk_classdata('_auth_initialized');
     $app->_authentication_initialize();
     $app->next::method(@_);
 }
@@ -331,7 +330,7 @@ sub setup_auth_realm {
     if ($realm) {
         $app->auth_realms->{$realmname} = $realm;
     } else {
-        $app->log->debug("realm initialization for '$realmname' failed.");
+        $app->log->error("realm initialization for '$realmname' failed.");
     }
     return $realm;
 }
@@ -375,12 +374,9 @@ sub authenticate {
 
     if ($realm) {
         return $realm->authenticate($app, $userinfo);
-    } else {
-        Catalyst::Exception->throw(
-                "authenticate called with nonexistant realm: '$realmname'.");
-
     }
-    return undef;
+    Catalyst::Exception->throw(
+            "authenticate called with nonexistant realm: '$realmname'.");
 }
 
 ## BACKWARDS COMPATIBILITY  -- Warning:  Here be monsters!
@@ -454,9 +450,8 @@ sub get_auth_store {
 
     if ($name ne 'default') {
         Carp::croak "get_auth_store called on non-default realm '$name'. Only default supported in compatibility mode";
-    } else {
-        $self->default_auth_store();
     }
+    $self->default_auth_store();
 }
 
 sub get_auth_store_name {

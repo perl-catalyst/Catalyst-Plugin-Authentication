@@ -16,12 +16,12 @@ requires 'namespace::autoclean' => '0.05';
 requires 'Catalyst::Runtime' => '5.80004';
 requires 'Class::Inspector';
 requires 'MRO::Compat';
+requires 'String::RewritePrefix';
+requires 'Try::Tiny';
 requires 'Catalyst::Plugin::Session' => '0.10';
 
 test_requires 'Test::More' => '0.88';
 test_requires 'Test::Exception';
-test_requires 'Class::MOP';
-test_requires 'Moose';
 
 author_tests 't/author';
 
