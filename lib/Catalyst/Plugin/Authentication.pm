@@ -887,6 +887,9 @@ and the session.  It does not delete the session.
 Fetch a particular users details, matching the provided user info, from the realm
 specified in $realm.
 
+    $user = $c->find_user({ id => $id });
+    $c->set_authenticated($user); # logs the user in and calls persist_user
+
 =head2 persist_user()
 
 Under normal circumstances the user data is only saved to the session during
@@ -911,7 +914,8 @@ for reference.
 =head2 $c->set_authenticated( $user, $realmname )
 
 Marks a user as authenticated. This is called from within the authenticate
-routine when a credential returns a user. $realmname defaults to 'default'
+routine when a credential returns a user. $realmname defaults to 'default'.
+You can use find_user to get $user
 
 =head2 $c->auth_restore_user( $user, $realmname )
 
