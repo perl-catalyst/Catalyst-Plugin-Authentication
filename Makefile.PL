@@ -1,4 +1,8 @@
+use strict;
+use warnings;
 use inc::Module::Install 0.87;
+use Module::Install::AuthorRequires;
+use Module::Install::AuthorTests;
 
 if ( $Module::Install::AUTHOR ) {
     system( 'pod2text lib/Catalyst/Plugin/Authentication.pm > README' )
@@ -20,6 +24,11 @@ test_requires 'Test::More' => '0.88';
 test_requires 'Test::Exception';
 test_requires 'Class::MOP';
 test_requires 'Moose';
+
+author_requires 'Test::WWW::Mechanize::Catalyst';
+author_requires 'Catalyst::Plugin::Session';
+author_requires 'Catalyst::Plugin::Session::State::Cookie';
+author_requires 'Digest::SHA1';
 
 author_tests 't/author';
 
