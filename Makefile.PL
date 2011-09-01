@@ -33,6 +33,6 @@ author_requires 'Digest::SHA1';
 author_tests 't/author';
 
 auto_install;
-resources repository => 'http://dev.catalyst.perl.org/repos/Catalyst/Catalyst-Plugin-Authentication/0.10000/trunk';
+resources repository => 'git://git.shadowcat.co.uk/catagits/Catalyst-Plugin-Authentication.git';
 
 WriteAll;
