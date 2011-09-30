@@ -1,5 +1,7 @@
 Revision history for Perl extension Catalyst::Plugin::Authentication
 
+     - Catalyst::Plugin::Authentication::Credential::NoPassword added
+       (Okko)
      - Convert repository to git (fREW Schmidt)
 
 0.10018 29 Jul 2011

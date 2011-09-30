@@ -1132,9 +1132,11 @@ Florian Ragwitz C<rafl@debian.org>
 
 Stephan Jauernick C<stephanj@cpan.org>
 
+Oskari Ojala (Okko), C<perl@okko.net>
+
 =head1 COPYRIGHT & LICENSE
 
-Copyright (c) 2005 - 2009
+Copyright (c) 2005 - 2011
 the Catalyst::Plugin::Authentication L</AUTHORS>
 as listed above.
 
