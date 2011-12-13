@@ -7,7 +7,6 @@ use Module::Install::AuthorTests;
 if ( $Module::Install::AUTHOR ) {
     system( 'pod2text lib/Catalyst/Plugin/Authentication.pm > README' )
         and die;
-    require Module::Install::AuthorTests;
 }
 
 perl_version '5.008001';
@@ -25,6 +24,9 @@ test_requires 'Test::Exception';
 test_requires 'Class::MOP';
 test_requires 'Moose';
 
+author_requires 'Test::Pod' => '1.14';
+author_requires 'Test::Pod::Coverage' => '1.04';
+author_requires 'Test::NoTabs';
 author_requires 'Test::WWW::Mechanize::Catalyst';
 author_requires 'Catalyst::Plugin::Session';
 author_requires 'Catalyst::Plugin::Session::State::Cookie';
