@@ -6,6 +6,9 @@ use strict;
 
 use base 'Catalyst::Authentication::Realm';
 
+use Try::Tiny;
+use Scalar::Util 'blessed';
+
 =head1 NAME
 
 Catalyst::Authentication::Realm::Progressive - Authenticate against multiple realms
@@ -123,23 +126,43 @@ sub authenticate {
     my ( $self, $c, $authinfo ) = @_;
     my $realms = $self->config->{realms};
     carp "No realms to authenticate against, check configuration"
-        unless $realms;
+      unless $realms;
     carp "Realms configuration must be an array reference"
-        unless ref $realms eq 'ARRAY';
-    foreach my $realm_name ( @$realms ) {
-        my $realm = $c->get_auth_realm( $realm_name );
+      unless ref $realms eq 'ARRAY';
+
+    my $should_detach;
+    foreach my $realm_name (@$realms) {
+        my $realm = $c->get_auth_realm($realm_name);
         carp "Unable to find realm: $realm_name, check configuration"
-            unless $realm;
-        my $auth = { %$authinfo };
+          unless $realm;
+        my $auth = {%$authinfo};
         $auth->{realm} ||= $realm->name;
-        if ( my $info = $self->config->{authinfo_munge}->{$realm->name} ) {
-            $auth = Catalyst::Utils::merge_hashes($auth, $info);
+        if ( my $info = $self->config->{authinfo_munge}->{ $realm->name } ) {
+            $auth = Catalyst::Utils::merge_hashes( $auth, $info );
         }
-        if ( my $obj = $realm->authenticate( $c, $auth ) ) {
-            $c->set_authenticated( $obj, $realm->name );
-            return $obj;
+
+        my $auth_obj;
+        try {
+            $auth_obj = $realm->authenticate( $c, $auth );
+        }
+        catch {
+            if ( blessed($_) && $_->isa('Catalyst::Exception::Detach') ) {
+                $should_detach = 1;
+            }
+            else {
+                die $_;
+            }
+        };
+
+        if ($auth_obj) {
+            $c->set_authenticated( $auth_obj, $realm->name );
+            return $auth_obj;
         }
     }
+
+    # detach if detach is thrown like from Credential::HTTP
+    $c->detach if $should_detach;
+
     return;
 }
 
@@ -149,7 +172,7 @@ sub authenticate {
 ## and return $self in order to avoid nasty warnings.
 
 sub new {
-    my ($class, $realmname, $config, $app) = @_;
+    my ( $class, $realmname, $config, $app ) = @_;
 
     my $self = { config => $config };
     bless $self, $class;
@@ -164,9 +187,15 @@ J. Shirley C<< <jshirley@cpan.org> >>
 
 Jay Kuri C<< <jayk@cpan.org> >>
 
+=head1 CONTRIBUTORS
+
+Gavin Henry C<< <ghenry@surevoip.co.uk> >>
+
+Tomas Doran C<< <bobtfish@bobtfish.net> >>
+
 =head1 COPYRIGHT & LICENSE
 
-Copyright (c) 2008 the aforementioned authors. All rights reserved. This program
+Copyright (c) 2008-2011 the aforementioned authors. All rights reserved. This program
 is free software; you can redistribute it and/or modify it under the same terms
 as Perl itself.
 
