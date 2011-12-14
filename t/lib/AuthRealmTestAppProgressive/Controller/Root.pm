@@ -30,5 +30,21 @@ sub progressive : Local {
     $c->res->body("ok");
 }
 
+sub progressive_detach : Local {
+    my ( $self, $c ) = @_;
+
+    my $realm = $AuthRealmTestAppProgressive::detach_test_info->{realm_to_pass};
+    my $user  = $AuthRealmTestAppProgressive::detach_test_info->{user};
+    my $pass  = $AuthRealmTestAppProgressive::detach_test_info->{password};
+    my $res;
+    my $ok = eval {
+        $res = $c->authenticate( { username => $user, password => $pass }, );
+        1;
+    };
+    ok( !$@,                       "authentication passed skipping detach." );
+    ok( $ok,                       "user authenticated skipping detach" );
+    ok( $c->user_in_realm($realm), "user in proper realm" );
+    $c->res->body("ok");
+}
 1;
 

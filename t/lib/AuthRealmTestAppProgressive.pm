@@ -23,6 +23,14 @@ our %members = (
     },
 );
 
+# Matches user above so we can test against a detach and confirm
+# it gets skipped and auths in 'members' realm
+our $detach_test_info = {
+    'user' => 'bob',
+    'password' => 's00p3r',
+    'realm_to_pass' => 'members',
+};
+
 __PACKAGE__->config('Plugin::Authentication' => {
     default_realm => 'progressive',
     progressive => {
