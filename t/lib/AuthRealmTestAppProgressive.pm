@@ -27,7 +27,16 @@ __PACKAGE__->config('Plugin::Authentication' => {
     default_realm => 'progressive',
     progressive => {
         class  => 'Progressive',
-        realms => [ 'other', 'members' ],
+        realms => [ 'alwaysdetach', 'other', 'members' ],
+    },
+    alwaysdetach => {
+        credential => {
+            class => 'AlwaysDetach',
+        },
+        store => {
+            class => 'Minimal',
+            users => {},
+        },
     },
     other => {
         credential => {
