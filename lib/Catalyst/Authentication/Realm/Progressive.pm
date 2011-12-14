@@ -146,7 +146,7 @@ sub authenticate {
             $auth_obj = $realm->authenticate( $c, $auth );
         }
         catch {
-            if ( blessed($_) && $_->isa('Catalyst::Exception::Detach') ) {
+            if ( $_ eq $Catalyst::DETACH ) {
                 $should_detach = 1;
             }
             else {
