@@ -11,8 +11,8 @@ with 'MooseX::Emulate::Class::Accessor::Fast';
 
 __PACKAGE__->mk_accessors(qw/_user/);
 
-our $VERSION = "0.10018";
-
+our $VERSION = "0.10019";
+`
 sub set_authenticated {
     my ( $c, $user, $realmname ) = @_;
 
@@ -1134,9 +1134,11 @@ Stephan Jauernick C<stephanj@cpan.org>
 
 Oskari Ojala (Okko), C<perl@okko.net>
 
+John Napiorkowski (jnap) C<jjnapiork@cpan.org>
+
 =head1 COPYRIGHT & LICENSE
 
-Copyright (c) 2005 - 2011
+Copyright (c) 2005 - 2012
 the Catalyst::Plugin::Authentication L</AUTHORS>
 as listed above.
 
