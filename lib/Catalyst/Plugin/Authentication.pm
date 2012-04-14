@@ -1,16 +1,15 @@
 package Catalyst::Plugin::Authentication;
 
-use base qw/Class::Accessor::Fast/;
-
-__PACKAGE__->mk_accessors(qw/_user/);
-
-use strict;
-use warnings;
-
+use Moose;
+use namespace::clean -except => 'meta';
 use MRO::Compat;
 use Tie::RefHash;
 use Class::Inspector;
 use Catalyst::Authentication::Realm;
+
+with 'MooseX::Emulate::Class::Accessor::Fast';
+
+__PACKAGE__->mk_accessors(qw/_user/);
 
 our $VERSION = "0.10018";
 
@@ -474,6 +473,7 @@ sub auth_stores {
     my %hash = ( 'default' => $self->get_auth_realm('default')->store);
 }
 
+__PACKAGE__->meta->make_immutable;
 __PACKAGE__;
 
 __END__
