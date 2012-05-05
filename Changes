@@ -1,5 +1,6 @@
 Revision history for Perl extension Catalyst::Plugin::Authentication
 
+0.10020 05 May 2012
      - Allow user_class to be configured for Catalyst::Authentication::Store::Minimal
        (Jochen Lutz <jlu@akk.org>)
 
