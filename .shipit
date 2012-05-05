@@ -1,7 +1,7 @@
 # auto-generated shipit config file.
 steps = FindVersion, ChangeVersion, CheckChangeLog, DistTest, Commit, Tag, MakeDist
 
-git.tagpattern = http://dev.catalyst.perl.org/repos/Catalyst/Catalyst-Plugin-Authentication/0.10000/tags/%v
+git.tagpattern = %v
 
 CheckChangeLog.files = Changes
 
