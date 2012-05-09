@@ -482,8 +482,7 @@ __END__
 
 =head1 NAME
 
-Catalyst::Plugin::Authentication - Infrastructure plugin for the Catalyst
-authentication framework.
+Catalyst::Plugin::Authentication - Infrastructure plugin for the Catalyst authentication framework.
 
 =head1 SYNOPSIS
 
