@@ -1,5 +1,7 @@
 Revision history for Perl extension Catalyst::Plugin::Authentication
 
+    - Document optional methods in stores needed for auto_create_user
+      and auto_update_user in realms.
     - Clarify support channels
     - Note primary maintainer in docs.
     - Add x_authority metadata.
