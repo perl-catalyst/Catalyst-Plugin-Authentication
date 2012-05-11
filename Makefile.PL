@@ -3,6 +3,7 @@ use warnings;
 use inc::Module::Install 0.87;
 use Module::Install::AuthorRequires;
 use Module::Install::AuthorTests;
+use Module::Install::Authority;
 
 if ( $Module::Install::AUTHOR ) {
     system( 'pod2text lib/Catalyst/Plugin/Authentication.pm > README' )
@@ -13,6 +14,7 @@ perl_version '5.008001';
 
 name 'Catalyst-Plugin-Authentication';
 all_from 'lib/Catalyst/Plugin/Authentication.pm';
+authority 'BOBTFISH';
 
 requires 'Catalyst::Runtime';
 requires 'Class::Inspector';

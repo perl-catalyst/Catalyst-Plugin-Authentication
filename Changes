@@ -1,5 +1,8 @@
 Revision history for Perl extension Catalyst::Plugin::Authentication
 
+    - Clarify support channels
+    - Note primary maintainer in docs.
+    - Add x_authority metadata.
     - Get the NAME right by making it 1 line, due to crappy parsing
       in EU::MM (RT#77028)
 
