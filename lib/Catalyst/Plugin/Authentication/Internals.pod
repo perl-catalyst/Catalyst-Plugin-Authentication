@@ -271,11 +271,11 @@ be able to function without an instantiated user object.
 If you want your store to be able to auto- create users, then you can
 implement these methods:
 
-=head24 auto_update_user( $authinfo, $c, $res )
+=head4 auto_update_user( $authinfo, $c, $res )
 
 This method is called if the realm's auto_update_user setting is true.
 
-=head2 auto_create_user( $authinfo, $c )
+=head4 auto_create_user( $authinfo, $c )
 
 This method is called if the realm's auto_create_user setting is true.
 
