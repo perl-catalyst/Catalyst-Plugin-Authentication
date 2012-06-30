@@ -16,9 +16,9 @@ sub new {
 
     my $self = { config => $config };
     bless $self, $class;
-    
+
     $self->name($realmname);
-    
+
     if (!exists($self->config->{'use_session'})) {
         if (exists($app->config->{'Plugin::Authentication'}{'use_session'})) {
             $self->config->{'use_session'} = $app->config->{'Plugin::Authentication'}{'use_session'};
@@ -29,16 +29,16 @@ sub new {
 
     $app->log->debug("Setting up auth realm $realmname") if $app->debug;
 
-    # use the Null store as a default - Don't complain if the realm class is being overridden, 
+    # use the Null store as a default - Don't complain if the realm class is being overridden,
     # as the new realm may behave differently.
     if( ! exists($config->{store}{class}) ) {
         $config->{store}{class} = '+Catalyst::Authentication::Store::Null';
         if (! exists($config->{class})) {
             $app->log->debug( qq(No Store specified for realm "$realmname", using the Null store.) );
         }
-    } 
+    }
     my $storeclass = $config->{'store'}{'class'};
-    
+
     ## follow catalyst class naming - a + prefix means a fully qualified class, otherwise it's
     ## taken to mean C::P::A::Store::(specifiedclass)
     if ($storeclass !~ /^\+(.*)$/ ) {
@@ -47,12 +47,12 @@ sub new {
         $storeclass = $1;
     }
 
-    # a little niceness - since most systems seem to use the password credential class, 
+    # a little niceness - since most systems seem to use the password credential class,
     # if no credential class is specified we use password.
     $config->{credential}{class} ||= '+Catalyst::Authentication::Credential::Password';
 
     my $credentialclass = $config->{'credential'}{'class'};
-    
+
     ## follow catalyst class naming - a + prefix means a fully qualified class, otherwise it's
     ## taken to mean C::A::Credential::(specifiedclass)
     if ($credentialclass !~ /^\+(.*)$/ ) {
@@ -60,21 +60,21 @@ sub new {
     } else {
         $credentialclass = $1;
     }
-    
+
     # if we made it here - we have what we need to load the classes
-    
-    ### BACKWARDS COMPATIBILITY - DEPRECATION WARNING:  
+
+    ### BACKWARDS COMPATIBILITY - DEPRECATION WARNING:
     ###  we must eval the ensure_class_loaded - because we might need to try the old-style
-    ###  ::Plugin:: module naming if the standard method fails. 
-    
+    ###  ::Plugin:: module naming if the standard method fails.
+
     ## Note to self - catch second exception and bitch in detail?
-    
+
     eval {
         Catalyst::Utils::ensure_class_loaded( $credentialclass );
     };
-    
+
     if ($@) {
-        # If the file is missing, then try the old-style fallback, 
+        # If the file is missing, then try the old-style fallback,
         # but re-throw anything else for the user to deal with.
         die unless $@ =~ /^Can't locate/;
         $app->log->warn( qq(Credential class "$credentialclass" not found, trying deprecated ::Plugin:: style naming. ) );
@@ -86,17 +86,17 @@ sub new {
             # Likewise this croak is useful if the second exception is also "not found",
             # but would be confusing if it's anything else.
             die unless $@ =~ /^Can't locate/;
-            Carp::croak "Unable to load credential class, " . $origcredentialclass . " OR " . $credentialclass . 
+            Carp::croak "Unable to load credential class, " . $origcredentialclass . " OR " . $credentialclass .
                         " in realm " . $self->name;
         }
     }
-    
+
     eval {
         Catalyst::Utils::ensure_class_loaded( $storeclass );
     };
-    
+
     if ($@) {
-        # If the file is missing, then try the old-style fallback, 
+        # If the file is missing, then try the old-style fallback,
         # but re-throw anything else for the user to deal with.
         die unless $@ =~ /^Can't locate/;
         $app->log->warn( qq(Store class "$storeclass" not found, trying deprecated ::Plugin:: style naming. ) );
@@ -107,13 +107,13 @@ sub new {
             # Likewise this croak is useful if the second exception is also "not found",
             # but would be confusing if it's anything else.
             die unless $@ =~ /^Can't locate/;
-            Carp::croak "Unable to load store class, " . $origstoreclass . " OR " . $storeclass . 
+            Carp::croak "Unable to load store class, " . $origstoreclass . " OR " . $storeclass .
                         " in realm " . $self->name;
         }
     }
-    
-    # BACKWARDS COMPATIBILITY - if the store class does not define find_user, we define it in terms 
-    # of get_user and add it to the class.  this is because the auth routines use find_user, 
+
+    # BACKWARDS COMPATIBILITY - if the store class does not define find_user, we define it in terms
+    # of get_user and add it to the class.  this is because the auth routines use find_user,
     # and rely on it being present. (this avoids per-call checks)
     if (!$storeclass->can('find_user')) {
         no strict 'refs';
@@ -123,7 +123,7 @@ sub new {
                                                 $self->get_user($info->{id}, @rest);
                                             };
     }
-    
+
     ## a little cruft to stay compatible with some poorly written stores / credentials
     ## we'll remove this soon.
     if ($storeclass->can('new')) {
@@ -138,7 +138,7 @@ sub new {
         $app->log->error("THIS IS DEPRECATED: $credentialclass has no new() method - Attempting to use uninstantiated");
         $self->credential($credentialclass);
     }
-    
+
     return $self;
 }
 
@@ -146,15 +146,15 @@ sub find_user {
     my ( $self, $authinfo, $c ) = @_;
 
     my $res = $self->store->find_user($authinfo, $c);
-    
+
     if (!$res) {
       if ($self->config->{'auto_create_user'} && $self->store->can('auto_create_user') ) {
           $res = $self->store->auto_create_user($authinfo, $c);
       }
     } elsif ($self->config->{'auto_update_user'} && $self->store->can('auto_update_user')) {
         $res = $self->store->auto_update_user($authinfo, $c, $res);
-    } 
-    
+    }
+
     return $res;
 }
 
@@ -172,7 +172,7 @@ sub authenticate {
 
 sub user_is_restorable {
     my ($self, $c) = @_;
-    
+
     return unless
          $c->can('session')
          and $self->config->{'use_session'}
@@ -183,23 +183,23 @@ sub user_is_restorable {
 
 sub restore_user {
     my ($self, $c, $frozen_user) = @_;
-    
+
     $frozen_user ||= $self->user_is_restorable($c);
     return unless defined($frozen_user);
 
     my $user = $self->from_session( $c, $frozen_user );
-    
+
     if ($user) {
         $c->_user( $user );
-    
+
         # this sets the realm the user originated in.
         $user->auth_realm($self->name);
-    } 
+    }
     else {
         $self->failed_user_restore($c) ||
             $c->error("Store claimed to have a restorable user, but restoration failed.  Did you change the user's id_field?");
-	}
-	 
+    }
+
     return $user;
 }
 
@@ -207,22 +207,22 @@ sub restore_user {
 ## can not be found.  Do what you must do here.
 ## Return true if you can fix the situation and find a user, false otherwise
 sub failed_user_restore {
-	my ($self, $c) = @_;
-	
-	$self->remove_persisted_user($c);
-	return;
+    my ($self, $c) = @_;
+
+    $self->remove_persisted_user($c);
+    return;
 }
 
 sub persist_user {
     my ($self, $c, $user) = @_;
-    
+
     if (
         $c->can('session')
         and $self->config->{'use_session'}
-        and $user->supports("session") 
+        and $user->supports("session")
     ) {
         $c->session->{__user_realm} = $self->name;
-    
+
         # we want to ask the store for a user prepared for the session.
         # but older modules split this functionality between the user and the
         # store.  We try the store first.  If not, we use the old method.
@@ -237,14 +237,14 @@ sub persist_user {
 
 sub remove_persisted_user {
     my ($self, $c) = @_;
-    
+
     if (
         $c->can('session')
         and $self->config->{'use_session'}
         and $c->session_is_valid
     ) {
         delete @{ $c->session }{qw/__user __user_realm/};
-    }    
+    }
 }
 
 ## backwards compatibility - I don't think many people wrote realms since they
@@ -257,7 +257,7 @@ sub save_user_in_session {
 
 sub from_session {
     my ($self, $c, $frozen_user) = @_;
-    
+
     return $self->store->from_session($c, $frozen_user);
 }
 
@@ -319,15 +319,15 @@ Returns an instance of the credential object for this realm.
 
 =head2 find_user( $authinfo, $c )
 
-Retrieves the user given the authentication information provided.  This 
+Retrieves the user given the authentication information provided.  This
 is most often called from the credential.  The default realm class simply
-delegates this call the store object.  If enabled, auto-creation and 
+delegates this call the store object.  If enabled, auto-creation and
 auto-updating of users is also handled here.
 
 =head2 authenticate( $c, $authinfo)
 
-Performs the authentication process for the current realm.  The default 
-realm class simply delegates this to the credential and sets 
+Performs the authentication process for the current realm.  The default
+realm class simply delegates this to the credential and sets
 the authenticated user on success.  Returns the authenticated user object;
 
 =head1 USER PERSISTENCE
@@ -336,15 +336,15 @@ The Realm class allows complete control over the persistance of users
 between requests.  By default the realm attempts to use the Catalyst
 session system to accomplish this.  By overriding the methods below
 in a custom Realm class, however, you can handle user persistance in
-any way you see fit.  
+any way you see fit.
 
 =head2 persist_user($c, $user)
 
 persist_user is the entry point for saving user information between requests
-in most cases this will utilize the session.  By default this uses the 
+in most cases this will utilize the session.  By default this uses the
 catalyst session system to store the user by calling for_session on the
-active store.  The user object must be a subclass of 
-Catalyst::Authentication::User.  If you have updated the user object, you 
+active store.  The user object must be a subclass of
+Catalyst::Authentication::User.  If you have updated the user object, you
 must call persist_user again to ensure that the persisted user object reflects
 your updates.
 
@@ -366,13 +366,13 @@ to decode the frozen user.
 
 =head2 failed_user_restore($c)
 
-If there is a session to restore, but the restore fails for any reason then this method 
+If there is a session to restore, but the restore fails for any reason then this method
 is called. This method supplied just removes the persisted user, but can be overridden
 if required to have more complex logic (e.g. finding a the user by their 'old' username).
 
 =head2 from_session($c, $frozenuser )
 
-Decodes the frozenuser information provided and returns an instantiated 
+Decodes the frozenuser information provided and returns an instantiated
 user object.  By default, this call is delegated to $store->from_session().
 
 =head2 save_user_in_session($c, $user)
