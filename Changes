@@ -1,5 +1,6 @@
 Revision history for Perl extension Catalyst::Plugin::Authentication
 
+    - Fix whitespace and tabs, add Test::EOL and Test::NoTabs
     - Document optional methods in stores needed for auto_create_user
       and auto_update_user in realms.
     - Clarify support channels
