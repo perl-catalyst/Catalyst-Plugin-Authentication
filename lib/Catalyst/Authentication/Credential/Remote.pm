@@ -1,15 +1,13 @@
 package Catalyst::Authentication::Credential::Remote;
+use Moose;
+use namespace::autoclean;
 
-use strict;
-use warnings;
+with 'MooseX::Emulate::Class::Accessor::Fast';
+
 use Try::Tiny qw/ try catch /;
 
-use base 'Class::Accessor::Fast';
-
-BEGIN {
-    __PACKAGE__->mk_accessors(
-        qw/allow_re deny_re cutname_re source realm username_field/);
-}
+__PACKAGE__->mk_accessors(
+    qw/allow_re deny_re cutname_re source realm username_field/);
 
 sub new {
     my ( $class, $config, $app, $realm ) = @_;

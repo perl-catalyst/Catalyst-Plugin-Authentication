@@ -22,7 +22,7 @@ requires 'MRO::Compat';
 requires 'Catalyst::Plugin::Session' => '0.10';
 requires 'Moose';
 requires 'MooseX::Emulate::Class::Accessor::Fast';
-requires 'namespace::clean';
+requires 'namespace::autoclean';
 requires 'String::RewritePrefix';
 requires 'Try::Tiny';
 

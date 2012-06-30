@@ -1,15 +1,12 @@
 package Catalyst::Authentication::Store::Null;
+use Moose;
+use namespace::autoclean;
 
-use strict;
-use warnings;
+with 'MooseX::Emulate::Class::Accessor::Fast';
 
 use Catalyst::Authentication::User::Hash;
 
-use base qw( Class::Accessor::Fast );
-
-BEGIN {
-    __PACKAGE__->mk_accessors( qw( _config ) );
-}
+__PACKAGE__->mk_accessors( qw( _config ) );
 
 sub new {
     my ( $class, $config, $app, $realm ) = @_;

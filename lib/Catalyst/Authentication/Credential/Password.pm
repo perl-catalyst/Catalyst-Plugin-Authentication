@@ -1,9 +1,8 @@
 package Catalyst::Authentication::Credential::Password;
+use Moose;
+use namespace::autoclean;
 
-use strict;
-use warnings;
-
-use base qw/Class::Accessor::Fast/;
+with 'MooseX::Emulate::Class::Accessor::Fast';
 
 use Scalar::Util        ();
 use Catalyst::Exception ();

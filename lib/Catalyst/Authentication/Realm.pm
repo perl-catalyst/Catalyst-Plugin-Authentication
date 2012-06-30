@@ -1,15 +1,12 @@
 package Catalyst::Authentication::Realm;
+use Moose;
+use namespace::autoclean;
 
-use strict;
-use warnings;
+with 'MooseX::Emulate::Class::Accessor::Fast';
 use String::RewritePrefix;
 use Try::Tiny qw/ try catch /;
 
-use base qw/Class::Accessor::Fast/;
-
-BEGIN {
-    __PACKAGE__->mk_accessors(qw/store credential name config/);
-};
+__PACKAGE__->mk_accessors(qw/store credential name config/);
 
 ## Add use_session config item to realm.
 
