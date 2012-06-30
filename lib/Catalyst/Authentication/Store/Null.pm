@@ -17,12 +17,12 @@ sub new {
 }
 
 sub for_session {
-	my ( $self, $c, $user ) = @_;
+    my ( $self, $c, $user ) = @_;
     return $user;
 }
 
 sub from_session {
-	my ( $self, $c, $user ) = @_;
+    my ( $self, $c, $user ) = @_;
     return $user;
 }
 
@@ -64,7 +64,7 @@ Catalyst::Authentication::Store::Null - Null authentication store
                     class => 'Null',
                 }
             }
-    	}
+        }
     });
 
 =head1 DESCRIPTION

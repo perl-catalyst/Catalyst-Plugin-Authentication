@@ -94,8 +94,8 @@ Catalyst::Authentication::User - Base class for user objects.
 
 =head1 SYNOPSIS
 
-	package MyStore::User;
-	use base qw/Catalyst::Authentication::User/;
+    package MyStore::User;
+    use base qw/Catalyst::Authentication::User/;
 
 =head1 DESCRIPTION
 

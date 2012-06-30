@@ -58,12 +58,12 @@ sub authenticate {
             # maybe show warning that we are gonna use DEPRECATED $req->user            
             if (ref($c->req->user)) {
                 # I do not know exactly when this happens but it happens
-	        Catalyst::Exception->throw( "Cannot get remote user from ".
-		"\$c->req->user as it seems to be a reference not a string" );
-	    }
-	    else {
-	        $remuser = $c->req->user;
-	    }
+            Catalyst::Exception->throw( "Cannot get remote user from ".
+        "\$c->req->user as it seems to be a reference not a string" );
+        }
+        else {
+            $remuser = $c->req->user;
+        }
         }
     }    
     elsif ($self->source =~ /^(SSL_CLIENT_.*|CERT_*|AUTH_USER)$/) {
