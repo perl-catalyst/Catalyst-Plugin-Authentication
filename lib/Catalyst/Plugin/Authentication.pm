@@ -1128,7 +1128,7 @@ Jay Kuri, C<jayk@cpan.org> - Large rewrite
 
 Tomas Doran (t0m), C<bobtfish@bobtfish.net>
 
-=hasd1 ADDITIONAL CONTRIBUTORS
+=head1 ADDITIONAL CONTRIBUTORS
 
 =over
 
@@ -1136,7 +1136,7 @@ Tomas Doran (t0m), C<bobtfish@bobtfish.net>
 
 =item David Kamholz
 
-=itm kmx
+=item kmx
 
 =item Nigel Metheringham
 
