@@ -1,5 +1,6 @@
 Revision history for Perl extension Catalyst::Plugin::Authentication
 
+0.10021 30 June 2012
     - Change all classes to Moose and MooseX::Emulate::Class::Accessor::Fast,
       fixing undeclared dependency on Class::Accessor::Fast.
     - Change Catalyst::Authentication::Realm to use String::RewritePrefix
