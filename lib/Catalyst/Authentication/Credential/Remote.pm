@@ -2,6 +2,7 @@ package Catalyst::Authentication::Credential::Remote;
 
 use strict;
 use warnings;
+use Try::Tiny qw/ try catch /;
 
 use base 'Class::Accessor::Fast';
 
@@ -17,21 +18,27 @@ sub new {
     bless $self, $class;
 
     # we are gonna compile regular expresions defined in config parameters
-    # and explicitly throw an exception saying what parameter was invalid 
-    if (defined($config->{allow_regexp}) && ($config->{allow_regexp} ne "")) { 
-        eval { $self->allow_re( qr/$config->{allow_regexp}/ ) };
-        Catalyst::Exception->throw( "Invalid regular expression in ".
-        "'allow_regexp' configuration parameter") if $@;
+    # and explicitly throw an exception saying what parameter was invalid
+    if (defined($config->{allow_regexp}) && ($config->{allow_regexp} ne "")) {
+        try { $self->allow_re( qr/$config->{allow_regexp}/ ) }
+        catch {
+            Catalyst::Exception->throw( "Invalid regular expression in ".
+                "'allow_regexp' configuration parameter");
+        };
     }
-    if (defined($config->{deny_regexp}) && ($config->{deny_regexp} ne "")) { 
-        eval { $self->deny_re( qr/$config->{deny_regexp}/ ) };     
-        Catalyst::Exception->throw( "Invalid regular expression in ".
-             "'deny_regexp' configuration parameter") if $@;
+    if (defined($config->{deny_regexp}) && ($config->{deny_regexp} ne "")) {
+        try { $self->deny_re( qr/$config->{deny_regexp}/ ) }
+        catch {
+            Catalyst::Exception->throw( "Invalid regular expression in ".
+                 "'deny_regexp' configuration parameter");
+        };
     }
-    if (defined($config->{cutname_regexp}) && ($config->{cutname_regexp} ne "")) { 
-        eval { $self->cutname_re( qr/$config->{cutname_regexp}/ ) };
-        Catalyst::Exception->throw( "Invalid regular expression in ".
-             "'cutname_regexp' configuration parameter") if $@;
+    if (defined($config->{cutname_regexp}) && ($config->{cutname_regexp} ne "")) {
+        try { $self->cutname_re( qr/$config->{cutname_regexp}/ ) }
+        catch {
+            Catalyst::Exception->throw( "Invalid regular expression in ".
+                "'cutname_regexp' configuration parameter");
+        };
     }
     $self->source($config->{source} || 'REMOTE_USER');
     $self->realm($realm);

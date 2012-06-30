@@ -24,6 +24,7 @@ requires 'Moose';
 requires 'MooseX::Emulate::Class::Accessor::Fast';
 requires 'namespace::clean';
 requires 'String::RewritePrefix';
+requires 'Try::Tiny';
 
 test_requires 'Test::More' => '0.88';
 test_requires 'Test::Exception';

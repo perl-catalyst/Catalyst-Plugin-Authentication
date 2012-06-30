@@ -3,6 +3,7 @@ package Catalyst::Authentication::Realm;
 use strict;
 use warnings;
 use String::RewritePrefix;
+use Try::Tiny qw/ try catch /;
 
 use base qw/Class::Accessor::Fast/;
 
@@ -68,48 +69,46 @@ sub new {
 
     ## Note to self - catch second exception and bitch in detail?
 
-    eval {
+    try {
         Catalyst::Utils::ensure_class_loaded( $credentialclass );
-    };
-
-    if ($@) {
+    }
+    catch {
         # If the file is missing, then try the old-style fallback,
         # but re-throw anything else for the user to deal with.
-        die unless $@ =~ /^Can't locate/;
+        die $_ unless /^Can't locate/;
         $app->log->warn( qq(Credential class "$credentialclass" not found, trying deprecated ::Plugin:: style naming. ) );
         my $origcredentialclass = $credentialclass;
         $credentialclass =~ s/Catalyst::Authentication/Catalyst::Plugin::Authentication/;
 
-        eval { Catalyst::Utils::ensure_class_loaded( $credentialclass ); };
-        if ($@) {
+        try { Catalyst::Utils::ensure_class_loaded( $credentialclass ); }
+        catch {
             # Likewise this croak is useful if the second exception is also "not found",
             # but would be confusing if it's anything else.
-            die unless $@ =~ /^Can't locate/;
+            die $_ unless /^Can't locate/;
             Carp::croak "Unable to load credential class, " . $origcredentialclass . " OR " . $credentialclass .
                         " in realm " . $self->name;
-        }
-    }
-
-    eval {
-        Catalyst::Utils::ensure_class_loaded( $storeclass );
+        };
     };
 
-    if ($@) {
+    try {
+        Catalyst::Utils::ensure_class_loaded( $storeclass );
+    }
+    catch {
         # If the file is missing, then try the old-style fallback,
         # but re-throw anything else for the user to deal with.
-        die unless $@ =~ /^Can't locate/;
+        die $_ unless /^Can't locate/;
         $app->log->warn( qq(Store class "$storeclass" not found, trying deprecated ::Plugin:: style naming. ) );
         my $origstoreclass = $storeclass;
         $storeclass =~ s/Catalyst::Authentication/Catalyst::Plugin::Authentication/;
-        eval { Catalyst::Utils::ensure_class_loaded( $storeclass ); };
-        if ($@) {
+        try { Catalyst::Utils::ensure_class_loaded( $storeclass ); }
+        catch {
             # Likewise this croak is useful if the second exception is also "not found",
             # but would be confusing if it's anything else.
-            die unless $@ =~ /^Can't locate/;
+            die $_ unless /^Can't locate/;
             Carp::croak "Unable to load store class, " . $origstoreclass . " OR " . $storeclass .
                         " in realm " . $self->name;
-        }
-    }
+        };
+    };
 
     # BACKWARDS COMPATIBILITY - if the store class does not define find_user, we define it in terms
     # of get_user and add it to the class.  this is because the auth routines use find_user,
@@ -127,13 +126,15 @@ sub new {
     ## we'll remove this soon.
     if ($storeclass->can('new')) {
         $self->store($storeclass->new($config->{'store'}, $app, $self));
-    } else {
+    }
+    else {
         $app->log->error("THIS IS DEPRECATED: $storeclass has no new() method - Attempting to use uninstantiated");
         $self->store($storeclass);
     }
     if ($credentialclass->can('new')) {
         $self->credential($credentialclass->new($config->{'credential'}, $app, $self));
-    } else {
+    }
+    else {
         $app->log->error("THIS IS DEPRECATED: $credentialclass has no new() method - Attempting to use uninstantiated");
         $self->credential($credentialclass);
     }

@@ -863,8 +863,8 @@ default realm is checked.
 
 Returns the currently logged in user, or undef if there is none.
 Normally the user is re-retrieved from the store.
-For L<Catalyst::Authentication::Store::DBIx::Class> the user is re-restored 
-using the primary key of the user table. 
+For L<Catalyst::Authentication::Store::DBIx::Class> the user is re-restored
+using the primary key of the user table.
 Thus B<user> can throw an error even though B<user_exists>
 returned true.
 
