@@ -2,6 +2,7 @@ package Catalyst::Authentication::Realm;
 
 use strict;
 use warnings;
+use String::RewritePrefix;
 
 use base qw/Class::Accessor::Fast/;
 
@@ -41,11 +42,10 @@ sub new {
 
     ## follow catalyst class naming - a + prefix means a fully qualified class, otherwise it's
     ## taken to mean C::P::A::Store::(specifiedclass)
-    if ($storeclass !~ /^\+(.*)$/ ) {
-        $storeclass = "Catalyst::Authentication::Store::${storeclass}";
-    } else {
-        $storeclass = $1;
-    }
+    $storeclass = String::RewritePrefix->rewrite({
+        '' => 'Catalyst::Authentication::Store::',
+        '+' => '',
+    }, $storeclass);
 
     # a little niceness - since most systems seem to use the password credential class,
     # if no credential class is specified we use password.
@@ -55,11 +55,10 @@ sub new {
 
     ## follow catalyst class naming - a + prefix means a fully qualified class, otherwise it's
     ## taken to mean C::A::Credential::(specifiedclass)
-    if ($credentialclass !~ /^\+(.*)$/ ) {
-        $credentialclass = "Catalyst::Authentication::Credential::${credentialclass}";
-    } else {
-        $credentialclass = $1;
-    }
+    $credentialclass = String::RewritePrefix->rewrite({
+        '' => 'Catalyst::Authentication::Credential::',
+        '+' => '',
+    }, $credentialclass);
 
     # if we made it here - we have what we need to load the classes
 
