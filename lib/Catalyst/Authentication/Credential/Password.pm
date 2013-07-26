@@ -175,7 +175,7 @@ be sure to use that same field name when calling $c->authenticate().
 
 This sets the password type.  Often passwords are stored in crypted or hashed
 formats.  In order for the password module to verify the plaintext password
-passed in, it must be told what format the password will be in when it is retreived
+passed in, it must be told what format the password will be in when it is retrieved
 from the user object. The supported options are:
 
 =over 8
