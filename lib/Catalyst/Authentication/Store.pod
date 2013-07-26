@@ -1,4 +1,3 @@
-
 =head1 NAME
 
 Catalyst::Authentication::Store - All about authentication stores
@@ -66,7 +65,7 @@ Writing an authentication storage backend is a very simple matter.
 The only method you really need to support is C<get_user>.
 
 This method should accept an arbitrary list of parameters (determined by you or
-the credential verifyer), and return an object inheriting
+the credential verifier), and return an object inheriting
 L<Catalyst::Authentication::User>.
 
 For introspection purposes you can also define the C<user_supports> method. See
@@ -97,7 +96,7 @@ about the store as a whole,
 
 is supposed to be the lowest common denominator.
 
-The standardization of these values is to be goverened by the community,
+The standardization of these values is to be governed by the community,
 typically defined by the credential verification plugins.
 
 =head2 Stores implying certain credentials
