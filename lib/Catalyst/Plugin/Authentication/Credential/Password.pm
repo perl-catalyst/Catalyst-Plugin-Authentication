@@ -7,7 +7,7 @@ use Catalyst::Authentication::Credential::Password ();
 
 ## BACKWARDS COMPATIBILITY - all subs below here are deprecated 
 ## They are here for compatibility with older modules that use / inherit from C::P::A::Password 
-## login()'s existance relies rather heavily on the fact that only Credential::Password
+## login()'s existence relies rather heavily on the fact that only Credential::Password
 ## is being used as a credential.  This may not be the case.  This is only here 
 ## for backward compatibility.  It will go away in a future version
 ## login should not be used in new applications.
