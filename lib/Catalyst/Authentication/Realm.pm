@@ -329,10 +329,10 @@ the authenticated user on success.  Returns the authenticated user object;
 
 =head1 USER PERSISTENCE
 
-The Realm class allows complete control over the persistance of users
+The Realm class allows complete control over the persistence of users
 between requests.  By default the realm attempts to use the Catalyst
 session system to accomplish this.  By overriding the methods below
-in a custom Realm class, however, you can handle user persistance in
+in a custom Realm class, however, you can handle user persistence in
 any way you see fit.
 
 =head2 persist_user($c, $user)
@@ -352,7 +352,7 @@ Removes any persisted user data.  By default, removes the user from the session.
 =head2 user_is_restorable( $c )
 
 Returns whether there is a persisted user that may be restored.  Returns
-a token used to restore the user.  With the default session persistance
+a token used to restore the user.  With the default session persistence
 it returns the raw frozen user information.
 
 =head2 restore_user($c, [$frozen_user])
