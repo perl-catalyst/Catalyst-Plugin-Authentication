@@ -131,7 +131,7 @@ This authentication store lets you create a very quick and dirty user
 database in your application's config hash.
 
 You will need to include the Authentication plugin, and at least one Credential
-plugin to use this Store. Credential::Password is reccommended.
+plugin to use this Store. Credential::Password is recommended.
 
 It's purpose is mainly for testing, and it should probably be replaced by a
 more "serious" store for production.
@@ -159,7 +159,7 @@ own class, it must inherit from L<Catalyst::Authentication::User::Hash>.
 
 =item users
 
-This is a simple hash of users, the keys are the usenames, and the values are
+This is a simple hash of users, the keys are the usernames, and the values are
 hashrefs containing a password key/value pair, and optionally, a roles/list
 of role-names pair. If using roles, you will also need to add the
 Authorization::Roles plugin.
