@@ -814,7 +814,7 @@ However, even if use_session is disabled, if any code touches $c->session, a ses
 object will be auto-vivified and session Cookies will be sent in the headers. To
 prevent accidental session creation, check if a session already exists with
 if ($c->sessionid) { ... }. If the session doesn't exist, then don't place
-anything in the session to prevent an unecessary session from being created.
+anything in the session to prevent an unnecessary session from being created.
 
 =item default_realm
 
@@ -1113,7 +1113,7 @@ Register stores into the application.
 
 =head1 SUPPORT
 
-Please use the rt.cpan.org bug tracker, and git patches are wecome.
+Please use the rt.cpan.org bug tracker, and git patches are welcome.
 
 Questions on usage should be directed to the Catalyst mailing list
 or the #catalyst irc channel.
