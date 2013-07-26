@@ -15,7 +15,7 @@ sub new {
     my $self = { };
     bless $self, $class;
 
-    # we are gonna compile regular expresions defined in config parameters
+    # we are gonna compile regular expressions defined in config parameters
     # and explicitly throw an exception saying what parameter was invalid
     if (defined($config->{allow_regexp}) && ($config->{allow_regexp} ne "")) {
         try { $self->allow_re( qr/$config->{allow_regexp}/ ) }
@@ -55,7 +55,7 @@ sub authenticate {
             $remuser = $c->engine->env->{REMOTE_USER};
         }
         elsif ($c->req->can('remote_user')) {
-            # $c->req->remote_users was introduced in 5.80005; if not evailable we are
+            # $c->req->remote_users was introduced in 5.80005; if not available we are
             # gonna use $c->req->user that is deprecated but more or less works as well 
             $remuser = $c->req->remote_user;
         }
@@ -73,7 +73,7 @@ sub authenticate {
     }    
     elsif ($self->source =~ /^(SSL_CLIENT_.*|CERT_*|AUTH_USER)$/) {
         # if you are using 'exotic' webserver or if the user is 
-        # authenticated e.g via SSL certificate his name could be avaliable
+        # authenticated e.g via SSL certificate his name could be available
         # in different variables
         # BEWARE: $c->engine->env was broken prior 5.80005
         my $nam=$self->source;
@@ -101,7 +101,7 @@ sub authenticate {
     return if (defined($self->deny_re)  && ($remuser =~ $self->deny_re));
     return if (defined($self->allow_re) && ($remuser !~ $self->allow_re));
 
-    # if param cutname_regexp is specified we try to cut the final usename as a
+    # if param cutname_regexp is specified we try to cut the final username as a
     # substring from remote_user 
     my $usr = $remuser;
     if (defined($self->cutname_re)) {
@@ -188,7 +188,7 @@ The main idea of this module is based on a fact that webserver passes the name
 of authenticated user into Catalyst application as REMOTE_USER variable (or in 
 case of SSL client authentication in other variables like SSL_CLIENT_S_DN on
 Apache + mod_ssl) - from this point referenced as WEBUSER. 
-This module simply takes this value - perfoms some optional checks (see
+This module simply takes this value - performs some optional checks (see
 below) - and if everything is OK the WEBUSER is declared as authenticated on 
 Catalyst level. In fact this module does not perform any check for password or 
 other credential; it simply believes the webserver that user was properly 
@@ -258,11 +258,11 @@ The order deny-allow is fixed.
 
 This config item is B<OPTIONAL> - no default value.
 
-If param B<cutname_regexp> is specified we try to cut the final usename passed to
+If param B<cutname_regexp> is specified we try to cut the final username passed to
 Catalyst application as a substring from WEBUSER. This is useful for 
 example in case of SSL authentication when WEBUSER looks like this 
 'CN=john, OU=Unit Name, O=Company, C=CZ' - from this format we can simply cut
-pure usename by cutname_regexp set to 'CN=(.*), OU=Unit Name, O=Company, C=CZ'.
+pure username by cutname_regexp set to 'CN=(.*), OU=Unit Name, O=Company, C=CZ'.
 
 Substring is always taken as '$1' regexp substring. If WEBUSER does not
 match cutname_regexp at all or if '$1' regexp substring is empty we pass the
@@ -289,7 +289,7 @@ configuration parameter (e.g. invalid regular expression) throws an exception.
 =head2 authenticate ( $realm, $authinfo )
 
 Takes the username form WEBUSER set by webserver, performs additional 
-checks using optional allow_regexp/deny_regexp configuration params, optionaly 
+checks using optional allow_regexp/deny_regexp configuration params, optionally 
 takes substring from WEBUSER and the sets the resulting value as
 a Catalyst username.
 
