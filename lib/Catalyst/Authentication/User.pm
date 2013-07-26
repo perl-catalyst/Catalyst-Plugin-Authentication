@@ -40,7 +40,7 @@ sub supports {
 ## get should return the value of the field specified as it's single argument from the underlying
 ## user object.  This is here to provide a simple, standard way of accessing individual elements of a user
 ## object - ensuring no overlap between C::P::A::User methods and actual fieldnames.
-## this is not the most effecient method, since it uses introspection.  If you have an underlying object
+## this is not the most efficient method, since it uses introspection.  If you have an underlying object
 ## you most likely want to write this yourself.
 sub get {
     my ($self, $field) = @_;
@@ -104,7 +104,7 @@ This is the base class for authentication user objects.
 THIS IS NOT A COMPLETE CLASS! it is intended to provide base functionality only.
 
 It provides the base methods listed below, and any additional methods
-are proxied onto the user object fetched from the underlieing store.
+are proxied onto the user object fetched from the underlying store.
 
 =head1 NOTES TO STORE IMPLEMENTORS
 
