@@ -71,7 +71,7 @@ sub authenticate {
         }
         }
     }    
-    elsif ($self->source =~ /^(SSL_CLIENT_.*|CERT_*|AUTH_USER)$/) {
+    elsif ($self->source =~ /^(SSL_CLIENT_.*|CERT_.*|X-AUTH.*|X_AUTH.*|AUTH_USER)$/) {
         # if you are using 'exotic' webserver or if the user is 
         # authenticated e.g via SSL certificate his name could be avaliable
         # in different variables
