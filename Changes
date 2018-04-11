@@ -1,5 +1,8 @@
 Revision history for Perl extension Catalyst::Plugin::Authentication
 
+    - Don't load password when password_type is 'none',
+      for example when used for authorization
+
 0.10023 11 Jan 2013
    - Add Howto on using the auth from the proxy server with
      ::Credential::Remote (Robert Rothenberg)
