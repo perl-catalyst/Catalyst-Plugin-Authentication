@@ -17,7 +17,6 @@ all_from 'lib/Catalyst/Plugin/Authentication.pm';
 authority 'cpan:BOBTFISH';
 
 requires 'Catalyst::Runtime';
-requires 'Class::Inspector';
 requires 'MRO::Compat';
 requires 'Catalyst::Plugin::Session' => '0.10';
 requires 'Moose';

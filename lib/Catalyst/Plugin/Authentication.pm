@@ -4,7 +4,6 @@ use Moose;
 use namespace::clean -except => 'meta';
 use MRO::Compat;
 use Tie::RefHash;
-use Class::Inspector;
 use Catalyst::Authentication::Realm;
 
 with 'MooseX::Emulate::Class::Accessor::Fast';
