@@ -37,7 +37,7 @@ author_requires(
     'Test::WWW::Mechanize::Catalyst' => 0,
     'Catalyst::Plugin::Session' => '0.10',
     'Catalyst::Plugin::Session::State::Cookie' => 0,
-    'Digest::SHA1' => 0,
+    'Digest::SHA' => 0,
 );
 
 author_tests 't/author';

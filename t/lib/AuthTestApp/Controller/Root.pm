@@ -9,7 +9,7 @@ use Test::More;
 use Test::Exception;
 
 use Digest::MD5 qw/md5/;
-use Digest::SHA1 qw/sha1_base64/;
+use Digest::SHA qw/sha1_base64/;
 
 sub number_of_elements { return scalar @_ }
 
