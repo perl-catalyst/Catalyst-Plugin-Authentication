@@ -18,7 +18,6 @@ authority 'cpan:BOBTFISH';
 
 requires 'Catalyst::Runtime';
 requires 'MRO::Compat';
-requires 'Catalyst::Plugin::Session' => '0.10';
 requires 'Moose';
 requires 'MooseX::Emulate::Class::Accessor::Fast';
 requires 'namespace::autoclean';
@@ -36,7 +35,7 @@ author_requires(
     'Test::NoTabs' => 0,
     'Test::EOL' => 0,
     'Test::WWW::Mechanize::Catalyst' => 0,
-    'Catalyst::Plugin::Session' => 0,
+    'Catalyst::Plugin::Session' => '0.10',
     'Catalyst::Plugin::Session::State::Cookie' => 0,
     'Digest::SHA1' => 0,
 );
