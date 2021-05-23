@@ -3,7 +3,6 @@ package Catalyst::Plugin::Authentication;
 use Moose;
 use namespace::clean -except => 'meta';
 use MRO::Compat;
-use Tie::RefHash;
 use Catalyst::Authentication::Realm;
 
 with 'MooseX::Emulate::Class::Accessor::Fast';
