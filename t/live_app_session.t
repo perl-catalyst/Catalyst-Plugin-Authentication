@@ -18,30 +18,30 @@ use HTTP::Cookies;
 use HTTP::Request::Common qw(GET);
 
 my $jar = HTTP::Cookies->new;
-sub _get {
+sub _request {
     my $url = shift;
+    $url =~ s{^/}{http://localhost/};
     my $req = GET $url;
     $jar->add_cookie_header($req);
-    my $res = get($req);
+    my $res = request($req);
     $jar->extract_cookies($res);
     return $res;
 }
 
 my $res;
 
-$res = _get('/moose');
-ok +$res->success, 'get ok';
+$res = _request('/moose');
+ok +$res->is_success, 'get ok';
 
-$res = _get('/elk');
-ok +$res->success, 'get ok';
+$res = _request('/elk');
+ok +$res->is_success, 'get ok';
 
-$res = _get('/yak');
-ok !$res->success, 'Not ok, user unable to be resotred == nasal demons';
+$res = _request('/yak');
+ok !$res->is_success, 'Not ok, user unable to be resotred == nasal demons';
 
 foreach my $type (qw/ goat fluffy_bunny possum butterfly /) {
-    $res = _get("/$type");
-    ok +$res->success, "get $type ok";
+    $res = _request("/$type");
+    ok +$res->is_success, "get $type ok";
 }
 
 done_testing;
-
