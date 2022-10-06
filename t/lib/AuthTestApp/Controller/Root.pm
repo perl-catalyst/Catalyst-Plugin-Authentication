@@ -6,7 +6,7 @@ use base qw/ Catalyst::Controller /;
 __PACKAGE__->config( namespace => '' );
 
 use Test::More;
-use Test::Exception;
+use Test::Fatal;
 
 use Digest::MD5 qw/md5/;
 use Digest::SHA qw/sha1_base64/;
@@ -49,7 +49,7 @@ sub moose : Local {
     ok(!$c->login( "bar", "bad pass" ), "can't login with bad password");
     ok(!$c->user, "no user");
 
-    throws_ok { $c->login( "baz", "foo" ) } qr/support.*mechanism/, "can't login without any supported mech";
+    like exception { $c->login( "baz", "foo" ) }, qr/support.*mechanism/, "can't login without any supported mech";
 
     $c->res->body( "ok" );
 }
