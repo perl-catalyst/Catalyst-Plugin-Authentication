@@ -42,8 +42,8 @@ my %META = (
   },
   resources => {
     repository => {
-      url => 'git://git.shadowcat.co.uk/catagits/Catalyst-Plugin-Authentication.git',
-      web => 'http://git.shadowcat.co.uk/gitweb/gitweb.cgi?p=catagits/Catalyst-Plugin-Authentication.git',
+      url => 'https://github.com/perl-catalyst/Catalyst-Plugin-Authentication.git',
+      web => 'https://github.com/perl-catalyst/Catalyst-Plugin-Authentication',
       type => 'git',
     },
     bugtracker => {
