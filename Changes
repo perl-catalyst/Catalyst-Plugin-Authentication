@@ -1,5 +1,6 @@
 Revision history for Perl extension Catalyst::Plugin::Authentication
 
+0.10024 - 2024-10-16
     - update to prefer modern Catalyst APIs
     - silence expected warnings in tests
     - move repository to GitHub
