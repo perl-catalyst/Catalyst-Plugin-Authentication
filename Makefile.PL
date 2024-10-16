@@ -13,8 +13,6 @@ my %META = (
       requires => {
         'Test::More' => '0.88',
         'Test::Fatal' => 0,
-        'Class::MOP' => 0,
-        'Moose' => 0,
       },
     },
     runtime => {
