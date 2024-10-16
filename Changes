@@ -1,7 +1,6 @@
 Revision history for Perl extension Catalyst::Plugin::Authentication
 
-
-    - update to use modern Catalyst APIs
+    - update to prefer modern Catalyst APIs
     - silence expected warnings in tests
     - move repository to GitHub
     - convert tests from Test::WWW::Mechanize::Catalyst to Catalyst::Test
