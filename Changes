@@ -1,7 +1,9 @@
 Revision history for Perl extension Catalyst::Plugin::Authentication
 
+    - no changes since 0.10_025
+
 0.10_025 - 2026-05-19
-    - fix password comparison to avoid timing attacks (CVE TBA)
+    - fix password comparison to avoid timing attacks (CVE-2026-5091)
 
 0.10024 - 2024-10-16
     - update to prefer modern Catalyst APIs
