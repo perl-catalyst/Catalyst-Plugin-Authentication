@@ -43,8 +43,8 @@ sub _accessor {
 
     my $data = $self->{$key};
     ( $self->{__hash_obj_key_is_array}{$key} || $key =~ /roles/ )
-      ? @{ $data || [] }
-      : $data;
+        ? @{ $data || [] }
+        : $data;
 }
 
 ## password portion of this is no longer necessary, but here for backwards compatibility.
@@ -89,7 +89,7 @@ sub supports {
 
 sub for_session {
     my $self = shift;
-    
+
     return $self; # we serialize the whole user
 }
 
@@ -112,7 +112,7 @@ object based on hashes.
 =head1 SYNOPSIS
 
     use Catalyst::Authentication::User::Hash;
-    
+
     Catalyst::Authentication::User::Hash->new(
         password => "s3cr3t",
     );

@@ -113,10 +113,10 @@ sub new {
     if (!$storeclass->can('find_user')) {
         no strict 'refs';
         *{"${storeclass}::find_user"} = sub {
-                                                my ($self, $info) = @_;
-                                                my @rest = @{$info->{rest}} if exists($info->{rest});
-                                                $self->get_user($info->{id}, @rest);
-                                            };
+            my ($self, $info) = @_;
+            my @rest = @{$info->{rest}} if exists($info->{rest});
+            $self->get_user($info->{id}, @rest);
+        };
     }
 
     ## a little cruft to stay compatible with some poorly written stores / credentials
@@ -145,9 +145,9 @@ sub find_user {
     my $res = $self->store->find_user($authinfo, $c);
 
     if (!$res) {
-      if ($self->config->{'auto_create_user'} && $self->store->can('auto_create_user') ) {
-          $res = $self->store->auto_create_user($authinfo, $c);
-      }
+        if ($self->config->{'auto_create_user'} && $self->store->can('auto_create_user') ) {
+            $res = $self->store->auto_create_user($authinfo, $c);
+        }
     } elsif ($self->config->{'auto_update_user'} && $self->store->can('auto_update_user')) {
         $res = $self->store->auto_update_user($authinfo, $c, $res);
     }
@@ -156,15 +156,15 @@ sub find_user {
 }
 
 sub authenticate {
-     my ($self, $c, $authinfo) = @_;
+    my ($self, $c, $authinfo) = @_;
 
-     my $user = $self->credential->authenticate($c, $self, $authinfo);
-     if (ref($user)) {
-         $c->set_authenticated($user, $self->name);
-         return $user;
-     } else {
-         return undef;
-     }
+    my $user = $self->credential->authenticate($c, $self, $authinfo);
+    if (ref($user)) {
+        $c->set_authenticated($user, $self->name);
+        return $user;
+    } else {
+        return undef;
+    }
 }
 
 sub user_is_restorable {

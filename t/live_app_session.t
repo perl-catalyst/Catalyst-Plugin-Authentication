@@ -5,10 +5,10 @@ use Test::More;
 
 BEGIN {
     eval {
-      require Catalyst::Plugin::Session;
-      require Catalyst::Plugin::Session::State::Cookie;
+        require Catalyst::Plugin::Session;
+        require Catalyst::Plugin::Session::State::Cookie;
     } or do {
-      plan skip_all => "This test needs Catalyst::Plugin::Session and Catalyst::Plugin::Session::State::Cookie installed";
+        plan skip_all => "This test needs Catalyst::Plugin::Session and Catalyst::Plugin::Session::State::Cookie installed";
     }
 }
 

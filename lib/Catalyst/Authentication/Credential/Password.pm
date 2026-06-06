@@ -79,17 +79,17 @@ sub check_password {
                 $salt_len );
         } elsif ($self->_config->{'password_type'} eq 'hashed') {
 
-             my $d = Digest->new( $self->_config->{'password_hash_type'} );
-             $d->add( $self->_config->{'password_pre_salt'} || '' );
-             $d->add($password);
-             $d->add( $self->_config->{'password_post_salt'} || '' );
+            my $d = Digest->new( $self->_config->{'password_hash_type'} );
+            $d->add( $self->_config->{'password_pre_salt'} || '' );
+            $d->add($password);
+            $d->add( $self->_config->{'password_post_salt'} || '' );
 
-             my $computed    = $d->clone()->digest;
-             my $b64computed = $d->clone()->b64digest;
-             return ( ( _secure_compare($computed, $storedpassword) )
-                   || ( _secure_compare(unpack("H*", $computed), $storedpassword) )
-                   || ( _secure_compare($b64computed, $storedpassword) )
-                   || ( _secure_compare($b64computed.'=', $storedpassword)) );
+            my $computed    = $d->clone()->digest;
+            my $b64computed = $d->clone()->b64digest;
+            return ( ( _secure_compare($computed, $storedpassword) )
+                  || ( _secure_compare(unpack("H*", $computed), $storedpassword) )
+                  || ( _secure_compare($b64computed, $storedpassword) )
+                  || ( _secure_compare($b64computed.'=', $storedpassword)) );
         }
     }
 }
@@ -99,11 +99,11 @@ sub check_password {
 # the length of the string.
 # (lifted shamelessly from Mojo::Util 9.45)
 sub _secure_compare {
-  my ($one, $two) = @_;
-  my $r = length $one != length $two;
-  $two = $one if $r;
-  $r |= ord(substr $one, $_) ^ ord(substr $two, $_) for 0 .. length($one) - 1;
-  return $r == 0;
+    my ($one, $two) = @_;
+    my $r = length $one != length $two;
+    $two = $one if $r;
+    $r |= ord(substr $one, $_) ^ ord(substr $two, $_) for 0 .. length($one) - 1;
+    return $r == 0;
 }
 
 __PACKAGE__;
@@ -120,8 +120,8 @@ with a password.
 =head1 SYNOPSIS
 
     use Catalyst qw/
-      Authentication
-      /;
+        Authentication
+    /;
 
     package MyApp::Controller::Auth;
 
