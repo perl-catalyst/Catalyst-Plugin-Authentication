@@ -1144,6 +1144,8 @@ Tomas Doran (t0m), C<bobtfish@bobtfish.net> - Previous primary maintainer
 
 =item John Napiorkowski (jnap) C<jjnapiork@cpan.org>
 
+=item Graham Knop (haarg) C<haarg@haarg.org>
+
 =back
 
 =head1 COPYRIGHT & LICENSE
