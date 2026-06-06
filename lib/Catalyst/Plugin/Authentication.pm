@@ -1122,9 +1122,7 @@ Yuval Kogman, C<nothingmuch@woobling.org> - original author
 
 Jay Kuri, C<jayk@cpan.org> - Large rewrite
 
-=head1 PRIMARY MAINTAINER
-
-Tomas Doran (t0m), C<bobtfish@bobtfish.net>
+Tomas Doran (t0m), C<bobtfish@bobtfish.net> - Previous primary maintainer
 
 =head1 ADDITIONAL CONTRIBUTORS
 
@@ -1151,12 +1149,10 @@ Tomas Doran (t0m), C<bobtfish@bobtfish.net>
 =head1 COPYRIGHT & LICENSE
 
 Copyright (c) 2005 - 2012
-the Catalyst::Plugin::Authentication L</AUTHORS>,
-L</PRIMARY MAINTAINER> and L</ADDITIONAL CONTRIBUTORS>
+the Catalyst::Plugin::Authentication L</AUTHORS> and L</ADDITIONAL CONTRIBUTORS>
 as listed above.
 
 This program is free software; you can redistribute
 it and/or modify it under the same terms as Perl itself.
 
 =cut
-
