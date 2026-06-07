@@ -1,5 +1,6 @@
 Revision history for Perl extension Catalyst::Plugin::Authentication
 
+0.10_027 - 2026-06-07
     - When used with Catalyst::Plugin::Session, rotate the session id after a
       successful login to avoid session fixation attacks (CVE-2009-10007).
 
