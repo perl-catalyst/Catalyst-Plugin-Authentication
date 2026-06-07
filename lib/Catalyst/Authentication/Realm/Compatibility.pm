@@ -17,6 +17,8 @@ __END__
 
 =pod
 
+=for Pod::Coverage setup_credential setup_store
+
 =head1 NAME
 
 Catalyst::Authentication::Realm::Compatibility - Compatibility realm object
