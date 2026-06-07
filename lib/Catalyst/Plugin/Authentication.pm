@@ -814,6 +814,12 @@ prevent accidental session creation, check if a session already exists with
 if ($c->sessionid) { ... }. If the session doesn't exist, then don't place
 anything in the session to prevent an unecessary session from being created.
 
+=item rotate_session_id
+
+Whether or not to rotate the session ID when authenticating as a new user. This
+mitigates session-fixation attacks (L<CWE-384|https://cwe.mitre.org/data/definitions/384.html>).
+This requires L<Catalyst::Plugin::Session> version 0.25. This value is set to true by default.
+
 =item default_realm
 
 This defines which realm should be used as when no realm is provided to methods

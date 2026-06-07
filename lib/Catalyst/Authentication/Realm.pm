@@ -26,6 +26,14 @@ sub new {
         }
     }
 
+    if (!exists($self->config->{'rotate_session_id'})) {
+        if (exists($app->config->{'Plugin::Authentication'}{'rotate_session_id'})) {
+            $self->config->{'rotate_session_id'} = $app->config->{'Plugin::Authentication'}{'rotate_session_id'};
+        } else {
+            $self->config->{'rotate_session_id'} = 1;
+        }
+    }
+
     $app->log->debug("Setting up auth realm $realmname") if $app->debug;
 
     $self->setup_store($app);
@@ -238,6 +246,13 @@ sub persist_user {
         and $self->config->{'use_session'}
         and $user->supports("session")
     ) {
+        if (
+            $self->config->{rotate_session_id}
+            and $c->session_is_valid
+        ) {
+            $c->change_session_id;
+        }
+
         $c->session->{__user_realm} = $self->name;
 
         # we want to ask the store for a user prepared for the session.

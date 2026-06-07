@@ -39,7 +39,7 @@ ok +$res->is_success, 'get ok';
 $res = _request('/yak');
 ok !$res->is_success, 'Not ok, user unable to be resotred == nasal demons';
 
-foreach my $type (qw/ goat fluffy_bunny possum butterfly /) {
+foreach my $type (qw/ goat fluffy_bunny possum butterfly octopus/) {
     $res = _request("/$type");
     ok +$res->is_success, "get $type ok";
 }
