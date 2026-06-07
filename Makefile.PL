@@ -34,7 +34,7 @@ my %META = (
         'Test::Pod::Coverage' => '1.04',
         'Test::NoTabs' => 0,
         'Test::EOL' => 0,
-        'Catalyst::Plugin::Session' => '0.10',
+        'Catalyst::Plugin::Session' => '0.25',
         'Catalyst::Plugin::Session::State::Cookie' => 0,
         'Digest::SHA' => 0,
       },

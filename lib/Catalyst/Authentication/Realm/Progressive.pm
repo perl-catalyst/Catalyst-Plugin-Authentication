@@ -143,20 +143,9 @@ sub authenticate {
     return;
 }
 
-## we can not rely on inheriting new() because in this case we do not
-## load a credential or store, which is what new() sets up in the
-## standard realm.  So we have to create our realm object, set our name
-## and return $self in order to avoid nasty warnings.
-
-sub new {
-    my ($class, $realmname, $config, $app) = @_;
-
-    my $self = { config => $config };
-    bless $self, $class;
-
-    $self->name($realmname);
-    return $self;
-}
+## we don't want our own store or credential, so avoid setting them up
+sub setup_store {}
+sub setup_credential {}
 
 =head1 AUTHORS
 
