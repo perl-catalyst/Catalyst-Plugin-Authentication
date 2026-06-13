@@ -19,7 +19,18 @@ sub AUTOLOAD {
 }
 
 # this class effectively handles any method calls
-sub can { 1 }
+sub can {
+    my $self = shift;
+    my $coderef = $self->SUPER::can(@_);
+    return defined $coderef
+        if $coderef;
+
+    my $method = shift;
+    return sub {
+        my $self = shift;
+        $self->_accessor(@_);
+    };
+}
 
 sub id {
     my $self = shift;
