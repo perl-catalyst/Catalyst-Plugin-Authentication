@@ -189,7 +189,17 @@ be sure to use that same field name when calling $c->authenticate().
 This sets the password type.  Often passwords are stored in crypted or hashed
 formats.  In order for the password module to verify the plaintext password
 passed in, it must be told what format the password will be in when it is
-retrieved from the user object. The supported options are:
+retrieved from the user object.
+
+B<< Any password type aside from C<self_check> is highly discouraged. >>
+None of the built in password types are considered secure, and should only
+be used for compatibility with legacy systems. Instead, the password checking
+should be implemented in the user object's B<check_password> method. It is
+recommended to implement it using L<Crypt::Passphrase> and one of its
+recommended encoders and validators. L<Crypt::Passphrase> can also assist
+with updating hashed passwords to a new algorithm.
+
+The supported options are:
 
 =over 8
 
@@ -231,11 +241,15 @@ The hash type used, passed directly to L<Digest/new>.
 
 =item password_pre_salt
 
-Any pre-salt data to be passed to L<Digest/add> before processing the password.
+Any data to be passed to L<Digest/add> before processing the password. This is
+conventionally called a "pepper" value, but is named C<salt> here for backwards
+compatibility.
 
 =item password_post_salt
 
-Any post-salt data to be passed to L<Digest/add> after processing the password.
+Any data to be passed to L<Digest/add> after processing the password. This is
+conventionally called a "pepper" value, but is named C<salt> here for backwards
+compatibility.
 
 =back
 
