@@ -65,10 +65,12 @@ sub check_password {
         my $password = $authinfo->{$self->_config->{'password_field'}};
         my $storedpassword = $user->get($self->_config->{'password_field'});
 
+        # FIXME - Should we warn in the $storedpassword undef case,
+        #         as the user probably fluffed the config?
+        return
+            unless defined $storedpassword;
+
         if ($self->_config->{'password_type'} eq 'clear') {
-            # FIXME - Should we warn in the $storedpassword undef case,
-            #         as the user probably fluffed the config?
-            return unless defined $storedpassword;
             return _secure_compare($password, $storedpassword);
         } elsif ($self->_config->{'password_type'} eq 'crypted') {
             return _secure_compare(crypt($password, $storedpassword), $storedpassword);
