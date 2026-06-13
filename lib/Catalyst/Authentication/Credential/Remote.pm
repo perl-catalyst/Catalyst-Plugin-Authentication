@@ -50,7 +50,7 @@ sub authenticate {
     my $remuser;
     if ($self->source eq "REMOTE_USER") {
         if ($c->req->can('remote_user')) {
-            # $c->req->remote_users was introduced in 5.80005; if not evailable we are
+            # $c->req->remote_user was introduced in 5.80005; if not evailable we are
             # gonna use $c->req->user that is deprecated but more or less works as well
             $remuser = $c->req->remote_user;
         }
